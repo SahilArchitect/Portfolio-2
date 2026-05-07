@@ -10,8 +10,17 @@ import type { NextAuthConfig } from 'next-auth';
 import type { Adapter, AdapterUser, VerificationToken } from 'next-auth/adapters';
 import Resend from 'next-auth/providers/resend';
 
-// Single email from env — updated from array allowlist (AGENTS.md §C).
-const adminEmail = (process.env.ADMIN_EMAIL ?? '').trim().toLowerCase();
+const OWNER_EMAIL = 'sahil@bysahil.dev';
+
+function adminEmails() {
+  const configured = [process.env.ADMIN_EMAIL, process.env.ADMIN_EMAILS]
+    .filter((value): value is string => Boolean(value))
+    .flatMap((value) => value.split(','))
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean);
+
+  return new Set([...configured, OWNER_EMAIL]);
+}
 
 const usersById = new Map<string, AdapterUser>();
 const usersByEmail = new Map<string, AdapterUser>();
@@ -119,8 +128,7 @@ export const authConfig = {
     async signIn({ user }) {
       const email = user.email?.toLowerCase();
       if (!email) return false;
-      if (!adminEmail) return false;
-      return email === adminEmail;
+      return adminEmails().has(email);
     },
     async jwt({ token, user }) {
       if (user?.email) token.email = user.email;
