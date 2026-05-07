@@ -1,0 +1,34 @@
+[project]
+name = "engine-room"
+version = "0.1.0"
+description = "The Engine Room — workspace root for FastAPI services and the worker."
+requires-python = ">=3.12"
+readme = "README.md"
+
+# Workspace root: pulls in api + worker as editable members.
+dependencies = [
+    "engine-room-api",
+    "engine-room-worker",
+]
+
+[tool.uv.workspace]
+members = ["services/api", "services/worker"]
+
+[tool.uv.sources]
+engine-room-api = { workspace = true }
+engine-room-worker = { workspace = true }
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["**/alembic/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N", "RUF"]
+ignore = ["E501"]
+
+[tool.pyright]
+typeCheckingMode = "strict"
+pythonVersion = "3.12"
+include = ["services"]
+exclude = ["**/__pycache__", "**/.venv", "**/alembic/versions"]

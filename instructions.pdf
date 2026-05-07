@@ -1,0 +1,879 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R 10 0 R 12 0 R 14 0 R 16 0 R 18 0 R] /Count 8 >>
+endobj
+3 0 obj
+<< /Length 2337 >>
+stream
+BT
+/F1 10 Tf
+54 738 Td
+(Deployment Instructions For Portfolio-2) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(Assume your domain is yourdomain.com. Replace it everywhere with your real Namecheap) Tj
+0 -13 Td
+(domain.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(0. Understand What You Are Deploying) Tj
+0 -13 Td
+(This repo has multiple parts:) Tj
+0 -13 Td
+(- apps/web: public portfolio website) Tj
+0 -13 Td
+(- apps/admin: private admin dashboard) Tj
+0 -13 Td
+(- services/api: FastAPI backend) Tj
+0 -13 Td
+(- services/worker: background jobs) Tj
+0 -13 Td
+(- Postgres: database) Tj
+0 -13 Td
+(- Redis: cache, rate limit, cost logs) Tj
+0 -13 Td
+(- Namecheap: domain/DNS only) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(Namecheap is not where this project should run. Namecheap will only point your domain to) Tj
+0 -13 Td
+(Vercel and Render.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(1. Create Accounts) Tj
+0 -13 Td
+(Create or login to these accounts:) Tj
+0 -13 Td
+(1. GitHub: for code repo) Tj
+0 -13 Td
+(2. Vercel: for public website and admin dashboard) Tj
+0 -13 Td
+(3. Render: for FastAPI backend) Tj
+0 -13 Td
+(4. Neon: for free Postgres database) Tj
+0 -13 Td
+(5. Upstash: for free Redis) Tj
+0 -13 Td
+(6. Resend: for admin magic-link email login) Tj
+0 -13 Td
+(7. Namecheap: your domain DNS) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(2. Fix Secret Ignore Safety First) Tj
+0 -13 Td
+(Open terminal in the project:) Tj
+0 -13 Td
+(cd /Users/quantum-pulse/Important/Websites/Portfolio-2) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(Open .gitignore and make sure it contains:) Tj
+0 -13 Td
+(.env) Tj
+0 -13 Td
+(.env.local) Tj
+0 -13 Td
+(.env.*.local) Tj
+0 -13 Td
+(infra/.env.production) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(Your .gitignore already ignores .env, but add infra/.env.production if missing. This) Tj
+0 -13 Td
+(prevents accidentally committing production secrets.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(3. Check There Is No Git Repo Yet) Tj
+0 -13 Td
+(Run:) Tj
+0 -13 Td
+(git status) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(If it says fatal: not a git repository, that is okay. It means you still need to create) Tj
+0 -13 Td
+(a Git repo.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(4. Scan For Real Secrets Before GitHub) Tj
+0 -13 Td
+(Run:) Tj
+0 -13 Td
+(rg -n --hidden --glob '!.git/**' --glob '!node_modules/**' --glob '!*.lock') Tj
+0 -13 Td
+("\(OPENAI_API_KEY|ANTHROPIC_API_KEY|DATABASE_URL=|REDIS_URL=|ADMIN_TOKEN=|AUTH_SECRET=|RESEND_API_KEY|AWS_SECRET_ACCESS_KEY\)") Tj
+ET
+endstream
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Courier >> >> >> /Contents 3 0 R >>
+endobj
+5 0 obj
+<< /Length 2076 >>
+stream
+BT
+/F1 10 Tf
+54 738 Td
+() Tj
+0 -13 Td
+(Look at every result.) Tj
+0 -13 Td
+(Allowed results: OPENAI_API_KEY=, change-me, example.com.) Tj
+0 -13 Td
+(Not allowed: sk-..., postgresql://real-user:real-password@..., re_..., real token) Tj
+0 -13 Td
+(values.) Tj
+0 -13 Td
+(If you see real secrets in a file, remove them before pushing.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(5. Create GitHub Repo) Tj
+0 -13 Td
+(From project root:) Tj
+0 -13 Td
+(git init) Tj
+0 -13 Td
+(git add .) Tj
+0 -13 Td
+(git status) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(Check that .env or infra/.env.production is not listed.) Tj
+0 -13 Td
+(Then commit:) Tj
+0 -13 Td
+(git commit -m "Initial portfolio platform") Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(Create a new GitHub repo from GitHub website.) Tj
+0 -13 Td
+(Then connect your local repo:) Tj
+0 -13 Td
+(git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git) Tj
+0 -13 Td
+(git branch -M main) Tj
+0 -13 Td
+(git push -u origin main) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(6. Enable GitHub Secret Protection) Tj
+0 -13 Td
+(In GitHub:) Tj
+0 -13 Td
+(1. Open your repo) Tj
+0 -13 Td
+(2. Go to Settings) Tj
+0 -13 Td
+(3. Go to Code security) Tj
+0 -13 Td
+(4. Enable secret scanning if available) Tj
+0 -13 Td
+(5. Enable push protection if available) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(7. Create Neon Postgres) Tj
+0 -13 Td
+(Go to Neon:) Tj
+0 -13 Td
+(1. Create new project) Tj
+0 -13 Td
+(2. Choose free plan) Tj
+0 -13 Td
+(3. Name it engine-room) Tj
+0 -13 Td
+(4. Choose nearest region) Tj
+0 -13 Td
+(5. Open connection string) Tj
+0 -13 Td
+(6. Copy the pooled or direct connection string) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(It may look like:) Tj
+0 -13 Td
+(postgresql://user:password@host.neon.tech/dbname?sslmode=require) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(For this FastAPI app, save it as:) Tj
+0 -13 Td
+(postgresql+asyncpg://user:password@host.neon.tech/dbname?ssl=require) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(Important: replace postgresql:// with postgresql+asyncpg://.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(8. Create Upstash Redis) Tj
+0 -13 Td
+(Go to Upstash:) Tj
+0 -13 Td
+(1. Create Redis database) Tj
+0 -13 Td
+(2. Choose free plan) Tj
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Courier >> >> >> /Contents 5 0 R >>
+endobj
+7 0 obj
+<< /Length 2197 >>
+stream
+BT
+/F1 10 Tf
+54 738 Td
+(3. Choose nearest region) Tj
+0 -13 Td
+(4. Copy the Redis URL) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(It should look like:) Tj
+0 -13 Td
+(rediss://default:password@host.upstash.io:6379) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(Save it as REDIS_URL.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(9. Generate Your Private Tokens) Tj
+0 -13 Td
+(In terminal:) Tj
+0 -13 Td
+(openssl rand -base64 32) Tj
+0 -13 Td
+(Copy the output. This is your ADMIN_TOKEN.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(Run again:) Tj
+0 -13 Td
+(openssl rand -base64 32) Tj
+0 -13 Td
+(Copy the output. This is your AUTH_SECRET.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(Keep them somewhere safe, like a password manager. Do not put them in code.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(10. Create Resend API Key) Tj
+0 -13 Td
+(Go to Resend:) Tj
+0 -13 Td
+(1. Create account) Tj
+0 -13 Td
+(2. Add your sending domain if possible) Tj
+0 -13 Td
+(3. Create API key) Tj
+0 -13 Td
+(4. Copy API key) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(It looks like re_...) Tj
+0 -13 Td
+(Use it as RESEND_API_KEY.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(11. Deploy API To Render) Tj
+0 -13 Td
+(Go to Render:) Tj
+0 -13 Td
+(1. Click New) Tj
+0 -13 Td
+(2. Click Web Service) Tj
+0 -13 Td
+(3. Connect GitHub) Tj
+0 -13 Td
+(4. Select your repo) Tj
+0 -13 Td
+(5. Name it engine-room-api) Tj
+0 -13 Td
+(6. Runtime: Python) Tj
+0 -13 Td
+(7. Root directory: leave blank / repo root) Tj
+0 -13 Td
+(8. Build command: pip install uv && uv sync --all-packages --all-extras) Tj
+0 -13 Td
+(9. Start command: cd services/api && uv run --package engine-room-api alembic upgrade) Tj
+0 -13 Td
+(head && cd ../.. && uv run --package engine-room-api uvicorn app.main:app --app-dir) Tj
+0 -13 Td
+(services/api --host 0.0.0.0 --port $PORT) Tj
+0 -13 Td
+(10. Health check path: /api/health) Tj
+0 -13 Td
+(11. Choose free instance type) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(12. Add Render API Environment Variables) Tj
+0 -13 Td
+(Add these in Render service environment:) Tj
+0 -13 Td
+(ENVIRONMENT=production) Tj
+0 -13 Td
+(PYTHON_VERSION=3.12.8) Tj
+0 -13 Td
+(DATABASE_URL=postgresql+asyncpg://YOUR_NEON_URL) Tj
+0 -13 Td
+(REDIS_URL=rediss://YOUR_UPSTASH_URL) Tj
+0 -13 Td
+(API_CORS_ORIGINS=["https://yourdomain.com","https://www.yourdomain.com","https://admin.yourdomain.com"]) Tj
+ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Courier >> >> >> /Contents 7 0 R >>
+endobj
+9 0 obj
+<< /Length 2401 >>
+stream
+BT
+/F1 10 Tf
+54 738 Td
+(ADMIN_TOKEN=YOUR_RANDOM_ADMIN_TOKEN) Tj
+0 -13 Td
+(DEFAULT_FLAGS={}) Tj
+0 -13 Td
+(OPENAI_API_KEY=) Tj
+0 -13 Td
+(ANTHROPIC_API_KEY=) Tj
+0 -13 Td
+(EMBEDDING_MODEL=text-embedding-3-small) Tj
+0 -13 Td
+(SUBSTACK_FEED_URL=https://your-substack.substack.com/feed) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(If you do not have OpenAI or Anthropic keys yet, leave them empty.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(13. Get Render API URL) Tj
+0 -13 Td
+(After deploy, Render gives you a URL like:) Tj
+0 -13 Td
+(https://engine-room-api.onrender.com) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(Open:) Tj
+0 -13 Td
+(https://engine-room-api.onrender.com/api/health) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(Expected: status ok, db true, redis true. If db is false, DATABASE_URL is wrong. If) Tj
+0 -13 Td
+(redis is false, REDIS_URL is wrong.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(14. Deploy Public Website To Vercel) Tj
+0 -13 Td
+(Go to Vercel:) Tj
+0 -13 Td
+(1. Add New) Tj
+0 -13 Td
+(2. Project) Tj
+0 -13 Td
+(3. Import your GitHub repo) Tj
+0 -13 Td
+(4. Framework should detect Next.js) Tj
+0 -13 Td
+(5. Root Directory: apps/web) Tj
+0 -13 Td
+(6. Build command: pnpm build) Tj
+0 -13 Td
+(7. Install command: pnpm install) Tj
+0 -13 Td
+(8. Add environment variables:) Tj
+0 -13 Td
+(NEXT_PUBLIC_SITE_URL=https://yourdomain.com) Tj
+0 -13 Td
+(NEXT_PUBLIC_API_BASE_URL=https://engine-room-api.onrender.com) Tj
+0 -13 Td
+(API_INTERNAL_BASE_URL=https://engine-room-api.onrender.com) Tj
+0 -13 Td
+(9. Deploy) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(15. Deploy Admin App To Vercel) Tj
+0 -13 Td
+(Create another Vercel project from the same repo:) Tj
+0 -13 Td
+(1. Root Directory: apps/admin) Tj
+0 -13 Td
+(2. Add environment variables:) Tj
+0 -13 Td
+(AUTH_SECRET=YOUR_RANDOM_AUTH_SECRET) Tj
+0 -13 Td
+(AUTH_URL=https://admin.yourdomain.com) Tj
+0 -13 Td
+(AUTH_TRUST_HOST=true) Tj
+0 -13 Td
+(ADMIN_EMAIL=you@example.com) Tj
+0 -13 Td
+(ADMIN_TOKEN=THE_SAME_ADMIN_TOKEN_USED_IN_RENDER_API) Tj
+0 -13 Td
+(RESEND_API_KEY=YOUR_RESEND_API_KEY) Tj
+0 -13 Td
+(EMAIL_FROM=admin@yourdomain.com) Tj
+0 -13 Td
+(NEXT_PUBLIC_API_BASE_URL=https://engine-room-api.onrender.com) Tj
+0 -13 Td
+(API_INTERNAL_BASE_URL=https://engine-room-api.onrender.com) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(ADMIN_TOKEN must be exactly the same in Render API and Vercel Admin.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(16. Seed Production Database) Tj
+0 -13 Td
+(From your local terminal, run this using the Neon URL. Use normal Postgres URL here, not) Tj
+ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Courier >> >> >> /Contents 9 0 R >>
+endobj
+11 0 obj
+<< /Length 2202 >>
+stream
+BT
+/F1 10 Tf
+54 738 Td
+(asyncpg:) Tj
+0 -13 Td
+(DATABASE_URL='postgresql://user:password@host.neon.tech/dbname?sslmode=require') Tj
+0 -13 Td
+(ADMIN_EMAIL='you@example.com' uv run python infra/seed.py) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(17. Test API After Seed) Tj
+0 -13 Td
+(Run:) Tj
+0 -13 Td
+(curl -fsS https://engine-room-api.onrender.com/api/health) Tj
+0 -13 Td
+(curl -fsS https://engine-room-api.onrender.com/api/projects) Tj
+0 -13 Td
+(curl -fsS https://engine-room-api.onrender.com/api/now) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(18. Test Public Website) Tj
+0 -13 Td
+(Open your Vercel public URL. Check homepage, projects, search, contact form, and resume) Tj
+0 -13 Td
+(behavior.) Tj
+0 -13 Td
+(If data is missing, check NEXT_PUBLIC_API_BASE_URL and API_INTERNAL_BASE_URL.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(19. Test Admin Dashboard) Tj
+0 -13 Td
+(Open https://your-admin.vercel.app/sign-in. Enter your ADMIN_EMAIL. Click the email) Tj
+0 -13 Td
+(magic link. Try editing a project.) Tj
+0 -13 Td
+(If login works but edits fail, ADMIN_TOKEN is mismatched between Vercel admin and Render) Tj
+0 -13 Td
+(API.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(20. Add Custom Domain In Vercel For Public Site) Tj
+0 -13 Td
+(In Vercel public project:) Tj
+0 -13 Td
+(1. Settings) Tj
+0 -13 Td
+(2. Domains) Tj
+0 -13 Td
+(3. Add yourdomain.com) Tj
+0 -13 Td
+(4. Add www.yourdomain.com) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(Vercel usually asks for:) Tj
+0 -13 Td
+(@ A 76.76.21.21) Tj
+0 -13 Td
+(www CNAME cname.vercel-dns.com) Tj
+0 -13 Td
+(Use exactly what Vercel shows.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(21. Add Custom Domain In Vercel For Admin) Tj
+0 -13 Td
+(In Vercel admin project:) Tj
+0 -13 Td
+(1. Settings) Tj
+0 -13 Td
+(2. Domains) Tj
+0 -13 Td
+(3. Add admin.yourdomain.com) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(Vercel usually asks for:) Tj
+0 -13 Td
+(admin CNAME cname.vercel-dns.com) Tj
+0 -13 Td
+(Use exactly what Vercel shows.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(22. Add Custom Domain In Render For API) Tj
+0 -13 Td
+(In Render API service:) Tj
+0 -13 Td
+(1. Settings) Tj
+0 -13 Td
+(2. Custom Domains) Tj
+0 -13 Td
+(3. Add api.yourdomain.com) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(Render will show a DNS target. Use exactly what Render shows.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(23. Set DNS In Namecheap) Tj
+ET
+endstream
+endobj
+12 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Courier >> >> >> /Contents 11 0 R >>
+endobj
+13 0 obj
+<< /Length 2537 >>
+stream
+BT
+/F1 10 Tf
+54 738 Td
+(In Namecheap:) Tj
+0 -13 Td
+(1. Login) Tj
+0 -13 Td
+(2. Domain List) Tj
+0 -13 Td
+(3. Manage beside your domain) Tj
+0 -13 Td
+(4. Advanced DNS) Tj
+0 -13 Td
+(5. Host Records) Tj
+0 -13 Td
+(6. Delete conflicting old records for @, www, admin, api) Tj
+0 -13 Td
+(7. Add records:) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(A Record: Host @, Value 76.76.21.21, TTL Automatic) Tj
+0 -13 Td
+(CNAME Record: Host www, Value cname.vercel-dns.com, TTL Automatic) Tj
+0 -13 Td
+(CNAME Record: Host admin, Value cname.vercel-dns.com, TTL Automatic) Tj
+0 -13 Td
+(CNAME Record: Host api, Value YOUR_RENDER_DNS_TARGET, TTL Automatic) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(Save all changes. DNS can take 5 minutes to a few hours.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(24. Update Environment Variables To Custom Domains) Tj
+0 -13 Td
+(Update Render API:) Tj
+0 -13 Td
+(API_CORS_ORIGINS=["https://yourdomain.com","https://www.yourdomain.com","https://admin.yourdomain.com"]) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(Update Vercel public app:) Tj
+0 -13 Td
+(NEXT_PUBLIC_SITE_URL=https://yourdomain.com) Tj
+0 -13 Td
+(NEXT_PUBLIC_API_BASE_URL=https://api.yourdomain.com) Tj
+0 -13 Td
+(API_INTERNAL_BASE_URL=https://api.yourdomain.com) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(Update Vercel admin app:) Tj
+0 -13 Td
+(AUTH_URL=https://admin.yourdomain.com) Tj
+0 -13 Td
+(NEXT_PUBLIC_API_BASE_URL=https://api.yourdomain.com) Tj
+0 -13 Td
+(API_INTERNAL_BASE_URL=https://api.yourdomain.com) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(Redeploy Render API, Vercel public web, and Vercel admin.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(25. Final Verification Commands) Tj
+0 -13 Td
+(Run:) Tj
+0 -13 Td
+(curl -fsS https://api.yourdomain.com/api/health) Tj
+0 -13 Td
+(curl -fsSI https://yourdomain.com) Tj
+0 -13 Td
+(curl -fsSI https://www.yourdomain.com) Tj
+0 -13 Td
+(curl -fsSI https://admin.yourdomain.com/sign-in) Tj
+0 -13 Td
+(curl -fsS https://api.yourdomain.com/api/projects) Tj
+0 -13 Td
+(curl -fsS -X POST https://api.yourdomain.com/api/search -H "content-type:) Tj
+0 -13 Td
+(application/json" -d '{"query":"projects"}') Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(26. Browser Verification) Tj
+0 -13 Td
+(Open https://yourdomain.com and check homepage, images, projects, search, contact form,) Tj
+0 -13 Td
+(and browser console.) Tj
+0 -13 Td
+(Open https://admin.yourdomain.com/sign-in and check magic link login, admin pages,) Tj
+0 -13 Td
+(editing, and public update.) Tj
+0 -13 Td
+(Open https://api.yourdomain.com/docs and check FastAPI docs.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(27. Never Save These In Code) Tj
+0 -13 Td
+(Never commit:) Tj
+0 -13 Td
+(DATABASE_URL) Tj
+ET
+endstream
+endobj
+14 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Courier >> >> >> /Contents 13 0 R >>
+endobj
+15 0 obj
+<< /Length 2464 >>
+stream
+BT
+/F1 10 Tf
+54 738 Td
+(REDIS_URL) Tj
+0 -13 Td
+(ADMIN_TOKEN) Tj
+0 -13 Td
+(AUTH_SECRET) Tj
+0 -13 Td
+(RESEND_API_KEY) Tj
+0 -13 Td
+(OPENAI_API_KEY) Tj
+0 -13 Td
+(ANTHROPIC_API_KEY) Tj
+0 -13 Td
+(AWS_SECRET_ACCESS_KEY) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(Only these are safe to expose if intended:) Tj
+0 -13 Td
+(NEXT_PUBLIC_SITE_URL) Tj
+0 -13 Td
+(NEXT_PUBLIC_API_BASE_URL) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(Anything starting with NEXT_PUBLIC_ can be seen in the browser.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(28. Where To Store Secrets) Tj
+0 -13 Td
+(Store secrets only in Render Environment Variables, Vercel Environment Variables, Neon) Tj
+0 -13 Td
+(dashboard, Upstash dashboard, Resend dashboard, and a password manager.) Tj
+0 -13 Td
+(Do not store secrets in README.md, committed .env files, public Notion pages,) Tj
+0 -13 Td
+(screenshots, chat messages, client-side code, or NEXT_PUBLIC_* variables.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(29. Secret Leak Check Before Every Push) Tj
+0 -13 Td
+(Before pushing:) Tj
+0 -13 Td
+(git status --short) Tj
+0 -13 Td
+(rg -n --hidden --glob '!.git/**' --glob '!node_modules/**' --glob '!*.lock') Tj
+0 -13 Td
+("\(sk-|re_|postgresql://|postgresql\\\\+asyncpg://|rediss://|ADMIN_TOKEN=|AUTH_SECRET=|RESEND_API_KEY=|OPENAI_API_KEY=|ANTHROPIC_API_KEY=\)") Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(If real secrets appear, stop and remove them.) Tj
+0 -13 Td
+(Then:) Tj
+0 -13 Td
+(git add .) Tj
+0 -13 Td
+(git commit -m "Your message") Tj
+0 -13 Td
+(git push) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(30. If A Secret Leaks) Tj
+0 -13 Td
+(Do not just delete it from Git.) Tj
+0 -13 Td
+(1. Rotate the leaked secret in the provider dashboard) Tj
+0 -13 Td
+(2. Replace it in Render/Vercel) Tj
+0 -13 Td
+(3. Redeploy affected services) Tj
+0 -13 Td
+(4. Remove it from the repo) Tj
+0 -13 Td
+(5. Consider cleaning Git history if the repo is public) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(If ADMIN_TOKEN leaks:) Tj
+0 -13 Td
+(openssl rand -base64 32) Tj
+0 -13 Td
+(Then update Render API ADMIN_TOKEN and Vercel admin ADMIN_TOKEN, redeploy both, and test) Tj
+0 -13 Td
+(admin edits again.) Tj
+0 -13 Td
+() Tj
+0 -13 Td
+(31. Free Plan Limits To Remember) Tj
+0 -13 Td
+(Render free API sleeps when unused. First request may be slow.) Tj
+0 -13 Td
+(Vercel free is good for portfolio frontend.) Tj
+0 -13 Td
+(Neon free can pause or scale down depending on usage.) Tj
+0 -13 Td
+(Upstash free has request limits.) Tj
+0 -13 Td
+(This is fine for a personal portfolio. For real production, move API/database to paid) Tj
+0 -13 Td
+(plans.) Tj
+ET
+endstream
+endobj
+16 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Courier >> >> >> /Contents 15 0 R >>
+endobj
+17 0 obj
+<< /Length 672 >>
+stream
+BT
+/F1 10 Tf
+54 738 Td
+() Tj
+0 -13 Td
+(32. Minimal Working Checklist) Tj
+0 -13 Td
+(You are done only when all are true:) Tj
+0 -13 Td
+(- GitHub repo has no secrets) Tj
+0 -13 Td
+(- Render API health works) Tj
+0 -13 Td
+(- Neon database migrated) Tj
+0 -13 Td
+(- Seed script ran successfully) Tj
+0 -13 Td
+(- Upstash Redis works) Tj
+0 -13 Td
+(- Vercel public site loads) Tj
+0 -13 Td
+(- Vercel admin login works) Tj
+0 -13 Td
+(- Namecheap points your domain correctly) Tj
+0 -13 Td
+(- https://yourdomain.com works) Tj
+0 -13 Td
+(- https://admin.yourdomain.com works) Tj
+0 -13 Td
+(- https://api.yourdomain.com/api/health works) Tj
+0 -13 Td
+(- Admin edits appear on public site) Tj
+ET
+endstream
+endobj
+18 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Courier >> >> >> /Contents 17 0 R >>
+endobj
+xref
+0 19
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000162 00000 n 
+0000002551 00000 n 
+0000002724 00000 n 
+0000004852 00000 n 
+0000005025 00000 n 
+0000007274 00000 n 
+0000007447 00000 n 
+0000009900 00000 n 
+0000010074 00000 n 
+0000012329 00000 n 
+0000012504 00000 n 
+0000015094 00000 n 
+0000015269 00000 n 
+0000017786 00000 n 
+0000017961 00000 n 
+0000018685 00000 n 
+trailer
+<< /Size 19 /Root 1 0 R >>
+startxref
+18860
+%%EOF

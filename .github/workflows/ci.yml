@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  node:
+    name: Node lint, typecheck, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.12.0 --activate
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Format check
+        run: pnpm format:check
+      - name: Lint
+        run: pnpm lint
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Build apps and packages
+        run: pnpm build
+
+  python:
+    name: Python lint, migrations, tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: engine_room
+          POSTGRES_PASSWORD: engine_room
+          POSTGRES_DB: engine_room
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U engine_room -d engine_room"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql+asyncpg://engine_room:engine_room@localhost:5432/engine_room
+      REDIS_URL: redis://localhost:6379/0
+      ADMIN_TOKEN: ci-admin-token
+      ADMIN_EMAIL: ci@example.com
+      EMBEDDING_MODEL: text-embedding-3-small
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@v5
+      - name: Install Python workspace
+        run: uv sync --frozen --all-packages --all-extras
+      - name: Ruff
+        run: uv run ruff check services infra/seed.py
+      - name: Apply migrations
+        working-directory: services/api
+        run: uv run --package engine-room-api alembic upgrade head
+      - name: Alembic drift check
+        working-directory: services/api
+        run: uv run --package engine-room-api alembic check
+      - name: Pytest
+        run: uv run --package engine-room-api pytest services/api/tests --cov=app --cov-report=term-missing

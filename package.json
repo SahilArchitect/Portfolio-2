@@ -1,0 +1,28 @@
+{
+  "name": "engine-room",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The Engine Room — Sahil Bhatti's portfolio. A working demonstration of production AI infrastructure.",
+  "engines": {
+    "node": ">=20.11",
+    "pnpm": ">=9.0"
+  },
+  "packageManager": "pnpm@9.12.0",
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter \"./apps/*\" dev",
+    "dev:web": "pnpm --filter @engine-room/web dev",
+    "dev:admin": "pnpm --filter @engine-room/admin dev",
+    "build": "pnpm -r --filter \"./apps/*\" --filter \"./packages/*\" build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,mdx,css}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,mdx,css}\"",
+    "types:generate": "pnpm --filter @engine-room/types generate",
+    "clean": "pnpm -r exec rm -rf .next .turbo node_modules dist build"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "prettier-plugin-tailwindcss": "^0.6.8",
+    "typescript": "^5.6.3"
+  }
+}

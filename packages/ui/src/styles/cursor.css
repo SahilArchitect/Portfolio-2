@@ -1,0 +1,20 @@
+/*
+ * Custom cursor styles. Apply alongside the <Cursor /> primitive.
+ *
+ * When mounted, <Cursor /> sets `data-cursor="custom"` on <html>; that
+ * is the trigger to hide the native cursor. On touch devices and under
+ * `prefers-reduced-motion`, the primitive bails out and the native
+ * cursor stays — no special handling needed here.
+ */
+
+html[data-cursor='custom'],
+html[data-cursor='custom'] * {
+  cursor: none !important;
+}
+
+/* But text inputs MUST keep their I-beam: typing without it is hostile. */
+html[data-cursor='custom'] input,
+html[data-cursor='custom'] textarea,
+html[data-cursor='custom'] [contenteditable='true'] {
+  cursor: text !important;
+}

@@ -1,0 +1,116 @@
+name: engine-room
+
+# Local development stack. Six services:
+#   postgres  — Postgres 16 + pgvector extension
+#   redis     — cache + rate limits + queue brokers
+#   api       — FastAPI backend (services/api)
+#   worker    — APScheduler worker (services/worker)
+#   web       — public Next.js (apps/web, port 3000)
+#   admin     — admin Next.js (apps/admin, port 3001)
+#
+# Bring up infra only:
+#   docker compose -f infra/docker-compose.yml up postgres redis
+# Bring up the full stack:
+#   docker compose -f infra/docker-compose.yml up
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-engine_room}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-engine_room}
+      POSTGRES_DB: ${POSTGRES_DB:-engine_room}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-engine_room}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: ..
+      dockerfile: infra/docker/api.Dockerfile
+    restart: unless-stopped
+    env_file:
+      - path: ../.env
+        required: false
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-engine_room}:${POSTGRES_PASSWORD:-engine_room}@postgres:5432/${POSTGRES_DB:-engine_room}
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "${API_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: ..
+      dockerfile: infra/docker/worker.Dockerfile
+    restart: unless-stopped
+    env_file:
+      - path: ../.env
+        required: false
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-engine_room}:${POSTGRES_PASSWORD:-engine_room}@postgres:5432/${POSTGRES_DB:-engine_room}
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ..
+      dockerfile: infra/docker/web.Dockerfile
+    restart: unless-stopped
+    env_file:
+      - path: ../.env
+        required: false
+    environment:
+      API_BASE_URL: http://api:8000
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      - api
+
+  admin:
+    build:
+      context: ..
+      dockerfile: infra/docker/admin.Dockerfile
+    restart: unless-stopped
+    env_file:
+      - path: ../.env
+        required: false
+    environment:
+      API_BASE_URL: http://api:8000
+      AUTH_TRUST_HOST: "true"
+    ports:
+      - "${ADMIN_PORT:-3001}:3001"
+    depends_on:
+      - api
+
+volumes:
+  postgres-data:
+  redis-data:

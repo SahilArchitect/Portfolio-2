@@ -1,0 +1,160 @@
+name: engine-room-prod
+
+# Production compose stack. Use with:
+#   docker compose --env-file infra/.env.production -f infra/docker-compose.prod.yml up -d --build
+# Only Caddy exposes public ports; app/data services stay on the internal network.
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-engine_room}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-engine_room}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U $${POSTGRES_USER:-engine_room} -d $${POSTGRES_DB:-engine_room}',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ['redis-server', '--appendonly', 'yes']
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.111.0
+    restart: unless-stopped
+    command: ['--config=/etc/otelcol/config.yml']
+    environment:
+      OTEL_COLLECTOR_TRACES_EXPORTER: ${OTEL_COLLECTOR_TRACES_EXPORTER:-debug}
+      OTEL_COLLECTOR_EXPORT_OTLP_ENDPOINT: ${OTEL_COLLECTOR_EXPORT_OTLP_ENDPOINT:-http://localhost:4318}
+      OTEL_COLLECTOR_EXPORT_OTLP_AUTHORIZATION: ${OTEL_COLLECTOR_EXPORT_OTLP_AUTHORIZATION:-}
+    volumes:
+      - ./otel-collector.yml:/etc/otelcol/config.yml:ro
+    ports:
+      - '127.0.0.1:${OTEL_COLLECTOR_GRPC_PORT:-4317}:4317'
+      - '127.0.0.1:${OTEL_COLLECTOR_HTTP_PORT:-4318}:4318'
+
+  api:
+    build:
+      context: ..
+      dockerfile: infra/docker/api.prod.Dockerfile
+    restart: unless-stopped
+    env_file:
+      - path: ./.env.production
+        required: false
+    environment:
+      ENVIRONMENT: production
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-engine_room}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-engine_room}
+      REDIS_URL: redis://redis:6379/0
+      OTEL_SERVICE_NAME: engine-room-api
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
+
+  worker:
+    build:
+      context: ..
+      dockerfile: infra/docker/worker.prod.Dockerfile
+    restart: unless-stopped
+    env_file:
+      - path: ./.env.production
+        required: false
+    environment:
+      ENVIRONMENT: production
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-engine_room}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-engine_room}
+      REDIS_URL: redis://redis:6379/0
+      OTEL_SERVICE_NAME: engine-room-worker
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_started
+
+  web:
+    build:
+      context: ..
+      dockerfile: infra/docker/web.prod.Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-}
+    restart: unless-stopped
+    env_file:
+      - path: ./.env.production
+        required: false
+    environment:
+      API_BASE_URL: http://api:8000
+      API_INTERNAL_BASE_URL: http://api:8000
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-}
+    depends_on:
+      api:
+        condition: service_started
+
+  admin:
+    build:
+      context: ..
+      dockerfile: infra/docker/admin.prod.Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-}
+    restart: unless-stopped
+    env_file:
+      - path: ./.env.production
+        required: false
+    environment:
+      API_BASE_URL: http://api:8000
+      API_INTERNAL_BASE_URL: http://api:8000
+      AUTH_TRUST_HOST: 'true'
+    depends_on:
+      api:
+        condition: service_started
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN}
+      ADMIN_DOMAIN: ${ADMIN_DOMAIN:?set ADMIN_DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL:-}
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      web:
+        condition: service_started
+      admin:
+        condition: service_started
+      api:
+        condition: service_started
+
+volumes:
+  postgres-data:
+  redis-data:
+  caddy-data:
+  caddy-config:
