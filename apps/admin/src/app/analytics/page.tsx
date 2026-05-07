@@ -6,9 +6,30 @@ import { adminGet } from '@/lib/api';
 import { fallbackAnalytics, type AnalyticsState } from '@/lib/fallbacks';
 import { requireAdmin } from '@/lib/session';
 
+type UnknownRecord = Record<string, unknown>;
+
+function record(value: unknown): UnknownRecord {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+    ? (value as UnknownRecord)
+    : {};
+}
+
+function arrayValue<T>(value: unknown, fallback: T[]): T[] {
+  return Array.isArray(value) ? (value as T[]) : fallback;
+}
+
+function normalizeAnalytics(value: unknown): AnalyticsState {
+  const data = record(value);
+  return {
+    pageViews: arrayValue(data.pageViews ?? data.page_views, fallbackAnalytics.pageViews),
+    searchQueries: arrayValue(data.searchQueries ?? data.search_queries, fallbackAnalytics.searchQueries),
+    funnel: arrayValue(data.funnel ?? data.drop_off_funnel, fallbackAnalytics.funnel),
+  };
+}
+
 export default async function AnalyticsPage() {
   const admin = await requireAdmin();
-  const analytics = await adminGet<AnalyticsState>('/admin/analytics', fallbackAnalytics);
+  const analytics = normalizeAnalytics(await adminGet<unknown>('/admin/analytics', fallbackAnalytics));
 
   return (
     <AdminShell
