@@ -14,10 +14,62 @@ import {
   type LlmCostState,
 } from '@/lib/fallbacks';
 
+type UnknownRecord = Record<string, unknown>;
+
+function record(value: unknown): UnknownRecord {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+    ? (value as UnknownRecord)
+    : {};
+}
+
+function arrayValue<T>(value: unknown, fallback: T[]): T[] {
+  return Array.isArray(value) ? (value as T[]) : fallback;
+}
+
+function normalizeAnalytics(value: unknown): AnalyticsState {
+  const data = record(value);
+  return {
+    pageViews: arrayValue(data.pageViews ?? data.page_views, fallbackAnalytics.pageViews),
+    searchQueries: arrayValue(data.searchQueries ?? data.search_queries, fallbackAnalytics.searchQueries),
+    funnel: arrayValue(data.funnel ?? data.drop_off_funnel, fallbackAnalytics.funnel),
+  };
+}
+
+function normalizeLlmCost(value: unknown): LlmCostState {
+  const data = record(value);
+  const perDay = data.spendByDay ?? data.per_day;
+  const perEndpoint = data.spendByEndpoint ?? data.per_endpoint;
+  const histogram = data.tokenHistogram ?? data.token_histogram;
+
+  return {
+    spendByDay: Array.isArray(perDay)
+      ? perDay
+      : Object.entries(record(perDay)).map(([date, cost]) => ({
+          date,
+          cost_usd: Number(cost) || 0,
+          calls: 0,
+        })),
+    spendByEndpoint: Array.isArray(perEndpoint)
+      ? perEndpoint
+      : Object.entries(record(perEndpoint)).map(([endpoint, cost]) => ({
+          endpoint,
+          cost_usd: Number(cost) || 0,
+          tokens: 0,
+        })),
+    tokenHistogram: Array.isArray(histogram)
+      ? histogram
+      : Object.entries(record(histogram)).map(([bucket, calls]) => ({
+          bucket,
+          calls: Number(calls) || 0,
+        })),
+    slowestCalls: arrayValue(data.slowestCalls ?? data.slowest_20, fallbackLlmCost.slowestCalls),
+  };
+}
+
 export default async function AdminHome() {
   const admin = await requireAdmin();
-  const analytics = await adminGet<AnalyticsState>('/admin/analytics', fallbackAnalytics);
-  const llm = await adminGet<LlmCostState>('/admin/llm/cost', fallbackLlmCost);
+  const analytics = normalizeAnalytics(await adminGet<unknown>('/admin/analytics', fallbackAnalytics));
+  const llm = normalizeLlmCost(await adminGet<unknown>('/admin/llm/cost', fallbackLlmCost));
   const inquiries = await adminCollection<InquiryRow>('/admin/inquiries', fallbackInquiries);
 
   const visitorsToday = analytics.pageViews.reduce((sum, page) => sum + page.visitors, 0);
