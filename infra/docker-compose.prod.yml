@@ -103,7 +103,7 @@ services:
       args:
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-}
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-}
-        NEXT_PUBLIC_CAL_LINK: ${NEXT_PUBLIC_CAL_LINK:-sahilbhatti/intro}
+        NEXT_PUBLIC_CALENDLY_LINK: ${NEXT_PUBLIC_CALENDLY_LINK:-sahilbhatti/intro}
     restart: unless-stopped
     env_file:
       - path: ./.env.production
@@ -112,7 +112,7 @@ services:
       API_BASE_URL: http://api:8000
       API_INTERNAL_BASE_URL: http://api:8000
       NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-}
-      NEXT_PUBLIC_CAL_LINK: ${NEXT_PUBLIC_CAL_LINK:-sahilbhatti/intro}
+      NEXT_PUBLIC_CALENDLY_LINK: ${NEXT_PUBLIC_CALENDLY_LINK:-sahilbhatti/intro}
     depends_on:
       api:
         condition: service_started

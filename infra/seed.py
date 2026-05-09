@@ -160,7 +160,7 @@ RESUME_VARIANTS = [
         "label": "AI Backend Engineer",
         "slug": "ai-backend-engineer",
         "body_md": "## Focus\nFastAPI, RAG systems, LLM gateways, and observability.",
-        "pdf_url": None,
+        "pdf_url": "https://www.bysahil.dev/resume/ai-backend-engineer.pdf",
         "role_keywords": ["AI backend", "RAG", "FastAPI"],
         "is_default": True,
     }

@@ -8,6 +8,7 @@ import type {
 } from './view-models';
 
 const now = new Date('2026-05-07T12:00:00.000Z').toISOString();
+const resumeUrl = '/resume/ai-backend-engineer.pdf';
 
 export const fallbackProjects: ProjectView[] = [
   {
@@ -183,7 +184,7 @@ export const fallbackResumes: ResumeVariantView[] = [
     id: 'resume-ai-backend',
     slug: 'ai-backend-engineer',
     label: 'AI Backend Engineer',
-    fileUrl: '/resume/ai-backend-engineer.pdf',
+    fileUrl: resumeUrl,
     isDefault: true,
     createdAt: now,
     roleKeywords: ['RAG', 'FastAPI', 'LLM infrastructure'],
@@ -192,7 +193,7 @@ export const fallbackResumes: ResumeVariantView[] = [
     id: 'resume-platform',
     slug: 'backend-platform',
     label: 'Backend Platform',
-    fileUrl: '/resume/backend-platform.pdf',
+    fileUrl: resumeUrl,
     isDefault: false,
     createdAt: now,
     roleKeywords: ['Postgres', 'observability', 'distributed systems'],

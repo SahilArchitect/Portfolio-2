@@ -6,6 +6,8 @@ export type DashboardKpi = {
   inquiriesPending: number;
 };
 
+const publicResumeUrl = 'https://www.bysahil.dev/resume/ai-backend-engineer.pdf';
+
 export type ProjectRow = {
   id: string;
   title: string;
@@ -197,7 +199,7 @@ export const fallbackResumeVariants: ResumeVariantRow[] = [
     label: 'AI Backend Engineer',
     slug: 'ai-backend-engineer',
     body_md: '## Focus\nFastAPI, RAG systems, LLM gateways, and observability.',
-    pdf_url: null,
+    pdf_url: publicResumeUrl,
     is_default: true,
     role_keywords: ['AI backend', 'RAG', 'FastAPI'],
     updated_at: '2026-05-07T00:00:00Z',
