@@ -30,7 +30,7 @@ export function WritingSearch({ q, semantic, activeTag, tags }: WritingSearchPro
   }
 
   return (
-    <div className="rounded-xl border border-border bg-bg-elev p-4">
+    <div className="cyber-panel p-4">
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -39,7 +39,7 @@ export function WritingSearch({ q, semantic, activeTag, tags }: WritingSearchPro
         className="flex flex-col gap-3 sm:flex-row sm:items-center"
       >
         <label className="sr-only" htmlFor="writing-search">Search writing</label>
-        <div className="flex min-h-11 flex-1 items-center rounded-lg border border-border bg-bg px-3 focus-within:border-border-strong">
+        <div className="flex min-h-11 flex-1 items-center border border-border bg-bg px-3 focus-within:border-border-strong">
           <SearchIcon className="mr-3 h-4 w-4 shrink-0 text-fg-muted" />
           <input
             id="writing-search"
@@ -53,7 +53,7 @@ export function WritingSearch({ q, semantic, activeTag, tags }: WritingSearchPro
               }
             }}
             placeholder="Search essays, systems notes, and Substack mirrors"
-            className="h-11 flex-1 bg-transparent text-body text-fg placeholder:text-fg-muted focus:outline-none"
+            className="h-11 flex-1 bg-transparent font-mono text-body text-fg placeholder:text-fg-muted focus:outline-none"
           />
         </div>
         <button
@@ -61,8 +61,8 @@ export function WritingSearch({ q, semantic, activeTag, tags }: WritingSearchPro
           onClick={() => setSemanticMode((value) => !value)}
           data-cursor="hover"
           className={cn(
-            'rounded-md border px-3 py-2 font-mono text-mono-sm',
-            semanticMode ? 'border-border-strong text-accent' : 'border-border text-fg-muted hover:text-fg',
+            'min-h-11 border px-3 py-2 font-mono text-mono-sm',
+            semanticMode ? 'border-border-strong text-accent' : 'border-border text-fg-muted hover:text-accent',
           )}
         >
           {semanticMode ? 'Semantic on' : 'Full-text'}
@@ -70,9 +70,9 @@ export function WritingSearch({ q, semantic, activeTag, tags }: WritingSearchPro
         <button
           type="submit"
           data-cursor="hover"
-          className="rounded-md border border-border-strong bg-fg px-4 py-2 font-mono text-mono-sm text-bg"
+          className="cyber-button px-4 py-2"
         >
-          Search
+          <span>Search</span>
         </button>
       </form>
 
@@ -82,8 +82,8 @@ export function WritingSearch({ q, semantic, activeTag, tags }: WritingSearchPro
             href="/writing"
             data-cursor="hover"
             className={cn(
-              'rounded-full border px-2.5 py-0.5 font-mono text-mono-sm',
-              !activeTag ? 'border-border-strong text-fg' : 'border-border text-fg-muted hover:text-fg',
+              'border px-2.5 py-0.5 font-mono text-mono-sm',
+              !activeTag ? 'border-border-strong text-accent' : 'border-border text-fg-muted hover:text-accent',
             )}
           >
             All
@@ -99,8 +99,8 @@ export function WritingSearch({ q, semantic, activeTag, tags }: WritingSearchPro
                 href={`/writing?${params.toString()}`}
                 data-cursor="hover"
                 className={cn(
-                  'rounded-full border px-2.5 py-0.5 font-mono text-mono-sm',
-                  activeTag === tag ? 'border-border-strong text-fg' : 'border-border text-fg-muted hover:text-fg',
+                  'border px-2.5 py-0.5 font-mono text-mono-sm',
+                  activeTag === tag ? 'border-border-strong text-accent' : 'border-border text-fg-muted hover:text-accent',
                 )}
               >
                 {tag}

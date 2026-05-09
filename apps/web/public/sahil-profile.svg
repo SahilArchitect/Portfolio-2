@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-labelledby="title desc">
+  <title id="title">Sahil Bhatti profile portrait</title>
+  <desc id="desc">A stylized professional portrait with a navy suit and red tie.</desc>
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="28%" r="70%">
+      <stop offset="0%" stop-color="#d8e1e7"/>
+      <stop offset="55%" stop-color="#7f8c97"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </radialGradient>
+    <linearGradient id="suit" x1="50%" x2="50%" y1="48%" y2="100%">
+      <stop offset="0%" stop-color="#1f3658"/>
+      <stop offset="100%" stop-color="#0b1728"/>
+    </linearGradient>
+    <linearGradient id="tie" x1="50%" x2="50%" y1="58%" y2="96%">
+      <stop offset="0%" stop-color="#9f2734"/>
+      <stop offset="100%" stop-color="#5b121d"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="16" flood-color="#020617" flood-opacity=".45"/>
+    </filter>
+  </defs>
+  <rect width="320" height="320" fill="url(#bg)"/>
+  <g filter="url(#softShadow)">
+    <path d="M73 316c8-73 40-109 87-109s79 36 87 109H73z" fill="url(#suit)"/>
+    <path d="M128 219l32 34 32-34 21 92H107l21-92z" fill="#f8fafc"/>
+    <path d="M145 239h30l-9 76h-12l-9-76z" fill="url(#tie)"/>
+    <path d="M109 225l31 21-18 22-29-46 19-18 17 25zm102 0l-31 21 18 22 29-46-19-18-17 25z" fill="#172944"/>
+    <path d="M118 124c0-43 22-70 42-70s42 27 42 70c0 50-19 82-42 82s-42-32-42-82z" fill="#b98266"/>
+    <path d="M128 135c9 12 54 12 64 0-2 36-15 56-32 56s-30-20-32-56z" fill="#a66f58" opacity=".4"/>
+    <path d="M119 105c5-37 32-61 67-48 21 8 31 27 22 52-8-19-26-24-48-24-20 0-34 5-41 20z" fill="#111827"/>
+    <path d="M122 111c3-38 23-62 58-67-25-5-51 4-65 24-11 16-15 35-7 58 3-7 8-12 14-15z" fill="#0b1220"/>
+    <path d="M139 134c7-5 15-5 22 0m18 0c7-5 15-5 22 0" fill="none" stroke="#1f2937" stroke-width="5" stroke-linecap="round"/>
+    <path d="M149 171c8 6 16 6 24 0" fill="none" stroke="#5b2d25" stroke-width="5" stroke-linecap="round"/>
+    <path d="M128 155c-8-5-15-17-13-30m77 30c8-5 15-17 13-30" fill="none" stroke="#965f4c" stroke-width="8" stroke-linecap="round"/>
+    <path d="M129 89c30-18 57-12 75 15-4-33-25-55-56-54-25 1-42 18-49 44 9-1 20-2 30-5z" fill="#050a13"/>
+  </g>
+  <rect x="10" y="10" width="300" height="300" fill="none" stroke="#00fff2" stroke-opacity=".28" stroke-width="2"/>
+</svg>

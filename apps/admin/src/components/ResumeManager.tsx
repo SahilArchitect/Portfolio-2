@@ -84,28 +84,28 @@ export function ResumeManager({ variants }: { variants: ResumeVariantRow[] }) {
 
   return (
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(24rem,32rem)]">
-      <section className="rounded-lg border border-border bg-bg-elev p-4">
+      <section className="cyber-panel p-4">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
-            <h2 className="font-display text-display-sm font-medium text-fg">Resume variants</h2>
-            <p className="mt-1 text-body-sm text-fg-muted">Tag variants by role so /hire can pick the right PDF.</p>
+            <h2 className="font-display text-[18px] font-bold uppercase tracking-[2px] text-fg [font-family:Orbitron,monospace]">Resume variants</h2>
+            <p className="mt-1 font-mono text-[12px] leading-6 text-fg/65">Tag variants by role so /hire can pick the right PDF.</p>
           </div>
           <SecondaryButton onClick={() => choose(blankResume)}>New variant</SecondaryButton>
         </div>
         <DataTable columns={columns} data={variants} onRowClick={choose} />
       </section>
 
-      <motion.section variants={fadeUp} initial="hidden" animate="visible" className="rounded-lg border border-border bg-bg-elev p-4">
+      <motion.section variants={fadeUp} initial="hidden" animate="visible" className="cyber-panel p-4">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
-            <h2 className="font-display text-display-sm font-medium text-fg">
+            <h2 className="font-display text-[18px] font-bold uppercase tracking-[2px] text-fg [font-family:Orbitron,monospace]">
               {selected.id ? 'Edit resume' : 'Create resume'}
             </h2>
-            <p className="mt-1 text-body-sm text-fg-muted">PDF URL is stored server-side; markdown remains the editable source.</p>
+            <p className="mt-1 font-mono text-[12px] leading-6 text-fg/65">PDF upload stores a browser-downloadable URL; markdown remains the editable source.</p>
           </div>
           {selected.id ? <SecondaryButton onClick={remove} disabled={pending}>Delete</SecondaryButton> : null}
         </div>
-        <form action={submit} className="grid gap-3">
+        <form key={selected.id || 'new-resume'} action={submit} className="grid gap-3">
           <input type="hidden" name="id" value={selected.id} />
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Label">
@@ -121,6 +121,17 @@ export function ResumeManager({ variants }: { variants: ResumeVariantRow[] }) {
           <Field label="PDF URL">
             <input className={inputClass} name="pdf_url" defaultValue={selected.pdf_url ?? ''} placeholder="https://.../resume.pdf" />
           </Field>
+          {selected.pdf_url ? (
+            <a
+              href={selected.pdf_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-cursor="hover"
+              className="w-fit font-mono text-[10px] uppercase tracking-[2px] text-accent hover:text-fg"
+            >
+              Test current PDF download
+            </a>
+          ) : null}
           <Field label="Upload PDF">
             <input className={inputClass} name="pdf_file" type="file" accept="application/pdf" />
           </Field>

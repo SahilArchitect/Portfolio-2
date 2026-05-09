@@ -1,13 +1,17 @@
+import { AdminAuthFrame } from '@/components/AdminMotionSurfaces';
+
 export default function SignInErrorPage() {
   return (
-    <main className="mx-auto grid min-h-dvh max-w-md place-items-center px-6 py-20">
-      <section className="rounded-xl border border-border bg-bg-elev p-6">
-        <p className="font-mono text-micro uppercase tracking-wider text-danger">Access denied</p>
-        <h1 className="mt-3 font-display text-display-md font-medium text-fg">Unable to sign in</h1>
-        <p className="mt-3 text-body-sm text-fg-muted">
-          Use the allowlisted email and the current admin code.
-        </p>
-      </section>
-    </main>
+    <AdminAuthFrame tone="danger">
+      <p className="text-danger font-mono text-[9px] uppercase tracking-[4px]">
+        {'//'} Access denied
+      </p>
+      <h1 className="font-display text-display-md text-fg mt-3 font-bold uppercase tracking-[2px] [font-family:Orbitron,monospace]">
+        Unable to sign in
+      </h1>
+      <p className="text-body-sm text-fg/65 mt-3 font-mono">
+        Use the allowlisted email and the current admin code.
+      </p>
+    </AdminAuthFrame>
   );
 }

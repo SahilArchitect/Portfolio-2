@@ -23,7 +23,7 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
-from sqlalchemy.dialects.postgresql import ARRAY, INET
+from sqlalchemy.dialects.postgresql import ARRAY, INET, JSONB
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -204,6 +204,7 @@ class ResumeVariant(Base, TimestampMixin):
     slug: Mapped[str] = mapped_column(String(80), nullable=False, unique=True)
     body_md: Mapped[str] = mapped_column(Text, nullable=False)
     pdf_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    role_keywords: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False, default=list)
     is_default: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     __table_args__ = (
@@ -226,3 +227,10 @@ class AdminUser(Base, TimestampMixin):
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     __table_args__ = (UniqueConstraint("email", name="uq_admin_users_email"),)
+
+
+class SiteSetting(Base, TimestampMixin):
+    __tablename__ = "site_settings"
+
+    key: Mapped[str] = mapped_column(String(80), primary_key=True)
+    value: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)

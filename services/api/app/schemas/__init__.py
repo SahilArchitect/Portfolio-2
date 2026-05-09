@@ -35,6 +35,7 @@ from .resume_variant import (
     ResumeVariantUpdate,
 )
 from .search import Citation, SearchRequest, SearchResponse
+from .site_settings import HeroExperiment, HeroVariant, SubstackSettingsUpdate, SubstackState
 
 __all__ = [
     "AdminUserBase",
@@ -46,6 +47,8 @@ __all__ = [
     "FeatureFlagRead",
     "FeatureFlagUpdate",
     "HealthRead",
+    "HeroExperiment",
+    "HeroVariant",
     "InquiryBase",
     "InquiryCreate",
     "InquiryRead",
@@ -74,5 +77,7 @@ __all__ = [
     "ResumeVariantUpdate",
     "SearchRequest",
     "SearchResponse",
+    "SubstackSettingsUpdate",
+    "SubstackState",
     "Timestamped",
 ]

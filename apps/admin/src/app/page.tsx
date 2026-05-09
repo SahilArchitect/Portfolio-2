@@ -1,4 +1,5 @@
 import { AdminShell, Panel, SectionTitle } from '@/components/AdminShell';
+import { AdminConsolePulse } from '@/components/AdminMotionSurfaces';
 import { SpendLineChart } from '@/components/Charts';
 import { TopPagesTable } from '@/components/TopPagesTable';
 import { StatCard } from '@/components/StatCard';
@@ -30,7 +31,10 @@ function normalizeAnalytics(value: unknown): AnalyticsState {
   const data = record(value);
   return {
     pageViews: arrayValue(data.pageViews ?? data.page_views, fallbackAnalytics.pageViews),
-    searchQueries: arrayValue(data.searchQueries ?? data.search_queries, fallbackAnalytics.searchQueries),
+    searchQueries: arrayValue(
+      data.searchQueries ?? data.search_queries,
+      fallbackAnalytics.searchQueries,
+    ),
     funnel: arrayValue(data.funnel ?? data.drop_off_funnel, fallbackAnalytics.funnel),
   };
 }
@@ -68,7 +72,9 @@ function normalizeLlmCost(value: unknown): LlmCostState {
 
 export default async function AdminHome() {
   const admin = await requireAdmin();
-  const analytics = normalizeAnalytics(await adminGet<unknown>('/admin/analytics', fallbackAnalytics));
+  const analytics = normalizeAnalytics(
+    await adminGet<unknown>('/admin/analytics', fallbackAnalytics),
+  );
   const llm = normalizeLlmCost(await adminGet<unknown>('/admin/llm/cost', fallbackLlmCost));
   const inquiries = await adminCollection<InquiryRow>('/admin/inquiries', fallbackInquiries);
 
@@ -91,9 +97,14 @@ export default async function AdminHome() {
         <StatCard label="Inquiries pending" value={inquiriesPending} />
       </div>
 
+      <AdminConsolePulse />
+
       <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_28rem]">
         <Panel>
-          <SectionTitle title="LLM spend trend" detail="Per-day cost and call volume from /admin/llm/cost." />
+          <SectionTitle
+            title="LLM spend trend"
+            detail="Per-day cost and call volume from /admin/llm/cost."
+          />
           <SpendLineChart data={llm.spendByDay} />
         </Panel>
         <Panel>

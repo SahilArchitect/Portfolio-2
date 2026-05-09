@@ -1,13 +1,20 @@
 from __future__ import annotations
 
+import os
 from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
+os.environ["DATABASE_URL"] = "postgresql+asyncpg://engine_room:engine_room@localhost:5432/engine_room"
+os.environ["REDIS_URL"] = "redis://localhost:6379/0"
+
 import httpx
 import pytest
+from app.api import admin as admin_router
 from app.api import search as search_router
 from app.api.deps import get_redis_cache, get_redis_ratelimit, get_session
+from app.core.settings import get_settings
+from app.db.models import SiteSetting
 from app.main import create_app
 from app.schemas.search import Citation, SearchResponse
 
@@ -74,8 +81,41 @@ class FakeSession:
         return None
 
 
+class FakeAdminSession(FakeSession):
+    def __init__(self) -> None:
+        self.settings: dict[str, SiteSetting] = {}
+        self.scalar_result = 0
+
+    async def get(self, model: type[Any], key: str) -> Any:
+        if model is SiteSetting:
+            return self.settings.get(key)
+        return None
+
+    def add(self, obj: Any) -> None:
+        if isinstance(obj, SiteSetting):
+            self.settings[obj.key] = obj
+            return
+        super().add(obj)
+
+    async def scalar(self, statement: Any) -> int:
+        return self.scalar_result
+
+
 async def _fake_session():
     yield FakeSession()
+
+
+def _fake_admin_session(session: FakeAdminSession):
+    async def override():
+        yield session
+
+    return override
+
+
+def _set_admin_token(monkeypatch: pytest.MonkeyPatch) -> dict[str, str]:
+    monkeypatch.setenv("ADMIN_TOKEN", "test-admin-token")
+    get_settings.cache_clear()
+    return {"Authorization": "Bearer test-admin-token"}
 
 
 async def _client(app):
@@ -158,3 +198,136 @@ async def test_inquiries_rate_limit_edge_case() -> None:
         response = await client.post("/api/inquiries", json=payload)
 
     assert response.status_code == 429
+
+
+@pytest.mark.asyncio
+async def test_admin_requires_bearer_token(monkeypatch: pytest.MonkeyPatch) -> None:
+    _set_admin_token(monkeypatch)
+    app = create_app()
+    app.dependency_overrides[get_session] = _fake_admin_session(FakeAdminSession())
+
+    async with await _client(app) as client:
+        response = await client.get("/admin/hero")
+
+    assert response.status_code == 401
+    get_settings.cache_clear()
+
+
+@pytest.mark.asyncio
+async def test_admin_hero_round_trip_with_fake_database(monkeypatch: pytest.MonkeyPatch) -> None:
+    headers = _set_admin_token(monkeypatch)
+    fake_db = FakeAdminSession()
+    app = create_app()
+    app.dependency_overrides[get_session] = _fake_admin_session(fake_db)
+
+    payload = {
+        "variants": [
+            {
+                "id": "variant-a",
+                "label": "Backend Proof",
+                "copy": "I build AI backend systems with traces, recovery paths, and operator controls.",
+                "allocation": 50,
+            },
+            {
+                "id": "variant-b",
+                "label": "Hiring Signal",
+                "copy": "Hire Sahil for RAG, FastAPI, LLM gateways, and production observability.",
+                "allocation": 50,
+            },
+        ]
+    }
+
+    async with await _client(app) as client:
+        save_response = await client.patch("/admin/hero", headers=headers, json=payload)
+        get_response = await client.get("/admin/hero", headers=headers)
+
+    assert save_response.status_code == 200
+    assert get_response.status_code == 200
+    assert get_response.json()[0]["label"] == "Backend Proof"
+    assert fake_db.settings["hero_experiment"].value["variants"][1]["allocation"] == 50
+    get_settings.cache_clear()
+
+
+@pytest.mark.asyncio
+async def test_admin_hero_rejects_bad_allocation_edge_case(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    headers = _set_admin_token(monkeypatch)
+    app = create_app()
+    app.dependency_overrides[get_session] = _fake_admin_session(FakeAdminSession())
+
+    payload = {
+        "variants": [
+            {"id": "a", "label": "A", "copy": "This copy is long enough.", "allocation": 90},
+            {"id": "b", "label": "B", "copy": "This copy is also long enough.", "allocation": 90},
+        ]
+    }
+    async with await _client(app) as client:
+        response = await client.patch("/admin/hero", headers=headers, json=payload)
+
+    assert response.status_code == 422
+    get_settings.cache_clear()
+
+
+@pytest.mark.asyncio
+async def test_admin_substack_settings_with_fake_database(monkeypatch: pytest.MonkeyPatch) -> None:
+    headers = _set_admin_token(monkeypatch)
+    fake_db = FakeAdminSession()
+    app = create_app()
+    app.dependency_overrides[get_session] = _fake_admin_session(fake_db)
+
+    async with await _client(app) as client:
+        response = await client.patch(
+            "/admin/substack/settings",
+            headers=headers,
+            json={"embedding_model": "text-embedding-3-small", "chunk_size": 768},
+        )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["embeddingModel"] == "text-embedding-3-small"
+    assert body["chunkSize"] == 768
+    assert fake_db.settings["substack_state"].value["chunkSize"] == 768
+    get_settings.cache_clear()
+
+
+@pytest.mark.asyncio
+async def test_admin_substack_rejects_invalid_chunk_edge_case(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    headers = _set_admin_token(monkeypatch)
+    app = create_app()
+    app.dependency_overrides[get_session] = _fake_admin_session(FakeAdminSession())
+
+    async with await _client(app) as client:
+        response = await client.patch(
+            "/admin/substack/settings",
+            headers=headers,
+            json={"embedding_model": "text-embedding-3-small", "chunk_size": 999},
+        )
+
+    assert response.status_code == 422
+    get_settings.cache_clear()
+
+
+@pytest.mark.asyncio
+async def test_admin_worker_trigger_records_sync_log(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    headers = _set_admin_token(monkeypatch)
+    fake_db = FakeAdminSession()
+    app = create_app()
+    app.dependency_overrides[get_session] = _fake_admin_session(fake_db)
+
+    async def fake_ingest(session: Any) -> dict[str, int]:
+        return {"posts": 0, "chunks": 0}
+
+    monkeypatch.setattr(admin_router, "ingest_substack_feed", fake_ingest)
+
+    async with await _client(app) as client:
+        response = await client.post("/admin/worker/trigger/ingest_substack", headers=headers)
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "completed"
+    assert fake_db.settings["substack_state"].value["recentLog"][0]["level"] == "info"
+    get_settings.cache_clear()

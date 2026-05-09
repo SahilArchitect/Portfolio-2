@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 
-import { adminMutation, type ActionResult } from '@/lib/api';
+import { adminFetch, adminMutation, type ActionResult } from '@/lib/api';
 
 function text(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -125,11 +125,14 @@ export async function saveHeroVariants(formData: FormData): Promise<ActionResult
 
 export async function saveResumeVariant(formData: FormData): Promise<ActionResult> {
   const id = text(formData, 'id');
+  const uploadedPdf = await uploadResumePdf(formData);
+  if (!uploadedPdf.ok) return uploadedPdf;
+
   const payload = {
     label: text(formData, 'label'),
     slug: text(formData, 'slug'),
     body_md: text(formData, 'body_md'),
-    pdf_url: optionalText(formData, 'pdf_url'),
+    pdf_url: uploadedPdf.pdfUrl ?? optionalText(formData, 'pdf_url'),
     role_keywords: text(formData, 'role_keywords')
       .split(',')
       .map((item) => item.trim())
@@ -141,7 +144,46 @@ export async function saveResumeVariant(formData: FormData): Promise<ActionResul
     body: JSON.stringify(payload),
   }, 'Resume variant saved.');
   revalidatePath('/content/resumes');
+  revalidatePath('/hire');
+  revalidatePath('/');
   return result;
+}
+
+async function uploadResumePdf(formData: FormData): Promise<
+  | { ok: true; pdfUrl: string | null }
+  | { ok: false; message: string }
+> {
+  const file = formData.get('pdf_file');
+  if (!(file instanceof File) || file.size === 0) return { ok: true, pdfUrl: null };
+
+  if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+    return { ok: false, message: 'Upload a PDF file.' };
+  }
+
+  const upload = new FormData();
+  upload.set('file', file);
+
+  try {
+    const res = await adminFetch('/admin/resume-variants/upload', {
+      method: 'POST',
+      body: upload,
+    });
+    if (!res.ok) {
+      const body = (await res.json().catch(() => null)) as { detail?: unknown } | null;
+      const message = typeof body?.detail === 'string' ? body.detail : `PDF upload returned ${res.status}`;
+      return { ok: false, message };
+    }
+    const body = (await res.json()) as { pdf_url?: unknown };
+    if (typeof body.pdf_url !== 'string' || body.pdf_url.length === 0) {
+      return { ok: false, message: 'PDF upload did not return a download URL.' };
+    }
+    return { ok: true, pdfUrl: body.pdf_url };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : 'PDF upload failed.',
+    };
+  }
 }
 
 export async function deleteResumeVariant(id: string): Promise<ActionResult> {

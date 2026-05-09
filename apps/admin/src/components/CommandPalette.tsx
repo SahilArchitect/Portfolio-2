@@ -48,11 +48,11 @@ export function CommandPalette() {
         type="button"
         onClick={() => setOpen(true)}
         data-cursor="hover"
-        className="hidden items-center gap-2 rounded-md border border-border px-3 py-1.5 font-mono text-mono-sm text-fg-muted hover:border-border-strong hover:text-fg sm:flex"
+        className="hidden min-h-11 items-center gap-2 border border-border px-3 py-2 font-mono text-[10px] uppercase tracking-[2px] text-fg-muted hover:border-border-strong hover:text-accent sm:flex"
       >
         <SearchIcon className="h-3.5 w-3.5" />
         Command
-        <kbd className="rounded border border-border px-1 text-fg-muted">⌘K</kbd>
+        <kbd className="border border-border px-1 text-fg-muted">⌘K</kbd>
       </button>
       <AnimatePresence>
         {open ? (
@@ -65,7 +65,7 @@ export function CommandPalette() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setOpen(false)}
-              className="fixed inset-0 z-overlay bg-bg/80"
+              className="fixed inset-0 z-overlay bg-bg/90 backdrop-blur"
             />
             <motion.div
               key="command-palette"
@@ -75,18 +75,18 @@ export function CommandPalette() {
               exit="exit"
               className="fixed left-1/2 top-20 z-modal w-[calc(100%-2rem)] max-w-xl -translate-x-1/2"
             >
-              <Command className="overflow-hidden rounded-xl border border-border-strong bg-bg-elev">
+              <Command className="cyber-panel">
                 <div className="flex items-center border-b border-border px-4">
                   <SearchIcon className="mr-3 h-4 w-4 text-fg-muted" />
                   <Command.Input
                     autoFocus
                     placeholder="Jump to route or action"
-                    className="h-12 flex-1 bg-transparent font-display text-body-sm text-fg placeholder:text-fg-muted focus:outline-none"
+                    className="h-12 flex-1 bg-transparent font-mono text-body-sm text-fg placeholder:text-fg-muted focus:outline-none"
                   />
                   <button
                     type="button"
                     onClick={() => setOpen(false)}
-                    className="rounded border border-border px-2 py-1 font-mono text-mono-sm text-fg-muted hover:border-border-strong hover:text-fg"
+                    className="border border-border px-2 py-1 font-mono text-mono-sm text-fg-muted hover:border-border-strong hover:text-accent"
                   >
                     Esc
                   </button>
@@ -127,8 +127,8 @@ const groupClass =
   'mb-2 [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:font-mono [&_[cmdk-group-heading]]:text-mono-sm [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-fg-muted';
 
 const itemClass = cn(
-  'flex cursor-pointer items-center rounded-md px-3 py-2.5 font-display text-body-sm text-fg',
-  'hover:bg-accent-muted data-[selected=true]:bg-accent-muted',
+  'flex cursor-pointer items-center px-3 py-2.5 font-mono text-body-sm text-fg',
+  'hover:bg-accent-muted data-[selected=true]:bg-accent-muted data-[selected=true]:text-accent',
 );
 
 function SearchIcon({ className }: { className?: string }) {

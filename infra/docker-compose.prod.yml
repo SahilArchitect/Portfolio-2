@@ -64,6 +64,8 @@ services:
       REDIS_URL: redis://redis:6379/0
       OTEL_SERVICE_NAME: engine-room-api
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
+    volumes:
+      - api-uploads:/app/storage/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -101,6 +103,7 @@ services:
       args:
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-}
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-}
+        NEXT_PUBLIC_CAL_LINK: ${NEXT_PUBLIC_CAL_LINK:-sahilbhatti/intro}
     restart: unless-stopped
     env_file:
       - path: ./.env.production
@@ -109,6 +112,7 @@ services:
       API_BASE_URL: http://api:8000
       API_INTERNAL_BASE_URL: http://api:8000
       NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-}
+      NEXT_PUBLIC_CAL_LINK: ${NEXT_PUBLIC_CAL_LINK:-sahilbhatti/intro}
     depends_on:
       api:
         condition: service_started
@@ -156,5 +160,6 @@ services:
 volumes:
   postgres-data:
   redis-data:
+  api-uploads:
   caddy-data:
   caddy-config:

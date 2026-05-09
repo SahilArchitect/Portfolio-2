@@ -26,7 +26,7 @@ function CopyButton({ text }: { text: string }) {
       onClick={handleCopy}
       data-cursor="hover"
       aria-label="Copy code"
-      className="absolute right-3 top-3 rounded border border-border px-2 py-1 font-mono text-mono-sm text-fg-muted opacity-0 transition-opacity group-hover:opacity-100 hover:border-border-strong hover:text-fg"
+      className="absolute right-3 top-3 border border-border px-2 py-1 font-mono text-mono-sm text-fg-muted opacity-0 transition-opacity group-hover:opacity-100 hover:border-border-strong hover:text-accent"
     >
       {copied ? 'Copied' : 'Copy'}
     </button>
@@ -40,22 +40,22 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
         remarkPlugins={[remarkGfm]}
         components={{
           h1: ({ children }) => (
-            <h1 className="mt-12 font-display text-display-md font-medium text-fg tracking-tight first:mt-0">
+            <h1 className="mt-12 font-display text-display-md font-bold uppercase tracking-[2px] text-fg first:mt-0 [font-family:Orbitron,monospace]">
               {children}
             </h1>
           ),
           h2: ({ children }) => (
-            <h2 className="mt-10 font-display text-display-sm font-medium text-fg tracking-tight first:mt-0">
+            <h2 className="mt-10 font-display text-display-sm font-bold uppercase tracking-[2px] text-fg first:mt-0 [font-family:Orbitron,monospace]">
               {children}
             </h2>
           ),
           h3: ({ children }) => (
-            <h3 className="mt-8 font-display text-body font-medium text-fg first:mt-0">
+            <h3 className="mt-8 font-display text-body font-bold uppercase tracking-[2px] text-fg first:mt-0 [font-family:Orbitron,monospace]">
               {children}
             </h3>
           ),
           p: ({ children }) => (
-            <p className="mt-4 text-body text-fg-muted leading-relaxed first:mt-0">
+            <p className="mt-4 font-mono text-body text-fg/70 leading-relaxed first:mt-0">
               {children}
             </p>
           ),
@@ -63,7 +63,7 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
             <a
               href={href}
               data-cursor="hover"
-              className="text-accent underline underline-offset-4 hover:text-fg transition-colors"
+              className="text-accent underline underline-offset-4 transition-colors hover:text-fg"
               target={href?.startsWith('http') ? '_blank' : undefined}
               rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined}
             >
@@ -71,10 +71,10 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
             </a>
           ),
           ul: ({ children }) => (
-            <ul className="mt-4 space-y-2 pl-5 text-fg-muted">{children}</ul>
+            <ul className="mt-4 space-y-2 pl-5 font-mono text-fg/70">{children}</ul>
           ),
           ol: ({ children }) => (
-            <ol className="mt-4 list-decimal space-y-2 pl-5 text-fg-muted">{children}</ol>
+            <ol className="mt-4 list-decimal space-y-2 pl-5 font-mono text-fg/70">{children}</ol>
           ),
           li: ({ children }) => (
             <li className="text-body leading-relaxed marker:text-fg-muted">
@@ -82,7 +82,7 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
             </li>
           ),
           blockquote: ({ children }) => (
-            <blockquote className="mt-4 border-l-2 border-accent pl-4 text-fg-muted italic">
+            <blockquote className="mt-4 border-l-2 border-accent pl-4 font-mono text-fg/70 italic">
               {children}
             </blockquote>
           ),
@@ -90,7 +90,7 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
             const isInline = !cls;
             if (isInline) {
               return (
-                <code className="rounded bg-bg-elev px-1.5 py-0.5 font-mono text-mono-sm text-fg border border-border">
+                <code className="border border-border bg-bg-elev px-1.5 py-0.5 font-mono text-mono-sm text-fg">
                   {children}
                 </code>
               );
@@ -98,7 +98,7 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
             const codeText = String(children).replace(/\n$/, '');
             return (
               <div className="group relative mt-4">
-                <pre tabIndex={0} className="overflow-x-auto rounded-lg border border-border bg-bg-elev p-4">
+                <pre tabIndex={0} className="overflow-x-auto border border-border bg-bg-elev p-4">
                   <code
                     className={cn(
                       'font-mono text-mono-sm text-fg block',

@@ -10,22 +10,24 @@ type WorkListProps = {
 
 export function WorkList({ projects }: WorkListProps) {
   return (
-    <div className="divide-y divide-border rounded-xl border border-border bg-bg-elev">
+    <div className="cyber-panel divide-y divide-border">
       {projects.map((project) => (
         <Link key={project.slug} href={`/work/${project.slug}` as Route} data-cursor="hover" className="group block">
-          <article className="grid gap-4 p-6 sm:grid-cols-[80px_1fr_auto] sm:items-start">
-            <p className="font-mono text-mono-sm text-fg-muted">{String(project.displayOrder).padStart(2, '0')}</p>
+          <article className="grid gap-4 p-6 transition hover:bg-accent-muted sm:grid-cols-[100px_1fr_auto] sm:items-start">
+            <p className="font-mono text-[9px] uppercase tracking-[4px] text-fg-muted">PROJECT-{String(project.displayOrder).padStart(3, '0')}</p>
             <div>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
-                <h2 className="font-display text-display-sm font-medium text-fg group-hover:text-accent">{project.title}</h2>
-                <p className="font-mono text-mono-sm text-fg-muted">{project.role}</p>
+                <h2 className="font-display text-[clamp(16px,2vw,22px)] font-bold uppercase tracking-[2px] text-fg group-hover:text-accent [font-family:Orbitron,monospace]">
+                  {project.title}
+                </h2>
+                <p className="font-mono text-[10px] uppercase tracking-[2px] text-warning">{project.role}</p>
               </div>
-              <p className="mt-3 max-w-3xl text-body-sm text-fg-muted">{project.summary}</p>
+              <p className="mt-3 max-w-3xl font-mono text-[12px] leading-7 text-fg/65">{project.summary}</p>
               <div className="grid overflow-hidden sm:grid-rows-[0fr] sm:group-hover:grid-rows-[1fr]">
                 <div className="min-h-0">
                   <div className="mt-5 flex flex-wrap gap-2">
                     {project.stack.map((item) => (
-                      <span key={item} className="rounded-full border border-border px-2.5 py-0.5 font-mono text-mono-sm text-fg-muted">
+                      <span key={item} className="cyber-tag">
                         {item}
                       </span>
                     ))}

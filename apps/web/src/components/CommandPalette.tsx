@@ -9,6 +9,7 @@ import { cn } from '@engine-room/ui';
 import { commandPaletteEnter } from '@engine-room/ui/motion';
 
 import { clientFetchResume, clientSearchSite } from '@/lib/api';
+import { CONTACT_EMAIL } from '@/lib/site';
 import type { SearchResponseView } from '@/lib/view-models';
 import { DownloadIcon, MailIcon, PageIcon, SearchIcon } from './Icons';
 
@@ -79,7 +80,7 @@ export function CommandPalette() {
 
   const copyEmail = useCallback(() => {
     navigator.clipboard
-      .writeText('sahil@sahilbhatti.dev')
+      .writeText(CONTACT_EMAIL)
       .then(() => {
         setCopied(true);
         setTimeout(() => setCopied(false), 1800);
@@ -105,7 +106,7 @@ export function CommandPalette() {
         onClick={() => setOpen(true)}
         data-cursor="hover"
         aria-label="Open command palette"
-        className="hidden items-center gap-2 rounded-md border border-border px-3 py-2 font-mono text-mono-sm text-fg-muted hover:border-border-strong hover:text-fg sm:flex"
+        className="border-border text-fg-muted hover:border-border-strong hover:text-accent hidden min-h-11 items-center gap-2 border px-3 py-2 font-mono text-[10px] uppercase tracking-[2px] transition sm:flex"
       >
         <span>Search</span>
         <kbd className="flex items-center gap-0.5 opacity-70">
@@ -119,7 +120,7 @@ export function CommandPalette() {
         onClick={() => setOpen(true)}
         data-cursor="hover"
         aria-label="Open command palette"
-        className="flex h-9 w-9 items-center justify-center rounded-md border border-border text-fg-muted hover:border-border-strong hover:text-fg sm:hidden"
+        className="border-border text-fg-muted hover:border-border-strong hover:text-accent flex h-11 w-11 items-center justify-center border sm:hidden"
       >
         <SearchIcon className="h-4 w-4" />
       </button>
@@ -132,7 +133,7 @@ export function CommandPalette() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-overlay bg-bg/90"
+              className="z-overlay bg-bg/90 fixed inset-0 backdrop-blur"
               onClick={() => setOpen(false)}
             />
 
@@ -142,34 +143,32 @@ export function CommandPalette() {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="fixed left-1/2 top-24 z-modal w-[calc(100%-32px)] max-w-2xl -translate-x-1/2"
+              className="z-modal fixed left-1/2 top-24 w-[calc(100%-32px)] max-w-2xl -translate-x-1/2"
             >
-              <Command
-                label="Command palette"
-                className="overflow-hidden rounded-xl border border-border-strong bg-bg-elev"
-                shouldFilter={!query.trim()}
-              >
-                <div className="flex items-center border-b border-border px-4">
-                  <SearchIcon className="mr-3 h-4 w-4 shrink-0 text-fg-muted" />
+              <Command label="Command palette" className="cyber-panel" shouldFilter={!query.trim()}>
+                <div className="border-border flex items-center border-b px-4">
+                  <SearchIcon className="text-fg-muted mr-3 h-4 w-4 shrink-0" />
                   <Command.Input
                     value={query}
                     onValueChange={setQuery}
                     placeholder="Ask about projects, traces, writing..."
-                    className="h-14 flex-1 bg-transparent font-display text-body text-fg placeholder:text-fg-muted focus:outline-none"
+                    className="text-fg placeholder:text-fg-muted h-14 flex-1 bg-transparent font-mono text-[14px] focus:outline-none"
                   />
-                  {searching && <span className="font-mono text-mono-sm text-fg-muted">Searching</span>}
+                  {searching && (
+                    <span className="text-mono-sm text-fg-muted font-mono">Searching</span>
+                  )}
                   <button
                     type="button"
                     onClick={() => setOpen(false)}
                     data-cursor="hover"
-                    className="ml-3 rounded border border-border px-1.5 py-0.5 font-mono text-mono-sm text-fg-muted hover:border-border-strong hover:text-fg"
+                    className="border-border text-mono-sm text-fg-muted hover:border-border-strong hover:text-accent ml-3 border px-1.5 py-0.5 font-mono"
                   >
                     Esc
                   </button>
                 </div>
 
                 <Command.List className="max-h-96 overflow-y-auto p-2">
-                  <Command.Empty className="px-4 py-8 text-center font-mono text-mono-sm text-fg-muted">
+                  <Command.Empty className="text-mono-sm text-fg-muted px-4 py-8 text-center font-mono">
                     No command matched.
                   </Command.Empty>
 
@@ -185,7 +184,7 @@ export function CommandPalette() {
                                 href={citation.url ?? '#'}
                                 target={citation.url ? '_blank' : undefined}
                                 rel={citation.url ? 'noopener noreferrer' : undefined}
-                                className="rounded-full border border-border px-2.5 py-0.5 font-mono text-mono-sm text-fg-muted hover:border-border-strong hover:text-fg"
+                                className="border-border text-mono-sm text-fg-muted hover:border-border-strong hover:text-fg rounded-full border px-2.5 py-0.5 font-mono"
                               >
                                 {citation.title}
                               </a>
@@ -208,21 +207,35 @@ export function CommandPalette() {
                         data-cursor="hover"
                         className={itemClass}
                       >
-                        <PageIcon className="mr-3 h-4 w-4 shrink-0 text-fg-muted" />
+                        <PageIcon className="text-fg-muted mr-3 h-4 w-4 shrink-0" />
                         <span className="flex-1">{item.label}</span>
-                        <span className="font-mono text-mono-sm text-fg-muted opacity-70">{item.shortcut}</span>
+                        <span className="text-mono-sm text-fg-muted font-mono opacity-70">
+                          {item.shortcut}
+                        </span>
                       </Command.Item>
                     ))}
                   </Command.Group>
 
                   <Command.Group heading="Actions" className={groupClass}>
-                    <Command.Item value="copy email" onSelect={copyEmail} data-cursor="hover" className={itemClass}>
-                      <MailIcon className="mr-3 h-4 w-4 shrink-0 text-fg-muted" />
-                      <span className="flex-1">{copied ? 'Email copied' : 'Copy email address'}</span>
+                    <Command.Item
+                      value="copy email"
+                      onSelect={copyEmail}
+                      data-cursor="hover"
+                      className={itemClass}
+                    >
+                      <MailIcon className="text-fg-muted mr-3 h-4 w-4 shrink-0" />
+                      <span className="flex-1">
+                        {copied ? 'Email copied' : 'Copy email address'}
+                      </span>
                     </Command.Item>
 
-                    <Command.Item value="download resume" onSelect={downloadResume} data-cursor="hover" className={itemClass}>
-                      <DownloadIcon className="mr-3 h-4 w-4 shrink-0 text-fg-muted" />
+                    <Command.Item
+                      value="download resume"
+                      onSelect={downloadResume}
+                      data-cursor="hover"
+                      className={itemClass}
+                    >
+                      <DownloadIcon className="text-fg-muted mr-3 h-4 w-4 shrink-0" />
                       <span className="flex-1">Download default resume</span>
                     </Command.Item>
                   </Command.Group>
@@ -240,7 +253,7 @@ const groupClass =
   'mb-2 [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:font-mono [&_[cmdk-group-heading]]:text-mono-sm [&_[cmdk-group-heading]]:text-fg-muted';
 
 const itemClass = cn(
-  'flex cursor-pointer items-center rounded-md px-3 py-2.5 font-display text-body-sm text-fg',
-  'hover:bg-accent-muted data-[selected=true]:bg-accent-muted data-[selected=true]:text-fg',
-  'aria-selected:bg-accent-muted aria-selected:text-fg',
+  'text-fg flex cursor-pointer items-center px-3 py-2.5 font-mono text-[13px]',
+  'hover:bg-accent-muted data-[selected=true]:bg-accent-muted data-[selected=true]:text-accent',
+  'aria-selected:bg-accent-muted aria-selected:text-accent',
 );

@@ -3,7 +3,9 @@ import { MotionConfig } from 'framer-motion';
 
 import { Cursor } from '@engine-room/ui';
 
+import { CyberChrome } from '@/components/CyberChrome';
 import { SiteHeader } from '@/components/SiteHeader';
+import { SITE_URL } from '@/lib/site';
 
 import '@engine-room/ui/styles/globals.css';
 import '@engine-room/ui/styles/cursor.css';
@@ -12,14 +14,15 @@ import './fonts.css';
 export const metadata: Metadata = {
   title: {
     template: '%s - Sahil Bhatti',
-    default: 'Sahil Bhatti - AI Backend Engineer',
+    default: 'Sahil Bhatti - AI Backend / LLM Infrastructure Engineer',
   },
-  description: 'The Engine Room. Production AI infrastructure, in working order.',
-  metadataBase: new URL('https://sahilbhatti.dev'),
+  description:
+    'AI backend engineer building LLM gateways, RAG pipelines, inference APIs, and vector search systems.',
+  metadataBase: new URL(SITE_URL),
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://sahilbhatti.dev',
+    url: SITE_URL,
     siteName: 'Sahil Bhatti',
   },
 };
@@ -48,10 +51,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <MotionConfig reducedMotion="user">
+          <CyberChrome />
           <Cursor />
           <a
             href="#content"
-            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-modal focus:rounded-md focus:border focus:border-border-strong focus:bg-bg-elev focus:px-3 focus:py-2 focus:font-mono focus:text-mono-sm focus:text-fg"
+            className="focus:z-modal focus:border-border-strong focus:bg-bg-elev focus:text-mono-sm focus:text-fg sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:rounded-md focus:border focus:px-3 focus:py-2 focus:font-mono"
           >
             Skip to content
           </a>

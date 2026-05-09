@@ -1,4 +1,4 @@
-import { notFound, redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 
 import { auth } from '@/auth';
 
@@ -19,7 +19,7 @@ export async function requireAdmin() {
   const email = session?.user?.email?.toLowerCase();
 
   if (!email) redirect('/sign-in');
-  if (!adminEmails().has(email)) notFound();
+  if (!adminEmails().has(email)) redirect('/sign-in/error');
 
   return { email };
 }

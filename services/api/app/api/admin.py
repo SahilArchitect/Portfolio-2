@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime, timedelta
 from typing import Any
+from uuid import uuid4
 
 import redis.asyncio as aioredis
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -14,12 +15,128 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_redis_cache, get_session, require_admin
-from app.db.models import Inquiry
+from app.db.models import Inquiry, SiteSetting
 from app.rag.indexer import refresh_dirty_embeddings
 from app.rag.substack import ingest_substack_feed
+from app.schemas.site_settings import HeroExperiment, SubstackSettingsUpdate, SubstackState
 
 tracer = trace.get_tracer(__name__)
 router = APIRouter(prefix="/admin", tags=["admin:ops"], dependencies=[Depends(require_admin)])
+
+DEFAULT_HERO_EXPERIMENT = {
+    "variants": [
+        {
+            "id": "variant-a",
+            "label": "Systems Positioning",
+            "copy": "I build AI backend systems that stay observable when the demo ends.",
+            "allocation": 50,
+            "impressions": 0,
+            "inquiries": 0,
+        },
+        {
+            "id": "variant-b",
+            "label": "Hiring Positioning",
+            "copy": "AI backend engineer focused on RAG, LLM gateways, and production traces.",
+            "allocation": 50,
+            "impressions": 0,
+            "inquiries": 0,
+        },
+    ]
+}
+
+DEFAULT_SUBSTACK_STATE = {
+    "lastSyncAt": None,
+    "embeddingModel": "text-embedding-3-small",
+    "chunkSize": 512,
+    "recentLog": [
+        {
+            "id": "sync-pending",
+            "level": "info",
+            "message": "Worker has not reported a sync yet.",
+            "created_at": "2026-05-07T00:00:00+00:00",
+        }
+    ],
+}
+
+
+async def _setting(session: AsyncSession, key: str, fallback: dict[str, Any]) -> dict[str, Any]:
+    row = await session.get(SiteSetting, key)
+    if row is None or not isinstance(row.value, dict):
+        return dict(fallback)
+    return row.value
+
+
+async def _save_setting(session: AsyncSession, key: str, value: dict[str, Any]) -> None:
+    row = await session.get(SiteSetting, key)
+    if row is None:
+        row = SiteSetting(key=key, value=value)
+    else:
+        row.value = value
+    session.add(row)
+    await session.commit()
+    await session.refresh(row)
+
+
+def _sync_log(level: str, message: str) -> dict[str, str]:
+    return {
+        "id": f"sync-{uuid4().hex[:10]}",
+        "level": level,
+        "message": message,
+        "created_at": datetime.now(UTC).isoformat(),
+    }
+
+
+def _prepend_log(state: dict[str, Any], level: str, message: str) -> dict[str, Any]:
+    logs = state.get("recentLog") if isinstance(state.get("recentLog"), list) else []
+    return {
+        **state,
+        "lastSyncAt": datetime.now(UTC).isoformat(),
+        "recentLog": [_sync_log(level, message), *logs][:20],
+    }
+
+
+@router.get("/hero", response_model=list[dict[str, Any]], summary="Get editable hero variants")
+async def get_hero_variants(session: AsyncSession = Depends(get_session)) -> list[dict[str, Any]]:
+    with tracer.start_as_current_span("admin.hero.get"):
+        state = HeroExperiment.model_validate(
+            await _setting(session, "hero_experiment", DEFAULT_HERO_EXPERIMENT)
+        )
+        return [variant.model_dump(by_alias=True) for variant in state.variants]
+
+
+@router.patch("/hero", response_model=list[dict[str, Any]], summary="Save editable hero variants")
+async def save_hero_variants(
+    payload: HeroExperiment,
+    session: AsyncSession = Depends(get_session),
+) -> list[dict[str, Any]]:
+    with tracer.start_as_current_span("admin.hero.update"):
+        value = payload.model_dump(by_alias=True)
+        await _save_setting(session, "hero_experiment", value)
+        return [variant.model_dump(by_alias=True) for variant in payload.variants]
+
+
+@router.get("/substack", response_model=SubstackState, summary="Get Substack ingestion controls")
+async def get_substack_state(session: AsyncSession = Depends(get_session)) -> SubstackState:
+    with tracer.start_as_current_span("admin.substack.get"):
+        return SubstackState.model_validate(
+            await _setting(session, "substack_state", DEFAULT_SUBSTACK_STATE)
+        )
+
+
+@router.patch("/substack/settings", response_model=SubstackState, summary="Save Substack settings")
+async def save_substack_settings(
+    payload: SubstackSettingsUpdate,
+    session: AsyncSession = Depends(get_session),
+) -> SubstackState:
+    with tracer.start_as_current_span("admin.substack.settings"):
+        state = await _setting(session, "substack_state", DEFAULT_SUBSTACK_STATE)
+        next_state = {
+            **state,
+            "embeddingModel": payload.embedding_model,
+            "chunkSize": payload.chunk_size,
+        }
+        await _save_setting(session, "substack_state", next_state)
+        return SubstackState.model_validate(next_state)
 
 
 @router.post(
@@ -35,8 +152,20 @@ async def trigger_worker_job(
         span.set_attribute("job_id", job_id)
         if job_id == "ingest_substack":
             result = await ingest_substack_feed(session)
+            state = await _setting(session, "substack_state", DEFAULT_SUBSTACK_STATE)
+            await _save_setting(
+                session,
+                "substack_state",
+                _prepend_log(state, "info", "Substack RSS sync completed."),
+            )
         elif job_id == "refresh_embeddings":
             result = await refresh_dirty_embeddings(session)
+            state = await _setting(session, "substack_state", DEFAULT_SUBSTACK_STATE)
+            await _save_setting(
+                session,
+                "substack_state",
+                _prepend_log(state, "info", "Dirty embedding refresh completed."),
+            )
         else:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

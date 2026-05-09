@@ -67,6 +67,15 @@ class Settings(BaseSettings):
         description="Shared secret for admin API auth. Set in production env.",
     )
 
+    public_api_base_url: str = Field(
+        default="",
+        description="Public API origin used when generating browser-downloadable asset URLs.",
+    )
+    resume_upload_dir: str = Field(
+        default="storage/uploads",
+        description="Directory where admin-uploaded resume PDFs are stored and served from /uploads.",
+    )
+
     substack_feed_url: str = Field(
         default="",
         description="Substack RSS feed URL for the worker ingestion job.",

@@ -1,8 +1,8 @@
 /**
  * Typography — one display face, one mono. Period.
  *
- * Tracking is tight on display sizes (negative letter-spacing) and
- * comfortable on body. Mono opens slightly for legibility at micro sizes.
+ * Letter spacing stays neutral by default. Individual compositions can opt into
+ * uppercase tracking where the design language needs it.
  */
 
 export const fontFamilies = {
@@ -14,10 +14,10 @@ export const fontFamilies = {
 export type TypeScale = readonly [string, string, string];
 
 export const typeScale = {
-  'display-xl': ['64px', '68px', '-0.025em'] as const,
-  'display-lg': ['44px', '48px', '-0.02em'] as const,
-  'display-md': ['32px', '36px', '-0.015em'] as const,
-  'display-sm': ['24px', '30px', '-0.01em'] as const,
+  'display-xl': ['64px', '68px', '0em'] as const,
+  'display-lg': ['44px', '48px', '0em'] as const,
+  'display-md': ['32px', '36px', '0em'] as const,
+  'display-sm': ['24px', '30px', '0em'] as const,
   body: ['16px', '26px', '0em'] as const,
   'body-sm': ['14px', '22px', '0em'] as const,
   micro: ['13px', '20px', '0.01em'] as const,

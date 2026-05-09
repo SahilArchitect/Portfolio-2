@@ -38,7 +38,7 @@ export default async function PostPage({ params }: PostPageProps) {
       <ReadingProgress />
       <Section className="pb-12">
         <article className="mx-auto max-w-3xl">
-          <div className="mb-8 flex flex-wrap items-center gap-3 font-mono text-mono-sm text-fg-muted">
+          <div className="mb-8 flex flex-wrap items-center gap-3 font-mono text-[10px] uppercase tracking-[2px] text-fg-muted">
             <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
             <span>{post.readingMinutes} min read</span>
             {post.canonicalUrl && (
@@ -47,23 +47,23 @@ export default async function PostPage({ params }: PostPageProps) {
               </a>
             )}
           </div>
-          <h1 className="font-display text-display-lg font-medium text-fg">{post.title}</h1>
-          <p className="mt-5 text-body text-fg-muted">{post.summary}</p>
+          <h1 className="font-display text-display-lg font-bold uppercase tracking-[2px] text-fg [font-family:Orbitron,monospace]">{post.title}</h1>
+          <p className="mt-5 font-mono text-body text-fg/70">{post.summary}</p>
           <div className="mt-6 flex flex-wrap gap-2">
             {post.tags.map((tag) => (
-              <span key={tag} className="rounded-full border border-border px-2.5 py-0.5 font-mono text-mono-sm text-fg-muted">
+              <span key={tag} className="cyber-tag">
                 {tag}
               </span>
             ))}
           </div>
-          <div className="mt-12 rounded-xl border border-border bg-bg-elev p-6">
+          <div className="cyber-panel mt-12 p-6">
             <MarkdownRenderer content={post.body} />
           </div>
         </article>
       </Section>
 
       <Section eyebrow="Related" title="Continue with nearby systems notes." className="pt-0">
-        <div className="rounded-xl border border-border bg-bg-elev px-6">
+        <div className="cyber-panel px-6">
           {post.related.map((related) => (
             <PostCard key={related.slug} post={related} />
           ))}

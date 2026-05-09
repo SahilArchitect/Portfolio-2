@@ -36,7 +36,9 @@ ENV PYTHONUNBUFFERED=1 \
 
 RUN apk add --no-cache ca-certificates libpq \
     && addgroup -S -g 10001 app \
-    && adduser -S -D -H -u 10001 -G app app
+    && adduser -S -D -H -u 10001 -G app app \
+    && mkdir -p /app/storage/uploads \
+    && chown -R app:app /app/storage
 
 WORKDIR /app
 

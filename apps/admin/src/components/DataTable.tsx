@@ -37,7 +37,7 @@ export function DataTable<TData>({
 
   return (
     <div className={cn('w-full overflow-x-auto', className)}>
-      <table className="w-full border-collapse text-body-sm">
+      <table className="w-full border-collapse font-mono text-body-sm">
         <thead>
           {table.getHeaderGroups().map((hg) => (
             <tr key={hg.id}>
@@ -46,8 +46,8 @@ export function DataTable<TData>({
                   key={header.id}
                   onClick={header.column.getToggleSortingHandler()}
                   className={cn(
-                    'border-b border-border bg-bg-elev px-3 py-2 text-left font-mono text-micro uppercase tracking-wider text-fg-muted',
-                    header.column.getCanSort() && 'cursor-pointer select-none hover:text-fg',
+                    'border-b border-border bg-bg-elev px-3 py-2 text-left font-mono text-[9px] uppercase tracking-[3px] text-fg-muted',
+                    header.column.getCanSort() && 'cursor-pointer select-none hover:text-accent',
                   )}
                 >
                   {header.isPlaceholder
@@ -71,7 +71,7 @@ export function DataTable<TData>({
               onClick={() => onRowClick?.(row.original)}
               className={cn(
                 'border-b border-border transition-colors',
-                onRowClick && 'cursor-pointer hover:bg-bg-elev',
+                onRowClick && 'cursor-pointer hover:bg-accent-muted',
               )}
             >
               {row.getVisibleCells().map((cell) => (

@@ -52,7 +52,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       >
         <div className="flex flex-wrap gap-2">
           {project.stack.map((item) => (
-            <span key={item} className="rounded-full border border-border px-2.5 py-0.5 font-mono text-mono-sm text-fg-muted">
+            <span key={item} className="cyber-tag">
               {item}
             </span>
           ))}
@@ -63,16 +63,16 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
       <Section eyebrow="Deep dive" title="The decisions behind the system.">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <article className="rounded-xl border border-border bg-bg-elev p-6">
+          <article className="cyber-panel p-6">
             <MarkdownRenderer content={project.body} />
           </article>
           <div className="space-y-5">
-            <div className="rounded-xl border border-border bg-bg-elev p-5">
-              <p className="font-mono text-micro uppercase tracking-wider text-fg-muted">Embedded demo</p>
+            <div className="cyber-panel p-5">
+              <p className="font-mono text-[9px] uppercase tracking-[4px] text-warning">Embedded demo</p>
               <a
                 href={project.demoUrl ?? '/traces'}
                 data-cursor="hover"
-                className="mt-3 inline-flex font-mono text-mono-sm text-fg-muted hover:text-fg"
+                className="mt-3 inline-flex font-mono text-mono-sm text-fg-muted hover:text-accent"
               >
                 Open demo
               </a>
@@ -83,14 +83,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 sandbox="allow-scripts allow-popups allow-forms"
                 aria-hidden="true"
                 tabIndex={-1}
-                className="mt-4 h-80 w-full rounded-lg border border-border bg-bg"
+                className="mt-4 h-80 w-full border border-border bg-bg"
               />
             </div>
-            <div className="rounded-xl border border-border bg-bg-elev p-5">
-              <p className="font-mono text-micro uppercase tracking-wider text-fg-muted">Links</p>
+            <div className="cyber-panel p-5">
+              <p className="font-mono text-[9px] uppercase tracking-[4px] text-warning">Links</p>
               <div className="mt-4 grid gap-2 font-mono text-mono-sm">
-                {project.liveUrl && <a href={project.liveUrl} data-cursor="hover" className="text-fg-muted hover:text-fg">Live system</a>}
-                {project.repoUrl && <a href={project.repoUrl} data-cursor="hover" className="text-fg-muted hover:text-fg">Repository</a>}
+                {project.liveUrl && <a href={project.liveUrl} data-cursor="hover" className="text-fg-muted hover:text-accent">Live system</a>}
+                {project.repoUrl && <a href={project.repoUrl} data-cursor="hover" className="text-fg-muted hover:text-accent">Repository</a>}
                 {!project.liveUrl && !project.repoUrl && <p className="text-fg-muted">Private proof surface. Public traces stay visible.</p>}
               </div>
             </div>
@@ -99,7 +99,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       </Section>
 
       <Section eyebrow="Related writing" title="Notes that connect to this build." className="pt-0">
-        <div className="rounded-xl border border-border bg-bg-elev px-6">
+        <div className="cyber-panel px-6">
           {(related.length ? related : posts.slice(0, 3)).map((post) => (
             <PostCard key={post.slug} post={post} />
           ))}

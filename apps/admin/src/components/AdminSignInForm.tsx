@@ -1,71 +1,70 @@
 'use client';
 
-import { signIn } from 'next-auth/react';
-import { useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { useFormState, useFormStatus } from 'react-dom';
+
+import { adminSignInAction } from '@/app/sign-in/actions';
 
 export function AdminSignInForm({ callbackUrl }: { callbackUrl: string }) {
-  const [error, setError] = useState(false);
-  const [pending, setPending] = useState(false);
-
-  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError(false);
-    setPending(true);
-
-    const formData = new FormData(event.currentTarget);
-    const email = String(formData.get('email') ?? '').trim().toLowerCase();
-    const password = String(formData.get('password') ?? '');
-    const result = await signIn('credentials', {
-      email,
-      password,
-      redirect: false,
-      callbackUrl,
-    });
-
-    setPending(false);
-    if (result?.ok && result.url) {
-      window.location.assign(result.url);
-      return;
-    }
-
-    setError(true);
-  }
+  const [state, formAction] = useFormState(adminSignInAction, { error: '' });
+  const reducedMotion = useReducedMotion();
 
   return (
-    <form onSubmit={onSubmit} className="mt-6 grid gap-4">
-      <label className="grid gap-1.5">
-        <span className="font-mono text-micro uppercase tracking-wider text-fg-muted">Email</span>
+    <form action={formAction} className="mt-6 grid gap-4">
+      <input type="hidden" name="callbackUrl" value={callbackUrl} />
+      <motion.label
+        className="grid gap-1.5"
+        initial={reducedMotion ? false : { opacity: 0, x: -12 }}
+        animate={reducedMotion ? undefined : { opacity: 1, x: 0 }}
+        transition={{ delay: 0.08, duration: 0.35 }}
+      >
+        <span className="text-fg-muted font-mono text-[9px] uppercase tracking-[3px]">Email</span>
         <input
           required
           type="email"
           name="email"
           autoComplete="email"
           placeholder="you@example.com"
-          className="rounded-md border border-border bg-bg px-3 py-2 font-display text-body-sm text-fg placeholder:text-fg-muted focus:border-border-strong focus:outline-none"
+          className="border-border bg-bg text-body-sm text-fg placeholder:text-fg-muted focus:border-border-strong min-h-11 border px-3 py-2 font-mono transition focus:shadow-[0_0_24px_rgba(0,255,242,0.1)] focus:outline-none"
         />
-      </label>
-      <label className="grid gap-1.5">
-        <span className="font-mono text-micro uppercase tracking-wider text-fg-muted">Admin code</span>
+      </motion.label>
+      <motion.label
+        className="grid gap-1.5"
+        initial={reducedMotion ? false : { opacity: 0, x: 12 }}
+        animate={reducedMotion ? undefined : { opacity: 1, x: 0 }}
+        transition={{ delay: 0.16, duration: 0.35 }}
+      >
+        <span className="text-fg-muted font-mono text-[9px] uppercase tracking-[3px]">
+          Admin code
+        </span>
         <input
           required
           type="password"
           name="password"
           autoComplete="current-password"
           placeholder="Paste ADMIN_TOKEN or ADMIN_PASSCODE"
-          className="rounded-md border border-border bg-bg px-3 py-2 font-display text-body-sm text-fg placeholder:text-fg-muted focus:border-border-strong focus:outline-none"
+          className="border-border bg-bg text-body-sm text-fg placeholder:text-fg-muted focus:border-border-strong min-h-11 border px-3 py-2 font-mono transition focus:shadow-[0_0_24px_rgba(0,255,242,0.1)] focus:outline-none"
         />
-      </label>
-      {error ? (
-        <p className="text-body-sm text-danger">Use the allowlisted email and current admin code.</p>
-      ) : null}
-      <button
-        type="submit"
-        disabled={pending}
-        data-cursor="hover"
-        className="rounded-md border border-border-strong bg-accent-muted px-3 py-2 font-mono text-mono-sm font-medium text-fg hover:border-accent disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {pending ? 'Signing in...' : 'Sign in'}
-      </button>
+      </motion.label>
+      {state.error ? <p className="text-body-sm text-danger">{state.error}</p> : null}
+      <SignInButton />
     </form>
+  );
+}
+
+function SignInButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <motion.button
+      type="submit"
+      disabled={pending}
+      data-cursor="hover"
+      className="cyber-button px-3 py-2 disabled:cursor-not-allowed disabled:opacity-60"
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.98 }}
+    >
+      <span>{pending ? 'Signing in...' : 'Sign in'}</span>
+    </motion.button>
   );
 }

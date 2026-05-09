@@ -5,6 +5,7 @@ import { Cursor } from '@engine-room/ui';
 
 import '@engine-room/ui/styles/globals.css';
 import '@engine-room/ui/styles/cursor.css';
+import './fonts.css';
 
 export const metadata: Metadata = {
   title: 'Admin — The Engine Room',
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <MotionConfig reducedMotion="user">
+          <div className="cyber-grid-bg" aria-hidden />
           <Cursor />
           {children}
         </MotionConfig>

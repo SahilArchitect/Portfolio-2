@@ -27,7 +27,7 @@ export interface CursorProps {
   hoverSize?: number;
 }
 
-export function Cursor({ size = 8, hoverSize = 32 }: CursorProps) {
+export function Cursor({ size = 20, hoverSize = 42 }: CursorProps) {
   const reduced = useReducedMotion() ?? false;
   const [enabled, setEnabled] = useState(false);
   const [hovering, setHovering] = useState(false);
@@ -70,22 +70,20 @@ export function Cursor({ size = 8, hoverSize = 32 }: CursorProps) {
   const targetSize = hovering ? hoverSize : size;
 
   return (
-    <motion.div
-      aria-hidden
-      className="pointer-events-none fixed left-0 top-0 z-[9999] mix-blend-difference"
-      style={{ x: sx, y: sy }}
-    >
+    <motion.div aria-hidden className="pointer-events-none fixed left-0 top-0 z-[9999]" style={{ x: sx, y: sy }}>
       <motion.div
-        className="rounded-full bg-white"
+        className="rounded-full border border-accent shadow-[0_0_18px_rgba(0,255,242,0.45)]"
         animate={{
           width: targetSize,
           height: targetSize,
           x: -targetSize / 2,
           y: -targetSize / 2,
-          opacity: hovering ? 0.9 : 1,
+          backgroundColor: hovering ? 'rgba(0,255,242,0.08)' : 'rgba(0,255,242,0)',
+          opacity: hovering ? 1 : 0.95,
         }}
         transition={SPRING_SNAPPY}
       />
+      <div className="absolute left-0 top-0 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent shadow-[0_0_10px_var(--accent)]" />
     </motion.div>
   );
 }

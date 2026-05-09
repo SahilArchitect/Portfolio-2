@@ -37,9 +37,9 @@ export function MetricsWidget({ initialData, compact = false, className }: Metri
     .join(' ');
 
   return (
-    <div className={cn('rounded-xl border border-border bg-bg-elev p-5', className)}>
+    <div className={cn('cyber-panel p-5', className)}>
       <div className="flex items-center justify-between gap-4">
-        <p className="font-mono text-micro uppercase tracking-wider text-fg-muted">Live public metrics</p>
+        <p className="font-mono text-[9px] uppercase tracking-[4px] text-warning">Live public metrics</p>
         <time dateTime={metrics.updatedAt} className="font-mono text-mono-sm text-fg-muted">
           10s poll
         </time>
@@ -62,10 +62,10 @@ export function MetricsWidget({ initialData, compact = false, className }: Metri
 
 function Metric({ label, value, detail }: { label: string; value: string; detail: string }) {
   return (
-    <div className="rounded-lg border border-border bg-bg p-3">
-      <p className="font-mono text-mono-sm text-fg-muted">{label}</p>
-      <p className="mt-2 font-display text-display-sm font-medium text-fg">{value}</p>
-      <p className="mt-1 font-mono text-mono-sm text-fg-muted">{detail}</p>
+    <div className="border border-border bg-bg p-3">
+      <p className="font-mono text-[10px] uppercase tracking-[2px] text-fg-muted">{label}</p>
+      <p className="mt-2 font-display text-[22px] font-bold uppercase tracking-[2px] text-accent [font-family:Orbitron,monospace]">{value}</p>
+      <p className="mt-1 font-mono text-[10px] uppercase tracking-[2px] text-fg-muted">{detail}</p>
     </div>
   );
 }

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field
 
 from .common import ORMModel, Timestamped
 
@@ -27,9 +27,14 @@ class ResumeVariantBase(BaseModel):
         min_length=10,
         description="Markdown source. Rendered to HTML and PDF on demand.",
     )
-    pdf_url: HttpUrl | None = Field(
+    pdf_url: str | None = Field(
         default=None,
-        description="Cached PDF render. Regenerated when body_md changes; null until first build.",
+        description="Download URL for the uploaded or externally hosted PDF.",
+    )
+    role_keywords: list[str] = Field(
+        default_factory=list,
+        description="Role tags used by the hire page variant picker.",
+        examples=[["AI backend", "RAG", "FastAPI"]],
     )
     is_default: bool = Field(
         default=False,
@@ -45,6 +50,8 @@ class ResumeVariantUpdate(BaseModel):
     label: str | None = None
     slug: str | None = Field(default=None, pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
     body_md: str | None = None
+    pdf_url: str | None = None
+    role_keywords: list[str] | None = None
     is_default: bool | None = None
 
 

@@ -7,9 +7,11 @@ Phase 2 will mount the routers under `app/api/`.
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 
@@ -32,6 +34,9 @@ async def lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     settings = get_settings()
+    upload_root = Path(settings.resume_upload_dir)
+    upload_root.mkdir(parents=True, exist_ok=True)
+
     app = FastAPI(
         title="Engine Room API",
         version="0.1.0",
@@ -45,6 +50,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     FastAPIInstrumentor.instrument_app(app)
+    app.mount("/uploads", StaticFiles(directory=upload_root), name="uploads")
 
     app.include_router(health.router)
     app.include_router(projects.public_router)

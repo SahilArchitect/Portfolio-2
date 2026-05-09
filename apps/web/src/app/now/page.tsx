@@ -22,14 +22,14 @@ export default async function NowPage() {
       >
         <div className="space-y-5">
           {entries.map((entry) => (
-            <article key={entry.id} className="rounded-xl border border-border bg-bg-elev p-6">
+            <article key={entry.id} className="cyber-panel p-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-baseline sm:justify-between">
                 <div>
-                  <p className="font-mono text-mono-sm text-fg-muted">{formatMonth(entry.updatedAt)}</p>
-                  <h2 className="mt-2 font-display text-display-sm font-medium text-fg">{entry.headline}</h2>
+                  <p className="font-mono text-[10px] uppercase tracking-[2px] text-warning">{formatMonth(entry.updatedAt)}</p>
+                  <h2 className="mt-2 font-display text-[20px] font-bold uppercase tracking-[2px] text-fg [font-family:Orbitron,monospace]">{entry.headline}</h2>
                 </div>
                 {entry.mood && (
-                  <span className="w-fit rounded-full border border-border px-2.5 py-0.5 font-mono text-mono-sm text-fg-muted">
+                  <span className="cyber-tag w-fit">
                     {entry.mood}
                   </span>
                 )}

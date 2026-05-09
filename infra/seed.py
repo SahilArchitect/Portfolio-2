@@ -20,60 +20,126 @@ import asyncpg
 
 PROJECTS = [
     {
-        "id": uuid.uuid5(uuid.NAMESPACE_URL, "engine-room/project/lazarus-engine"),
-        "title": "Lazarus Engine",
-        "slug": "lazarus-engine",
-        "summary": (
-            "A recovery-first orchestration layer that turns brittle AI workflows into "
-            "observable, resumable execution traces."
-        ),
-        "body_md": """## Problem
-AI backends fail in unglamorous places: partial tool output, dropped context, retry storms, and silent cost drift.
-
-## Build
-Lazarus Engine models long-running AI work as resumable jobs with explicit checkpoints, typed tool envelopes, and audit-grade traces. The system favors boring recovery paths over magic retries.
-
-## Outcome
-The project demonstrates production habits around failure handling, observability, and operator control instead of a thin prompt wrapper.
-""".strip(),
-        "role": "Sole engineer",
-        "stack": ["FastAPI", "Postgres", "Redis", "OpenTelemetry", "LLM orchestration"],
-        "repo_url": None,
-        "live_url": None,
-        "cover_image_url": None,
-        "status": "published",
-        "started_on": date(2026, 1, 5),
-        "shipped_on": date(2026, 3, 18),
-        "featured": True,
-        "display_order": 10,
-    },
-    {
         "id": uuid.uuid5(uuid.NAMESPACE_URL, "engine-room/project/llm-gateway"),
         "title": "LLM Gateway",
         "slug": "llm-gateway",
         "summary": (
-            "A thin provider boundary for retries, timeouts, request logging, token accounting, "
-            "and cost-aware model calls."
+            "A self-hosted LLM API gateway for routing, rate limiting, cost tracking, "
+            "and model abstraction."
         ),
-        "body_md": """## Problem
-Portfolio AI demos often call vendors directly from feature code, making latency, cost, and failure modes impossible to inspect.
+        "body_md": """## What it is
+A self-hosted LLM API gateway that sits between product code and model providers. It handles request routing, rate limiting, cost tracking, and provider/model abstraction behind a backend API.
 
-## Build
-LLM Gateway centralizes model calls behind a small interface. Every request carries timeout policy, retry metadata, token counts, and cost attribution for downstream dashboards.
+## Stack
+FastAPI, Pydantic v2, PostgreSQL, and Docker.
 
-## Outcome
-The result is intentionally small: a credible production seam that makes RAG, inquiry scoring, and future model swaps observable instead of hidden.
+## Why it matters
+Technical founders need LLM systems that are deployable, inspectable, and cost-aware. A gateway is the control plane that makes model usage visible instead of scattered across feature code.
 """.strip(),
-        "role": "Backend engineer",
-        "stack": ["Python", "Anthropic", "OpenAI", "Redis", "OpenTelemetry"],
+        "role": "AI backend / LLM infrastructure",
+        "stack": ["FastAPI", "Pydantic v2", "PostgreSQL", "Docker"],
         "repo_url": None,
         "live_url": None,
         "cover_image_url": None,
         "status": "published",
         "started_on": date(2026, 2, 10),
-        "shipped_on": date(2026, 4, 2),
+        "shipped_on": None,
+        "featured": True,
+        "display_order": 10,
+    },
+    {
+        "id": uuid.uuid5(uuid.NAMESPACE_URL, "engine-room/project/lazarus-engine"),
+        "title": "Lazarus Engine",
+        "slug": "lazarus-engine",
+        "summary": (
+            "A C++ legacy code migration tool using tree-sitter AST extraction, "
+            "pgvector embeddings, and LLM-generated modernization."
+        ),
+        "body_md": """## What it is
+A legacy modernization system for C++ codebases. It parses source code with tree-sitter, extracts AST-aware structure, stores semantic embeddings in pgvector, and uses LLM APIs to generate more modern, idiomatic code.
+
+## Stack
+C++, Python, tree-sitter, PostgreSQL/pgvector, and LLM APIs.
+
+## Differentiator
+Legacy modernization is a $50B+ problem. The hard part is not only generation; it is preserving behavior, extracting structure, and making modernization reviewable.
+""".strip(),
+        "role": "Legacy modernization / AI systems",
+        "stack": ["C++", "Python", "tree-sitter", "pgvector", "LLM APIs"],
+        "repo_url": None,
+        "live_url": None,
+        "cover_image_url": None,
+        "status": "published",
+        "started_on": date(2026, 1, 5),
+        "shipped_on": None,
         "featured": True,
         "display_order": 20,
+    },
+    {
+        "id": uuid.uuid5(uuid.NAMESPACE_URL, "engine-room/project/mtech-thesis"),
+        "title": "Encrypted Network Traffic Classification",
+        "slug": "encrypted-network-traffic-classification",
+        "summary": "IIT Jammu M.Tech thesis on ML-based encrypted network traffic classification without decryption.",
+        "body_md": """## Institution
+IIT Jammu, M.Tech Data Science, 2022.
+
+## What it involved
+Machine-learning-based classification of encrypted network traffic without decrypting payloads, keeping the classification problem privacy-preserving.
+""".strip(),
+        "role": "M.Tech thesis",
+        "stack": ["Machine Learning", "Network Traffic", "Privacy-preserving ML"],
+        "repo_url": None,
+        "live_url": None,
+        "cover_image_url": None,
+        "status": "published",
+        "started_on": date(2021, 1, 1),
+        "shipped_on": date(2022, 1, 1),
+        "featured": True,
+        "display_order": 30,
+    },
+    {
+        "id": uuid.uuid5(uuid.NAMESPACE_URL, "engine-room/project/car-brand-classification"),
+        "title": "Car Brand Classification",
+        "slug": "car-brand-classification",
+        "summary": "A transfer-learning computer vision project using ResNet-50 for multi-class car brand image classification.",
+        "body_md": """## What it is
+A multi-class image classification project for identifying car brands from images.
+
+## Model
+ResNet-50 with transfer learning.
+""".strip(),
+        "role": "Computer vision project",
+        "stack": ["ResNet-50", "Transfer Learning", "Deep Learning"],
+        "repo_url": None,
+        "live_url": None,
+        "cover_image_url": None,
+        "status": "published",
+        "started_on": date(2021, 1, 1),
+        "shipped_on": None,
+        "featured": True,
+        "display_order": 40,
+    },
+    {
+        "id": uuid.uuid5(uuid.NAMESPACE_URL, "engine-room/project/covid-xray-detection"),
+        "title": "COVID-19 Detection from Chest X-rays",
+        "slug": "covid-19-detection-chest-xrays",
+        "summary": "A deep-learning medical imaging project for binary COVID-19 detection from chest X-ray images.",
+        "body_md": """## What it is
+A binary classification project using deep learning on chest X-ray images.
+
+## Task
+Detect COVID-19 from medical imaging inputs.
+""".strip(),
+        "role": "Medical imaging ML project",
+        "stack": ["Deep Learning", "Medical Imaging", "Image Classification"],
+        "repo_url": None,
+        "live_url": None,
+        "cover_image_url": None,
+        "status": "published",
+        "started_on": date(2020, 1, 1),
+        "shipped_on": None,
+        "featured": True,
+        "display_order": 50,
     },
 ]
 
@@ -87,6 +153,73 @@ NOW_ENTRY = {
     "mood": "focused",
     "is_current": True,
 }
+
+RESUME_VARIANTS = [
+    {
+        "id": uuid.uuid5(uuid.NAMESPACE_URL, "engine-room/resume/ai-backend-engineer"),
+        "label": "AI Backend Engineer",
+        "slug": "ai-backend-engineer",
+        "body_md": "## Focus\nFastAPI, RAG systems, LLM gateways, and observability.",
+        "pdf_url": None,
+        "role_keywords": ["AI backend", "RAG", "FastAPI"],
+        "is_default": True,
+    }
+]
+
+FEATURE_FLAGS = [
+    {
+        "name": "hire_calendar_embed",
+        "enabled": True,
+        "description": "Show the booking calendar on /hire.",
+    },
+    {
+        "name": "show_traces_page",
+        "enabled": True,
+        "description": "Expose redacted public traces.",
+    },
+]
+
+SITE_SETTINGS = [
+    {
+        "key": "hero_experiment",
+        "value": {
+            "variants": [
+                {
+                    "id": "variant-a",
+                    "label": "Systems Positioning",
+                    "copy": "I build AI backend systems that stay observable when the demo ends.",
+                    "allocation": 50,
+                    "impressions": 0,
+                    "inquiries": 0,
+                },
+                {
+                    "id": "variant-b",
+                    "label": "Hiring Positioning",
+                    "copy": "AI backend engineer focused on RAG, LLM gateways, and production traces.",
+                    "allocation": 50,
+                    "impressions": 0,
+                    "inquiries": 0,
+                },
+            ]
+        },
+    },
+    {
+        "key": "substack_state",
+        "value": {
+            "lastSyncAt": None,
+            "embeddingModel": "text-embedding-3-small",
+            "chunkSize": 512,
+            "recentLog": [
+                {
+                    "id": "sync-pending",
+                    "level": "info",
+                    "message": "Worker has not reported a sync yet.",
+                    "created_at": "2026-05-07T00:00:00+00:00",
+                }
+            ],
+        },
+    },
+]
 
 
 def _dsn() -> str:
@@ -178,7 +311,7 @@ async def _seed_now(conn: asyncpg.Connection) -> None:
 
 async def _seed_admin(conn: asyncpg.Connection) -> None:
     columns = await _columns(conn, "admin_users")
-    email = (os.getenv("ADMIN_EMAIL") or "sahil@example.com").strip().lower()
+    email = (os.getenv("ADMIN_EMAIL") or "sahil@bysahil.dev").strip().lower()
     admin = {
         "id": uuid.uuid5(uuid.NAMESPACE_URL, f"engine-room/admin/{email}"),
         "email": email,
@@ -189,14 +322,37 @@ async def _seed_admin(conn: asyncpg.Connection) -> None:
     await _upsert_by_unique(conn, "admin_users", admin, "email", columns)
 
 
+async def _seed_resumes(conn: asyncpg.Connection) -> None:
+    columns = await _columns(conn, "resume_variants")
+    for resume in RESUME_VARIANTS:
+        if resume["is_default"]:
+            await conn.execute("UPDATE resume_variants SET is_default = false WHERE is_default = true")
+        await _upsert_by_unique(conn, "resume_variants", resume, "slug", columns)
+
+
+async def _seed_flags(conn: asyncpg.Connection) -> None:
+    columns = await _columns(conn, "feature_flags")
+    for flag in FEATURE_FLAGS:
+        await _upsert_by_unique(conn, "feature_flags", flag, "name", columns)
+
+
+async def _seed_site_settings(conn: asyncpg.Connection) -> None:
+    columns = await _columns(conn, "site_settings")
+    for setting in SITE_SETTINGS:
+        await _upsert_by_unique(conn, "site_settings", setting, "key", columns)
+
+
 async def main() -> None:
     conn = await asyncpg.connect(_dsn())
     try:
         async with conn.transaction():
             await _seed_projects(conn)
             await _seed_now(conn)
+            await _seed_resumes(conn)
+            await _seed_flags(conn)
+            await _seed_site_settings(conn)
             await _seed_admin(conn)
-        print("seed complete: 2 projects, 1 now-entry, 0 posts, 1 admin user")
+        print("seed complete: 5 projects, 1 now-entry, 1 resume, 2 flags, 2 settings, 1 admin user")
     finally:
         await conn.close()
 

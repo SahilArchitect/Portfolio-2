@@ -24,12 +24,12 @@ type ScrollyArchitectureProps = {
 
 export function ScrollyArchitecture({ project, metrics }: ScrollyArchitectureProps) {
   return (
-    <section className="border-y border-border bg-bg">
+    <section className="relative z-[1] border-y border-border bg-bg/70">
       <div className="mx-auto grid max-w-6xl gap-8 px-6 py-16 sm:py-20 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
         <div>
-          <p className="font-mono text-micro uppercase tracking-wider text-fg-muted">System path</p>
-          <h2 className="mt-3 font-display text-display-md font-medium text-fg">Architecture walkthrough</h2>
-          <p className="mt-4 text-body text-fg-muted">
+          <p className="font-mono text-[9px] uppercase tracking-[4px] text-warning">System path</p>
+          <h2 className="mt-3 font-display text-display-md font-bold uppercase tracking-[2px] text-fg [font-family:Orbitron,monospace]">Architecture walkthrough</h2>
+          <p className="mt-4 font-mono text-body text-fg/70">
             The build is shaped around clear handoffs, citation discipline, and observable failure states.
           </p>
 
@@ -37,20 +37,20 @@ export function ScrollyArchitecture({ project, metrics }: ScrollyArchitecturePro
             {STAGES.map((item, index) => (
               <div
                 key={item.label}
-                className="rounded-lg border border-border bg-bg-elev p-4"
+                className="border border-border bg-bg-elev p-4"
               >
                 <p className="font-mono text-mono-sm text-fg">{String(index + 1).padStart(2, '0')} / {item.label}</p>
-                <p className="mt-2 text-body-sm text-fg-muted">{item.copy}</p>
+                <p className="mt-2 font-mono text-body-sm text-fg/65">{item.copy}</p>
               </div>
             ))}
           </div>
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-xl border border-border bg-bg-elev p-5">
+          <div className="cyber-panel p-5">
             <div className="mb-4 flex items-center justify-between gap-4">
-              <p className="font-mono text-micro uppercase tracking-wider text-fg-muted">{project.title} architecture</p>
-              <span className="rounded-full border border-border px-2.5 py-0.5 font-mono text-mono-sm text-fg-muted">
+              <p className="font-mono text-[9px] uppercase tracking-[4px] text-warning">{project.title} architecture</p>
+              <span className="cyber-tag">
                 SVG assembly
               </span>
             </div>

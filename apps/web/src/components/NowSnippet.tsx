@@ -20,18 +20,18 @@ export function NowSnippet({ entry, className }: NowSnippetProps) {
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="font-mono text-mono-sm text-fg-muted">{formatMonth(entry.updatedAt)}</p>
+        <p className="font-mono text-[10px] uppercase tracking-[2px] text-warning">{formatMonth(entry.updatedAt)}</p>
 
         <Link href="/now" data-cursor="hover" className="group">
-          <h3 className="mt-1 font-display text-display-sm font-medium text-fg group-hover:text-accent">
+          <h3 className="mt-1 font-display text-[20px] font-bold uppercase tracking-[2px] text-fg group-hover:text-accent [font-family:Orbitron,monospace]">
             {entry.headline}
           </h3>
         </Link>
 
-        <p className="mt-3 text-body-sm text-fg-muted">{bodyPreview}</p>
+        <p className="mt-3 font-mono text-[12px] leading-7 text-fg/65">{bodyPreview}</p>
 
         {entry.mood && (
-          <span className="mt-4 inline-block rounded-full border border-border px-2.5 py-0.5 font-mono text-mono-sm text-fg-muted">
+          <span className="cyber-tag mt-4 inline-block">
             {entry.mood}
           </span>
         )}

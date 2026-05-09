@@ -37,7 +37,7 @@ export default async function WritingPage({ searchParams }: WritingPageProps) {
       >
         <WritingSearch q={q} semantic={semantic} activeTag={tag} tags={tags} />
 
-        <div className="mt-8 rounded-xl border border-border bg-bg-elev px-6">
+        <div className="cyber-panel mt-8 px-6">
           {posts.length > 0 ? (
             posts.map((post) => <PostCard key={post.slug} post={post} />)
           ) : (

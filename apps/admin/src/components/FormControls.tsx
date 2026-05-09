@@ -4,8 +4,8 @@ import { cn } from '@engine-room/ui';
 import type { ActionResult } from '@/lib/api';
 
 export const inputClass = cn(
-  'w-full rounded-md border border-border bg-bg px-3 py-2 font-display text-body-sm text-fg',
-  'placeholder:text-fg-muted focus:border-border-strong focus:outline-none',
+  'w-full min-h-11 border border-border bg-bg px-3 py-2 font-mono text-body-sm text-fg',
+  'placeholder:text-fg-muted focus:border-border-strong focus:outline-none focus:[box-shadow:0_0_18px_rgba(0,255,242,0.12)]',
 );
 
 export const textareaClass = cn(
@@ -13,7 +13,7 @@ export const textareaClass = cn(
   'min-h-28 resize-y font-mono text-mono-sm',
 );
 
-export const labelClass = 'font-mono text-micro uppercase tracking-wider text-fg-muted';
+export const labelClass = 'font-mono text-[9px] uppercase tracking-[3px] text-fg-muted';
 
 export function Field({
   label,
@@ -38,9 +38,9 @@ export function SubmitButton({ children, pending }: { children: React.ReactNode;
       type="submit"
       disabled={pending}
       data-cursor="hover"
-      className="rounded-md border border-border-strong bg-accent-muted px-3 py-2 font-mono text-mono-sm font-medium text-fg hover:border-accent disabled:cursor-not-allowed disabled:opacity-50"
+      className="cyber-button px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
     >
-      {pending ? 'Saving...' : children}
+      <span>{pending ? 'Saving...' : children}</span>
     </button>
   );
 }
@@ -62,7 +62,7 @@ export function SecondaryButton({
       onClick={onClick}
       disabled={disabled}
       data-cursor="hover"
-      className="rounded-md border border-border px-3 py-2 font-mono text-mono-sm text-fg-muted hover:border-border-strong hover:text-fg disabled:cursor-not-allowed disabled:opacity-50"
+      className="min-h-11 border border-border px-3 py-2 font-mono text-mono-sm text-fg-muted hover:border-border-strong hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
     >
       {children}
     </button>

@@ -12,12 +12,12 @@ export function StatCard({ label, value, trend, suffix, className }: StatCardPro
   return (
     <div
       className={cn(
-        'rounded-md border border-border bg-bg-elev p-4',
+        'cyber-panel p-4',
         className,
       )}
     >
-      <p className="font-mono text-micro uppercase tracking-wider text-fg-muted">{label}</p>
-      <p className="mt-2 font-display text-display-sm font-medium text-fg">
+      <p className="font-mono text-[9px] uppercase tracking-[3px] text-warning">{label}</p>
+      <p className="mt-2 font-display text-display-sm font-bold uppercase tracking-[2px] text-accent [font-family:Orbitron,monospace]">
         {value}
         {suffix && (
           <span className="ml-1 font-mono text-body-sm text-fg-muted">{suffix}</span>

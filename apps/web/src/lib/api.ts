@@ -57,7 +57,20 @@ function toUrl(path: string): string {
   return `${getServerApiBase()}${path}`;
 }
 
+function skipApiFetchDuringBuild(): boolean {
+  if (process.env.USE_API_FALLBACKS === 'true') return true;
+
+  return (
+    process.env.NEXT_PHASE === 'phase-production-build' &&
+    process.env.ALLOW_API_FETCH_DURING_BUILD !== 'true'
+  );
+}
+
 async function apiFetchUnknown(path: string, options: FetchOptions = {}): Promise<unknown> {
+  if (skipApiFetchDuringBuild()) {
+    throw new Error(`API fetch skipped during production build for ${path}`);
+  }
+
   const init: NextFetchOptions = {
     headers: { Accept: 'application/json' },
     next: { revalidate: options.revalidate ?? 60, tags: options.tags },
@@ -214,7 +227,7 @@ function normalizeResume(input: unknown, fallback: ResumeVariantView): ResumeVar
     id: stringValue(obj.id, fallback.id),
     slug,
     label: stringValue(obj.label ?? obj.title, fallback.label),
-    fileUrl: stringValue(obj.file_url ?? obj.fileUrl ?? obj.url, fallback.fileUrl),
+    fileUrl: stringValue(obj.pdf_url ?? obj.pdfUrl ?? obj.file_url ?? obj.fileUrl ?? obj.url, fallback.fileUrl),
     isDefault: booleanValue(obj.is_default ?? obj.isDefault, fallback.isDefault),
     createdAt: stringValue(obj.created_at ?? obj.createdAt, fallback.createdAt),
     roleKeywords: stringArray(obj.role_keywords ?? obj.roleKeywords).length

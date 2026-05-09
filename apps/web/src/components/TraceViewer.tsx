@@ -22,11 +22,11 @@ export function TraceViewer({ initialData }: TraceViewerProps) {
   const traces = metrics.traces.slice(0, 50);
 
   return (
-    <div className="rounded-xl border border-border bg-bg-elev">
+    <div className="cyber-panel">
       <div className="flex flex-col gap-4 border-b border-border p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="font-mono text-micro uppercase tracking-wider text-fg-muted">Read-only trace stream</p>
-          <h2 className="mt-2 font-display text-display-sm font-medium text-fg">Last 50 redacted traces</h2>
+          <p className="font-mono text-[9px] uppercase tracking-[4px] text-warning">Read-only trace stream</p>
+          <h2 className="mt-2 font-display text-[18px] font-bold uppercase tracking-[2px] text-fg [font-family:Orbitron,monospace]">Last 50 redacted traces</h2>
         </div>
         <p className="font-mono text-mono-sm text-fg-muted">Payloads hidden. IDs truncated.</p>
       </div>
@@ -34,7 +34,7 @@ export function TraceViewer({ initialData }: TraceViewerProps) {
       <div tabIndex={0} className="overflow-x-auto">
         <table className="w-full min-w-[760px] border-collapse text-left">
           <thead>
-            <tr className="border-b border-border font-mono text-mono-sm text-fg-muted">
+            <tr className="border-b border-border font-mono text-[10px] uppercase tracking-[2px] text-fg-muted">
               <th className="px-5 py-3 font-medium">Trace</th>
               <th className="px-5 py-3 font-medium">Service</th>
               <th className="px-5 py-3 font-medium">Duration</th>
@@ -56,10 +56,10 @@ export function TraceViewer({ initialData }: TraceViewerProps) {
 
 function TraceRow({ trace }: { trace: PublicTraceView }) {
   return (
-    <tr className="border-b border-border last:border-b-0">
+    <tr className="border-b border-border transition hover:bg-accent-muted last:border-b-0">
       <td className="px-5 py-4">
         <p className="font-mono text-mono-sm text-fg">{trace.id.slice(0, 12)}</p>
-        <p className="mt-1 text-body-sm text-fg-muted">{trace.name}</p>
+        <p className="mt-1 font-mono text-[12px] text-fg-muted">{trace.name}</p>
       </td>
       <td className="px-5 py-4 font-mono text-mono-sm text-fg-muted">{trace.service}</td>
       <td className="px-5 py-4 font-mono text-mono-sm text-fg">{trace.durationMs}ms</td>

@@ -4,6 +4,10 @@
 
 // Source of truth: services/api/app/schemas/*.py via FastAPI OpenAPI.
 
+export interface Body_admin_upload_resume_pdf_admin_resume_variants_upload_post {
+  file: string;
+}
+
 export interface Citation {
   doc_id: string;
   title: string;
@@ -39,6 +43,19 @@ export interface HealthRead {
   db: boolean;
   redis: boolean;
   vector_index: boolean;
+}
+
+export interface HeroExperiment {
+  variants: HeroVariant[];
+}
+
+export interface HeroVariant {
+  id: string;
+  label: string;
+  copy: string;
+  allocation: number;
+  impressions?: number;
+  inquiries?: number;
 }
 
 export interface InquiryCreate {
@@ -210,6 +227,7 @@ export interface ResumeVariantCreate {
   slug: string;
   body_md: string;
   pdf_url?: string | null;
+  role_keywords?: string[];
   is_default?: boolean;
 }
 
@@ -220,6 +238,7 @@ export interface ResumeVariantRead {
   slug: string;
   body_md: string;
   pdf_url?: string | null;
+  role_keywords?: string[];
   is_default?: boolean;
   id: string;
 }
@@ -228,6 +247,8 @@ export interface ResumeVariantUpdate {
   label?: string | null;
   slug?: string | null;
   body_md?: string | null;
+  pdf_url?: string | null;
+  role_keywords?: string[] | null;
   is_default?: boolean | null;
 }
 
@@ -238,6 +259,25 @@ export interface SearchRequest {
 export interface SearchResponse {
   answer: string;
   citations?: Citation[];
+}
+
+export interface SubstackSettingsUpdate {
+  embedding_model: 'text-embedding-3-small' | 'text-embedding-3-large';
+  chunk_size: number;
+}
+
+export interface SubstackState {
+  lastSyncAt?: string | null;
+  embeddingModel?: 'text-embedding-3-small' | 'text-embedding-3-large';
+  chunkSize?: number;
+  recentLog?: SyncLogRow[];
+}
+
+export interface SyncLogRow {
+  id: string;
+  level: 'info' | 'warning' | 'error';
+  message: string;
+  created_at: string;
 }
 
 export interface ValidationError {

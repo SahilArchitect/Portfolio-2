@@ -64,7 +64,7 @@ curl -fsS https://engine-room-api.fly.dev/api/health
 Expected health response:
 
 ```json
-{"status":"ok","db":true,"redis":true,"vector_index":true}
+{ "status": "ok", "db": true, "redis": true, "vector_index": true }
 ```
 
 ## Seed Production
@@ -73,7 +73,7 @@ Expected health response:
 
 ```bash
 export DATABASE_URL='postgresql://USER:PASSWORD@HOST:5432/engine_room'
-export ADMIN_EMAIL='sahil@example.com'
+export ADMIN_EMAIL='sahil@bysahil.dev'
 uv run python infra/seed.py
 ```
 
@@ -125,7 +125,7 @@ fly secrets set --app engine-room-api ADMIN_TOKEN='...' OPENAI_API_KEY='...' ANT
 3. Rotate admin secrets:
 
 ```bash
-fly secrets set --app engine-room-admin AUTH_SECRET='...' ADMIN_TOKEN='...' RESEND_API_KEY='...' EMAIL_FROM='admin@example.com'
+fly secrets set --app engine-room-admin AUTH_SECRET='...' ADMIN_TOKEN='...' RESEND_API_KEY='...' EMAIL_FROM='sahil@bysahil.dev'
 ```
 
 4. Restart and verify:
@@ -206,5 +206,5 @@ curl -fsSI https://engine-room-web.fly.dev/work/<slug>
 - Public site does not reflect admin edits: check API cache/revalidation window and confirm the admin mutation succeeded.
 - Substack ingest inserts zero posts: verify `SUBSTACK_FEED_URL`; duplicate canonical URLs are skipped by design.
 - Embeddings stay empty: verify `OPENAI_API_KEY` in production or inspect worker logs.
-- CORS failures: set `API_CORS_ORIGINS` to exact production origins only, for example `["https://example.com","https://admin.example.com"]`.
+- CORS failures: set `API_CORS_ORIGINS` to exact production origins only, for example `["https://bysahil.dev","https://admin.bysahil.dev"]`.
 - Admin pages indexed: verify `https://engine-room-admin.fly.dev/robots.txt` returns `Disallow: /`.
