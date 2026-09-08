@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start --port 3000",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:trident": "node --test tests/trident-core.test.mjs"
   },
   "dependencies": {
     "@engine-room/types": "workspace:*",

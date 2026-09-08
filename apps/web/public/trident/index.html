@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#10291f" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta
+      name="description"
+      content="Your Trident Forge workout log. Lift, record, recover, review."
+    />
+    <link rel="canonical" href="https://www.bysahil.dev/trident/index.html" />
+    <title>Trident · Your training journal</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icon-192.png" />
+    <link rel="stylesheet" href="./style.css" />
+    <script type="module" src="./app.mjs"></script>
+  </head>
+  <body>
+    <header class="mast">
+      <div class="brand">
+        <img src="./icon.svg" width="34" height="34" alt="" /><span
+          >TRIDENT <small>TRAINING JOURNAL</small></span
+        >
+      </div>
+      <span id="save-status" role="status">On this device</span>
+    </header>
+    <main id="app"><noscript>Enable JavaScript to use your workout journal.</noscript></main>
+    <aside id="timer" class="timer" hidden>
+      <span>REST <strong id="timer-value">01:30</strong></span
+      ><button id="timer-add">+30s</button
+      ><button id="timer-close" aria-label="Close rest timer">×</button>
+    </aside>
+    <nav class="tabs" aria-label="Main navigation">
+      <button data-tab="train" aria-current="page"><span>↗</span>Train</button
+      ><button data-tab="history"><span>≡</span>History</button
+      ><button data-tab="review"><span>↥</span>Weekly review</button
+      ><button data-tab="settings"><span>⊙</span>Backup & help</button>
+    </nav>
+    <div id="toast" role="status" class="toast" hidden></div>
+  </body>
+</html>

@@ -116,3 +116,21 @@ export AWS_ACCESS_KEY_ID=...
 export AWS_SECRET_ACCESS_KEY=...
 infra/backup.sh
 ```
+
+
+## Personal workout journal
+
+The Trident mobile tracker is available at **/trident** (redirects to /trident/index.html).
+It is a standalone static app under apps/web/public/trident, so it does not inherit
+portfolio layout scripts or change API routing. Its service worker is scoped to
+/trident/ and caches only its own app shell.
+
+The page is public and marked noindex; that is not access control. Workout records
+stay in each visitor's browser. No personal baseline is embedded in public source.
+Save a weekly JSON backup to Files/iCloud Drive and use the Markdown coaching export
+for reviewing weights, reps, RIR and recovery. There is no automatic cloud sync.
+
+On iPhone, open the page in Safari, then Share → Add to Home Screen. Open it once
+online before relying on offline use.
+
+Run tracker logic tests with **pnpm --filter @engine-room/web test:trident**.
