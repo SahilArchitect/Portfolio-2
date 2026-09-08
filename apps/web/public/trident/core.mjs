@@ -1,4 +1,5 @@
-export const PLAN_VERSION = '2026-09-08';
+import { LEGACY_PLAN } from './legacy-plan.mjs';
+export const PLAN_VERSION = '2026-09-08-r2';
 export const STORAGE_KEY = 'trident-forge-v1';
 const ex = (id, name, sets, min, max, group, basis = 'stack', unilateral = false, cue = '') => ({
   id,
@@ -11,274 +12,346 @@ const ex = (id, name, sets, min, max, group, basis = 'stack', unilateral = false
   unilateral,
   cue,
 });
-export const EXERCISES = Object.fromEntries(
+const current = Object.fromEntries(
   [
     ex(
       'incline',
-      'Incline dumbbell press',
-      2,
-      6,
-      10,
+      'Low-incline dumbbell press',
+      4,
+      12,
+      12,
       'Chest',
       'per-dumbbell',
       false,
-      '15–30° bench. Keep 2–3 clean reps in reserve.',
+      'Use a lighter load for 4 × 12. Comfortable 15–30° incline.',
     ),
     ex(
-      'pullup',
-      'Neutral-grip pull-up',
-      3,
-      6,
-      10,
-      'Back',
-      'assistance',
-      false,
-      'Record assistance removed by the machine, or switch to bodyweight / added kg.',
-    ),
-    ex(
-      'row',
-      'Chest-supported row',
-      2,
-      8,
+      'pulldown',
+      'Neutral-grip lat pulldown',
+      4,
+      12,
       12,
       'Back',
       'stack',
       false,
-      'Use the same machine or note your equipment change.',
+      'Drive elbows toward hips. Avoid torso heaving.',
     ),
     ex(
-      'smith',
-      'Low-incline Smith press',
-      2,
-      8,
+      'pecdeck',
+      'Pec deck fly',
+      3,
+      10,
       12,
       'Chest',
+      'stack',
+      false,
+      'Comfortable stretch; avoid forcing the shoulder behind the torso.',
+    ),
+    ex('lateral', 'Cable lateral raise', 3, 10, 12, 'Delts', 'stack', true),
+    ex(
+      'inclinecurl',
+      'Incline dumbbell curl',
+      3,
+      10,
+      12,
+      'Biceps',
+      'per-dumbbell',
+      false,
+      'Arms slightly behind torso; no forced shoulder stretch.',
+    ),
+    ex(
+      'preacher',
+      'Preacher EZ-bar curl',
+      3,
+      10,
+      12,
+      'Biceps',
       'total',
       false,
-      'Record total external load including the known bar load; note machine convention.',
+      'Include the bar weight. Supported upper arms; no bounce.',
     ),
-    ex('highrow', 'Chest-supported high row', 3, 8, 12, 'Back', 'stack'),
     ex(
-      'lat',
-      'Single-arm cable lat pulldown',
-      2,
+      'overhead',
+      'Overhead cable triceps extension',
+      3,
       10,
-      15,
-      'Back',
-      'stack',
-      true,
-      'Log left and right repetitions.',
-    ),
-    ex('lateral', 'Cable lateral raise', 3, 12, 20, 'Delts', 'stack', true),
-    ex('rear', 'Reverse pec deck', 2, 12, 20, 'Delts', 'stack'),
-    ex('rearfly', 'Cable rear-delt fly', 2, 12, 20, 'Delts', 'stack', true),
-    ex('dblateral', 'Dumbbell lateral raise', 3, 12, 20, 'Delts', 'per-dumbbell'),
-    ex(
-      'shrug',
-      'Dumbbell shrug',
-      4,
-      10,
-      15,
-      'Traps',
-      'per-dumbbell',
-      false,
-      'Elevate smoothly. No shoulder rolling.',
-    ),
-    ex(
-      'yraise',
-      'Prone Y-raise',
-      2,
       12,
-      20,
-      'Traps',
-      'per-dumbbell',
+      'Triceps',
+      'stack',
       false,
-      'Light load; allow shoulder blades to rotate upward.',
+      'Controlled elbow flexion; comfortable overhead reach.',
     ),
+    ex('rope', 'Cable rope pushdown', 3, 10, 12, 'Triceps', 'stack'),
     ex(
       'hack',
       'Hack squat / leg press',
-      3,
-      6,
-      10,
+      4,
+      12,
+      12,
       'Legs',
       'plates',
       false,
-      'Note machine and sled convention for comparable logs.',
+      'Record the machine and sled convention.',
     ),
-    ex('legcurl', 'Seated leg curl', 3, 10, 15, 'Legs', 'stack'),
-    ex('extension', 'Leg extension', 2, 10, 15, 'Legs', 'stack'),
-    ex('calf', 'Standing calf raise', 3, 8, 15, 'Calves', 'stack'),
+    ex('legcurl', 'Seated leg curl', 3, 10, 12, 'Legs', 'stack'),
+    ex('calf', 'Standing calf raise', 3, 12, 15, 'Calves', 'stack'),
     ex(
       'rollout',
       'Ab wheel rollout',
       3,
-      6,
+      10,
       12,
       'Core',
       'bodyweight',
       false,
-      'Stop before your lower back sags.',
+      'Use a shorter rollout to keep the trunk controlled.',
     ),
-    ex('rdl', 'Romanian deadlift', 3, 6, 10, 'Legs', 'total'),
+    ex(
+      'wristcurl',
+      'Supported wrist curl',
+      3,
+      12,
+      15,
+      'Forearms',
+      'per-dumbbell',
+      false,
+      'Forearms supported. Comfortable wrist flexion; note bar versus dumbbells.',
+    ),
+    ex(
+      'cgbp',
+      'Close-grip bench press',
+      4,
+      12,
+      12,
+      'Triceps',
+      'total',
+      false,
+      'First exercise today. Shoulder-width grip; safeties or spotter.',
+    ),
+    ex(
+      'dbcurl',
+      'Dumbbell curl',
+      3,
+      10,
+      12,
+      'Biceps',
+      'per-dumbbell',
+      false,
+      'Reps per arm; controlled supination without torso swing.',
+    ),
+    ex('hammer', 'Dumbbell hammer curl', 3, 10, 12, 'Biceps', 'per-dumbbell'),
+    ex(
+      'skullcrusher',
+      'EZ-bar skull crusher',
+      3,
+      10,
+      12,
+      'Triceps',
+      'total',
+      false,
+      'Start light. Controlled path clear of the face; do not train through elbow pain.',
+    ),
+    ex('dblateral', 'Dumbbell lateral raise', 3, 10, 12, 'Delts', 'per-dumbbell'),
+    ex(
+      'shrug',
+      'Dumbbell shrug',
+      3,
+      10,
+      12,
+      'Traps',
+      'per-dumbbell',
+      false,
+      'Smooth shoulder elevation; no rolling.',
+    ),
+    ex(
+      'facepull',
+      'Cable face pull',
+      3,
+      10,
+      12,
+      'Delts / traps',
+      'stack',
+      false,
+      'Pull toward forehead with comfortable shoulder rotation.',
+    ),
+    ex(
+      'cabley',
+      'Cable Y-raise',
+      3,
+      10,
+      12,
+      'Traps',
+      'stack',
+      true,
+      'Light load; reach upward and allow scapular rotation. This replaces prone Y-raises.',
+    ),
+    ex('crunch', 'Cable crunch', 3, 10, 12, 'Core', 'stack'),
+    ex(
+      'row',
+      'Chest-supported row',
+      4,
+      12,
+      12,
+      'Back',
+      'stack',
+      false,
+      'Elbows about 45–70°; controlled reach and retraction.',
+    ),
+    ex('lat', 'Single-arm cable lat pulldown', 4, 12, 12, 'Back', 'stack', true),
+    ex('rearfly', 'Cable rear-delt fly', 3, 10, 12, 'Delts', 'stack', true),
+    ex(
+      'crosshammer',
+      'Cross-body dumbbell hammer curl',
+      3,
+      10,
+      12,
+      'Biceps',
+      'per-dumbbell',
+      true,
+      'Curl toward the opposite upper chest without shrugging or twisting.',
+    ),
+    ex(
+      'rdl',
+      'Romanian deadlift',
+      4,
+      12,
+      12,
+      'Legs',
+      'total',
+      false,
+      'Modest load for twelve controlled reps. Bar close; hinge through hips.',
+    ),
     ex(
       'split',
-      'Bulgarian split squat',
-      3,
-      8,
+      'Supported Bulgarian split squat',
+      4,
+      12,
       12,
       'Legs',
       'per-dumbbell',
       true,
-      'Repetitions and RIR for both legs.',
+      'Use support to keep balance from limiting leg work.',
     ),
-    ex('calfseat', 'Seated calf raise', 3, 10, 20, 'Calves', 'plates'),
-    ex('crunch', 'Cable crunch', 3, 10, 15, 'Core', 'stack'),
+    ex('calfseat', 'Seated calf raise', 3, 12, 15, 'Calves', 'plates'),
     ex(
-      'cgbp',
-      'Close-grip bench press',
-      1,
-      6,
+      'kneeraise',
+      'Hanging knee raise',
+      3,
       10,
-      'Triceps',
-      'total',
+      12,
+      'Core',
+      'bodyweight',
       false,
-      'Shoulder-width grip; use safeties or a spotter. No failure.',
+      'Curl the pelvis upward without swinging. Captain’s chair is an alternative.',
     ),
     ex(
-      'dip',
-      'Upright parallel-bar dip',
-      1,
-      6,
+      'reversewrist',
+      'Supported reverse wrist curl',
+      3,
       12,
-      'Triceps',
-      'assistance',
-      false,
-      'Use assistance and comfortable depth. No forced shoulder stretch.',
-    ),
-    ex(
-      'inclinecurl',
-      'Incline dumbbell curl',
-      1,
-      8,
-      12,
-      'Biceps',
+      15,
+      'Forearms',
       'per-dumbbell',
       false,
-      'Pair A · overhead cable extension. One working round.',
+      'Light load; supported forearms and comfortable wrist extension.',
     ),
-    ex(
-      'overhead',
-      'Overhead cable extension',
-      1,
-      10,
-      15,
-      'Triceps',
-      'stack',
-      false,
-      'Pair A · incline curl.',
-    ),
-    ex(
-      'preacher',
-      'Preacher curl',
-      1,
-      10,
-      15,
-      'Biceps',
-      'total',
-      false,
-      'Pair B · rope pushdown. Note EZ-bar total or machine change.',
-    ),
-    ex('rope', 'Rope pushdown', 1, 10, 15, 'Triceps', 'stack', false, 'Pair B · preacher curl.'),
-    ex(
-      'bayesian',
-      'Bayesian cable curl',
-      1,
-      10,
-      15,
-      'Biceps',
-      'stack',
-      true,
-      'Pair C · dumbbell overhead extension.',
-    ),
-    ex(
-      'dboverhead',
-      'Dumbbell overhead extension',
-      1,
-      10,
-      15,
-      'Triceps',
-      'single-dumbbell',
-      false,
-      'Pair C · Bayesian curl. Log the single dumbbell used.',
-    ),
-    ex(
-      'spider',
-      'Spider curl',
-      1,
-      10,
-      15,
-      'Biceps',
-      'per-dumbbell',
-      false,
-      'Pair D · reverse-grip pushdown.',
-    ),
-    ex(
-      'reversepush',
-      'Reverse-grip pushdown',
-      1,
-      12,
-      20,
-      'Triceps',
-      'stack',
-      false,
-      'Pair D · spider curl. Comfortable wrists.',
-    ),
-    ex('hammer', 'Dumbbell hammer curl', 1, 10, 15, 'Biceps', 'per-dumbbell'),
-    ex('reversecurl', 'Reverse EZ-bar curl', 1, 12, 20, 'Biceps', 'total'),
   ].map((e) => [e.id, e]),
 );
-export const ARMS = [
-  'cgbp',
-  'dip',
-  'inclinecurl',
-  'overhead',
-  'preacher',
-  'rope',
-  'bayesian',
-  'dboverhead',
-  'spider',
-  'reversepush',
-  'hammer',
-  'reversecurl',
-];
+export const EXERCISES = { ...LEGACY_PLAN.exercises, ...current };
+export const ARMS = [...new Set([...LEGACY_PLAN.arms, 'dbcurl', 'crosshammer', 'skullcrusher'])];
 export const TEMPLATES = {
   upperA: {
     name: 'Upper A + arms',
     day: 'Monday',
-    ids: ['incline', 'pullup', 'row', ...ARMS, 'lateral', 'rear'],
+    ids: [
+      'incline',
+      'pulldown',
+      'pecdeck',
+      'lateral',
+      'inclinecurl',
+      'overhead',
+      'preacher',
+      'rope',
+    ],
+    pairing:
+      'Incline curl ↔ overhead cable extension; preacher curl ↔ rope pushdown. Three rounds per pair.',
   },
   lowerA: {
-    name: 'Lower A + abs',
+    name: 'Lower A + abs & forearms',
     day: 'Tuesday',
-    ids: ['hack', 'legcurl', 'extension', 'calf', 'rollout'],
+    ids: ['hack', 'legcurl', 'calf', 'rollout', 'wristcurl'],
+    pairing:
+      'Straight sets on hack squat. Calves and wrist work may alternate after the main lifts.',
   },
   arms: {
-    name: 'Arms, delts & traps',
+    name: 'Arms, delts, traps & abs',
     day: 'Wednesday',
-    ids: [...ARMS, 'dblateral', 'shrug', 'yraise'],
+    ids: [
+      'cgbp',
+      'dbcurl',
+      'skullcrusher',
+      'hammer',
+      'dblateral',
+      'shrug',
+      'facepull',
+      'cabley',
+      'crunch',
+    ],
+    pairing:
+      'Close-grip bench first. DB curl ↔ skull crusher; hammer curl ↔ lateral raise. Three rounds per accessory pair.',
   },
   upperB: {
-    name: 'Upper B + arms',
+    name: 'Back, pec deck + arms',
     day: 'Friday',
-    ids: ['smith', 'highrow', 'lat', ...ARMS, 'lateral', 'rearfly'],
+    ids: [
+      'row',
+      'lat',
+      'pecdeck',
+      'lateral',
+      'rearfly',
+      'preacher',
+      'overhead',
+      'crosshammer',
+      'rope',
+    ],
+    pairing:
+      'Preacher curl ↔ overhead cable extension; cross-body hammer curl ↔ rope pushdown. Three rounds per pair.',
   },
   lowerB: {
-    name: 'Lower B + abs',
+    name: 'Lower B + abs & forearms',
     day: 'Saturday',
-    ids: ['rdl', 'split', 'legcurl', 'calfseat', 'crunch'],
+    ids: ['rdl', 'split', 'legcurl', 'calfseat', 'kneeraise', 'reversewrist'],
+    pairing:
+      'RDL and split squat as straight sets. Finish with controlled core and wrist-extension work.',
   },
 };
+export function planFor(version = PLAN_VERSION) {
+  if (version === LEGACY_PLAN.version) return LEGACY_PLAN;
+  if (version === PLAN_VERSION)
+    return { version: PLAN_VERSION, exercises: EXERCISES, templates: TEMPLATES, arms: ARMS };
+  throw Error('Unsupported training revision. Preserve your backup and update the app.');
+}
+export function sessionName(s) {
+  return planFor(s.planVersion || LEGACY_PLAN.version).templates[s.template].name;
+}
+export function exerciseDefinition(id, version = PLAN_VERSION) {
+  return planFor(version).exercises[id];
+}
+export function sessionInstructions(s) {
+  if ((s.planVersion || LEGACY_PLAN.version) !== PLAN_VERSION)
+    return (
+      'Earlier prescription: original exercises and set counts are preserved. New sessions use the revised 3-set / 4-set plan.' +
+      (s.week === 7 ? ' This older deload used reduced set counts.' : '')
+    );
+  if (s.week === 7)
+    return 'Easier week: keep 4 sets for compounds and 3 for isolations; use lighter loads and 4–5 RIR. No finishers.';
+  return (
+    'Compounds 4 × 12; isolations 3 × 10–12 (calves/wrists 12–15). ' +
+    TEMPLATES[s.template].pairing +
+    ' Rest 90–120 sec after pairs; 2–3 min for compounds.'
+  );
+}
+
 export const BASES = {
   stack: 'Machine stack kg',
   total: 'Total bar + plates kg',
@@ -330,13 +403,17 @@ export function initialStateFromHash(hash) {
     });
   return data;
 }
-export function createSession(date, template, week = 1) {
+export function createSession(date, template, week = 1, planVersion = PLAN_VERSION) {
+  const plan = planFor(planVersion);
   if (!TEMPLATES[template] || !validDate(date) || !Number.isInteger(week) || week < 1 || week > 8)
     throw Error('Choose a valid date, workout and week.');
-  const exercises = TEMPLATES[template].ids.map((id) => {
-    const e = EXERCISES[id];
-    let count = id === 'legcurl' && template === 'lowerB' ? 2 : e.sets;
-    if (week === 7 && !ARMS.includes(id)) count = count >= 3 ? 2 : 1;
+  const exercises = plan.templates[template].ids.map((id) => {
+    const e = plan.exercises[id];
+    let count = e.sets;
+    if (planVersion === LEGACY_PLAN.version) {
+      if (id === 'legcurl' && template === 'lowerB') count = 2;
+      if (week === 7 && !plan.arms.includes(id)) count = count >= 3 ? 2 : 1;
+    }
     return {
       id,
       name: e.name,
@@ -354,11 +431,11 @@ export function createSession(date, template, week = 1) {
     };
   });
   return {
-    id: date + '_' + template,
+    id: date + '_' + template + (planVersion === LEGACY_PLAN.version ? '' : '_' + planVersion),
     date,
     template,
     week,
-    planVersion: PLAN_VERSION,
+    planVersion,
     exercises,
     notes: '',
     pain: 'none',
@@ -412,7 +489,12 @@ export function previousExercise(state, id, date) {
       .flatMap((s) =>
         s.exercises
           .filter((e) => e.id === id && e.sets.some((x) => x.done && setValid(x, e)))
-          .map((e) => ({ date: s.date, week: s.week, exercise: e })),
+          .map((e) => ({
+            date: s.date,
+            week: s.week,
+            planVersion: s.planVersion || LEGACY_PLAN.version,
+            exercise: e,
+          })),
       )[0] || null
   );
 }
@@ -524,10 +606,12 @@ export function weeklySummary(state, date) {
       '## ' +
         s.date +
         ' · ' +
-        TEMPLATES[s.template].name +
+        sessionName(s) +
         ' · week ' +
         s.week +
-        (s.week === 7 ? ' (DELOAD)' : ''),
+        (s.week === 7 ? ' (DELOAD)' : '') +
+        ' · prescription ' +
+        (s.planVersion || LEGACY_PLAN.version),
       'Status: ' +
         s.status +
         '; sets ' +
@@ -549,6 +633,11 @@ export function weeklySummary(state, date) {
       lines.push(
         '- ' +
           e.name +
+          ' (target ' +
+          exerciseDefinition(e.id, s.planVersion || LEGACY_PLAN.version).min +
+          '–' +
+          exerciseDefinition(e.id, s.planVersion || LEGACY_PLAN.version).max +
+          ' reps)' +
           (e.variation ? ' [equipment/substitution: ' + e.variation + ']' : '') +
           ': ' +
           done.join('; '),
@@ -590,7 +679,7 @@ export function validateState(data) {
       !s ||
       !validDate(s.date) ||
       !TEMPLATES[s.template] ||
-      s.id !== s.date + '_' + s.template ||
+      typeof s.id !== 'string' ||
       ids.has(s.id) ||
       !Number.isInteger(s.week) ||
       s.week < 1 ||
@@ -599,7 +688,13 @@ export function validateState(data) {
     )
       throw Error('Invalid workout in backup.');
     ids.add(s.id);
-    const expected = createSession(s.date, s.template, s.week);
+    const expected = createSession(
+      s.date,
+      s.template,
+      s.week,
+      s.planVersion || LEGACY_PLAN.version,
+    );
+    if (s.id !== expected.id) throw Error('Invalid workout identifier.');
     if (
       !['draft', 'finished'].includes(s.status) ||
       !['none', 'mild', 'stop'].includes(s.pain) ||

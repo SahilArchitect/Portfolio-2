@@ -134,3 +134,5 @@ On iPhone, open the page in Safari, then Share → Add to Home Screen. Open it o
 online before relying on offline use.
 
 Run tracker logic tests with **pnpm --filter @engine-room/web test:trident**.
+
+Trident prescription revision 2026-09-08-r2 uses 4×12 compounds and three-set isolations, with rotating arms, twice-weekly pec deck and more abs/wrist work. Historical session definitions are retained for compatible backup imports and review; current sessions never overwrite same-day older-revision records.

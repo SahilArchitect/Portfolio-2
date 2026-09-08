@@ -2,6 +2,9 @@ import {
   PLAN_VERSION,
   STORAGE_KEY,
   EXERCISES,
+  exerciseDefinition,
+  sessionInstructions,
+  sessionName,
   TEMPLATES,
   BASES,
   ARMS,
@@ -244,7 +247,7 @@ function renderHome() {
               '"><small>' +
               esc(s.status) +
               '</small><strong>' +
-              esc(TEMPLATES[s.template].name) +
+              esc(sessionName(s)) +
               '</strong>' +
               progress(s).done +
               '/' +
@@ -279,14 +282,15 @@ function renderHome() {
     const date = $('#workout-date').value,
       t = $('#template').value,
       w = Number($('#week').value);
-    const id = date + '_' + t;
-    let s = state.sessions.find((s) => s.id === id);
+    let s = state.sessions.find(
+      (s) => s.date === date && s.template === t && s.planVersion === PLAN_VERSION,
+    );
     if (!s) {
       s = createSession(date, t, w);
       state.sessions.push(s);
       save();
     }
-    activeId = id;
+    activeId = s.id;
     render();
     window.scrollTo(0, 0);
   };
@@ -306,7 +310,7 @@ function openSession(id) {
   window.scrollTo(0, 0);
 }
 function exerciseCard(e, i, s) {
-  const def = EXERCISES[e.id],
+  const def = exerciseDefinition(e.id, s.planVersion || '2026-09-08'),
     previous = previousExercise(state, e.id, s.date),
     done = e.sets.filter((x) => x.done && setValid(x, e)).length;
   let text =
@@ -461,11 +465,9 @@ function renderSession() {
     s.week +
     (s.week === 7 ? ' · DELOAD' : '') +
     '</div><h1>' +
-    esc(TEMPLATES[s.template].name) +
+    esc(sessionName(s)) +
     '</h1><p class="subtle">Only working sets go here. RIR means clean reps you could still do. Tap the circle after a complete set.</p><div class="hint">' +
-    (s.week === 7
-      ? 'Deload: lighter loads and 4–5 RIR. Set counts are already reduced.'
-      : 'Arms: one working set per exercise. Four isolation superset pairs, one round each. Rest 90–120 sec after a pair; 2–3 min for compounds.') +
+    esc(sessionInstructions(s)) +
     '</div><div class="sticky"><div class="row"><h2 id="session-progress">' +
     p.done +
     ' / ' +
@@ -572,7 +574,9 @@ function renderSession() {
         touch(s);
         renderSession();
         $('#ex-' + i).scrollIntoView({ block: 'start' });
-        toast('Previous weights copied. This is a reference, not a prescribed increase.');
+        toast(
+          'Previous weights copied as a reference. A new 12-rep target may need a lighter load.',
+        );
       }),
   );
   $('#duration').oninput = (e) => {
@@ -628,7 +632,7 @@ function renderHistory() {
           '</small><span class="pill">' +
           esc(s.status) +
           '</span></div><strong>' +
-          esc(TEMPLATES[s.template].name) +
+          esc(sessionName(s)) +
           '</strong><span class="subtle">' +
           p.done +
           '/' +
@@ -713,7 +717,7 @@ function renderSettings() {
     '<p class="subtle" style="margin:14px 0 0">Logs are stored in this browser on this device. Clearing website data, private browsing, switching app addresses or losing the phone can remove access. There is no automatic cloud sync.</p></section>' +
     '<section class="card"><h2>Restore a backup</h2><p class="subtle">Choose a Trident JSON file. You will review its counts before restoring. Matching sessions/check-ins use the newer edit; other entries are retained.</p><input id="import-file" type="file" accept=".json,application/json" aria-label="Choose Trident backup"><div id="import-preview"></div></section>' +
     '<section class="card"><h2>On your iPhone</h2><ol><li>Open the app in Safari.</li><li>Tap Share, then Add to Home Screen.</li><li>Open it from that icon and use that same place for logging.</li><li>Open once online before relying on offline access.</li></ol><p class="subtle">Offline readiness: <strong id="offline-status">checking…</strong>. Rest timers catch up after you unlock your phone; there are no background alarms.</p></section>' +
-    '<section class="card"><h2>How to log accurately</h2><p><strong>kg:</strong> choose per dumbbell, total bar + plates, machine stack, assistance or bodyweight. Less assistance means a harder rep.</p><p><strong>RIR:</strong> clean reps still available. A set at 10 reps with 2 RIR means you could likely do 12 clean reps.</p><p><strong>Unilateral lifts:</strong> enter both sides, including RIR. One logged set represents the pair. Note unequal loads.</p><p><strong>Equipment:</strong> record your machine or substitution. Numbers from different machines are not automatically comparable.</p><p><strong>Week 7:</strong> choose it when starting a session; the tracker applies deload set counts. Keep the prescribed lighter load and 4–5 RIR.</p><p><strong>Next weights:</strong> use the weekly export for coaching. “Use last weights” only copies your record; it does not prescribe an increase.</p></section><footer>TRIDENT FORGE · plan ' +
+    '<section class="card"><h2>How to log accurately</h2><p><strong>kg:</strong> choose per dumbbell, total bar + plates, machine stack, assistance or bodyweight. Less assistance means a harder rep.</p><p><strong>RIR:</strong> clean reps still available. A set at 10 reps with 2 RIR means you could likely do 12 clean reps.</p><p><strong>Unilateral lifts:</strong> enter both sides, including RIR. One logged set represents the pair. Note unequal loads.</p><p><strong>Equipment:</strong> record your machine or substitution. Numbers from different machines are not automatically comparable.</p><p><strong>Week 7:</strong> choose it when starting a session; new sessions keep 4 compound sets and 3 isolation sets, with lighter load and 4–5 RIR. Older sessions retain their original prescription.</p><p><strong>Next weights:</strong> use the weekly export for coaching. “Use last weights” only copies your record; it does not prescribe an increase.</p></section><footer>TRIDENT FORGE · plan ' +
     PLAN_VERSION +
     '<br>No analytics. No workout data is sent to a server by this app.<br>Source and operating guide are in your fitness project.</footer>';
   $('#backup').onclick = async () => {
