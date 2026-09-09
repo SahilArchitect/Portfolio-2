@@ -3,7 +3,9 @@ import {
   STORAGE_KEY,
   EXERCISES,
   exerciseDefinition,
+  exerciseRir,
   sessionInstructions,
+  sessionCardio,
   sessionName,
   TEMPLATES,
   BASES,
@@ -40,7 +42,9 @@ let state,
   toastTimeout;
 try {
   rawBackup = localStorage.getItem(STORAGE_KEY) || '';
-  state = rawBackup ? validateState(JSON.parse(rawBackup)) : initialStateFromHash(location.hash);
+  state = rawBackup
+    ? validateState(JSON.parse(rawBackup))
+    : initialStateFromHash(location.hash);
   if (location.hash.startsWith('#weight='))
     history.replaceState(null, '', location.pathname + location.search);
 } catch {
@@ -67,7 +71,9 @@ function save() {
   } catch {
     $('#save-status').textContent = 'NOT SAVED · export backup';
     $('#save-status').classList.add('error');
-    toast('Storage is unavailable or full. Export a backup now; current edits are only in memory.');
+    toast(
+      'Storage is unavailable or full. Export a backup now; current edits are only in memory.',
+    );
     return false;
   }
 }
@@ -217,7 +223,7 @@ function renderHome() {
     (weight ? ' · ' + esc(weight.date.slice(5)) : '') +
     '</small></div><div class="stat"><strong>' +
     weekSessions.filter((s) => s.status === 'finished').length +
-    ' / 5</strong><small>sessions this week</small></div><div class="stat"><strong>' +
+    ' / 6</strong><small>sessions this week</small></div><div class="stat"><strong>' +
     weekSessions.reduce((n, s) => n + progress(s).done, 0) +
     '</strong><small>working sets logged</small></div></div>' +
     '<div class="weekstrip">' +
@@ -256,12 +262,12 @@ function renderHome() {
           )
           .join('')
       : '') +
-    '<section class="card"><h2>Open a workout</h2><p class="subtle">Choose another date for a missed log. Existing sessions reopen without resetting.</p><form id="start-form">' +
+    '<section class="card"><h2>Open a workout</h2><p class="subtle">Six-day PPL applies to new workouts. Resume earlier workouts from History; do not repeat completed days when changing plans.</p><form id="start-form">' +
     field('Workout date', 'workout-date', today, 'date', 'required') +
     '<div class="grid"><label>Session<select id="template" required>' +
     options(
       Object.fromEntries(Object.entries(TEMPLATES).map(([id, t]) => [id, t.name])),
-      rec || 'upperA',
+      rec || 'pushA',
     ) +
     '</select></label><label>Training week<select id="week">' +
     options(
@@ -338,7 +344,7 @@ function exerciseCard(e, i, s) {
     ' reps' +
     (def.unilateral ? ' each side' : '') +
     ' · ' +
-    (s.week === 7 ? '4–5' : s.week === 1 ? '3–4' : s.week === 2 ? '3' : '2–3') +
+    exerciseRir(s, e.id) +
     ' RIR</p>';
   if (def.cue) text += '<p class="subtle">' + esc(def.cue) + '</p>';
   text += previous
@@ -353,7 +359,9 @@ function exerciseCard(e, i, s) {
           .map((x) => formatSet(x, previous.exercise))
           .join(' · '),
       ) +
-      (previous.exercise.variation ? '<br>Equipment: ' + esc(previous.exercise.variation) : '') +
+      (previous.exercise.variation
+        ? '<br>Equipment: ' + esc(previous.exercise.variation)
+        : '') +
       '<br><button data-copy="' +
       i +
       '">Use last weights only</button></div>'
@@ -476,6 +484,11 @@ function renderSession() {
     (p.done / p.total) * 100 +
     '%"></span></div></div>' +
     s.exercises.map((e, i) => exerciseCard(e, i, s)).join('') +
+    '<section class="card"><h2>Cardio</h2><p class="subtle">' +
+    esc(sessionCardio(s)) +
+    '</p><label>Cardio actually performed<textarea id="session-cardio" maxlength="3000" placeholder="e.g. treadmill 20 min, 4.5 km/h, 4% incline, RPE 4. Or write skipped + reason.">' +
+    esc(s.cardio || '') +
+    '</textarea></label><p class="subtle">Log minutes, equipment, effort and any load or rounds. Cardio is separate from working-set totals.</p></section>' +
     '<section class="card"><h2>Session reflection</h2><div class="grid">' +
     field(
       'Duration · minutes',
@@ -575,7 +588,7 @@ function renderSession() {
         renderSession();
         $('#ex-' + i).scrollIntoView({ block: 'start' });
         toast(
-          'Previous weights copied as a reference. A new 12-rep target may need a lighter load.',
+          'Previous weights copied as a reference. Match today’s rep range, RIR and equipment before choosing your load.',
         );
       }),
   );
@@ -590,6 +603,10 @@ function renderSession() {
       toast(
         'Stop the provoking exercise. Include symptoms in your review; do not force the planned load.',
       );
+  };
+  $('#session-cardio').oninput = (e) => {
+    s.cardio = e.target.value;
+    touch(s);
   };
   $('#session-notes').oninput = (e) => {
     s.notes = e.target.value;
@@ -687,7 +704,8 @@ function renderReview() {
       try {
         await navigator.share({ title: 'Trident weekly review', text: report });
       } catch (e) {
-        if (e.name !== 'AbortError') toast('Share was unavailable. Use Copy text or Save summary.');
+        if (e.name !== 'AbortError')
+          toast('Share was unavailable. Use Copy text or Save summary.');
       }
     } else $('#copy-report').click();
   };
@@ -717,7 +735,7 @@ function renderSettings() {
     '<p class="subtle" style="margin:14px 0 0">Logs are stored in this browser on this device. Clearing website data, private browsing, switching app addresses or losing the phone can remove access. There is no automatic cloud sync.</p></section>' +
     '<section class="card"><h2>Restore a backup</h2><p class="subtle">Choose a Trident JSON file. You will review its counts before restoring. Matching sessions/check-ins use the newer edit; other entries are retained.</p><input id="import-file" type="file" accept=".json,application/json" aria-label="Choose Trident backup"><div id="import-preview"></div></section>' +
     '<section class="card"><h2>On your iPhone</h2><ol><li>Open the app in Safari.</li><li>Tap Share, then Add to Home Screen.</li><li>Open it from that icon and use that same place for logging.</li><li>Open once online before relying on offline access.</li></ol><p class="subtle">Offline readiness: <strong id="offline-status">checking…</strong>. Rest timers catch up after you unlock your phone; there are no background alarms.</p></section>' +
-    '<section class="card"><h2>How to log accurately</h2><p><strong>kg:</strong> choose per dumbbell, total bar + plates, machine stack, assistance or bodyweight. Less assistance means a harder rep.</p><p><strong>RIR:</strong> clean reps still available. A set at 10 reps with 2 RIR means you could likely do 12 clean reps.</p><p><strong>Unilateral lifts:</strong> enter both sides, including RIR. One logged set represents the pair. Note unequal loads.</p><p><strong>Equipment:</strong> record your machine or substitution. Numbers from different machines are not automatically comparable.</p><p><strong>Week 7:</strong> choose it when starting a session; new sessions keep 4 compound sets and 3 isolation sets, with lighter load and 4–5 RIR. Older sessions retain their original prescription.</p><p><strong>Next weights:</strong> use the weekly export for coaching. “Use last weights” only copies your record; it does not prescribe an increase.</p></section><footer>TRIDENT FORGE · plan ' +
+    '<section class="card"><h2>How to log accurately</h2><p><strong>kg:</strong> choose per dumbbell, total bar + plates, machine stack, assistance or bodyweight. Less assistance means a harder rep.</p><p><strong>RIR:</strong> clean reps still available. A set at 10 reps with 2 RIR means you could likely do 12 clean reps.</p><p><strong>Unilateral lifts:</strong> enter both sides, including RIR. One logged set represents the pair. Note unequal loads.</p><p><strong>Equipment:</strong> record your machine or substitution. Numbers from different machines are not automatically comparable.</p><p><strong>Week 7:</strong> choose it when starting a session; new PPL sessions use 2 working sets per exercise, lighter loads and 4–5 RIR. Easy walking only. Older sessions retain their original prescription.</p><p><strong>Next weights:</strong> use the weekly export for coaching. “Use last weights” only copies your record; it does not prescribe an increase.</p></section><footer>TRIDENT FORGE · plan ' +
     PLAN_VERSION +
     '<br>No analytics. No workout data is sent to a server by this app.<br>Source and operating guide are in your fitness project.</footer>';
   $('#backup').onclick = async () => {
@@ -814,14 +832,18 @@ $('#timer-close').onclick = () => {
 };
 setInterval(tick, 500);
 document.addEventListener('visibilitychange', tick);
-document.querySelectorAll('[data-tab]').forEach((b) => (b.onclick = () => setTab(b.dataset.tab)));
+document
+  .querySelectorAll('[data-tab]')
+  .forEach((b) => (b.onclick = () => setTab(b.dataset.tab)));
 window.addEventListener('storage', (e) => {
   if (e.key === STORAGE_KEY) {
     rawBackup = e.newValue || '';
     blocked = true;
     $('#save-status').textContent = 'Another tab changed data';
     $('#save-status').classList.add('error');
-    toast('Another tab changed your log. Reload this tab before editing. Saving here is paused.');
+    toast(
+      'Another tab changed your log. Reload this tab before editing. Saving here is paused.',
+    );
   }
 });
 if (!blocked) save();
