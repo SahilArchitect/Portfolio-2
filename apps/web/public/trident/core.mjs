@@ -1,5 +1,6 @@
 import { LEGACY_PLAN } from './legacy-plan.mjs';
-export const PLAN_VERSION = '2026-09-08-r2';
+import { PREVIOUS_PLAN } from './previous-plan.mjs';
+export const PLAN_VERSION = '2026-09-09-r3';
 export const STORAGE_KEY = 'trident-forge-v1';
 const ex = (id, name, sets, min, max, group, basis = 'stack', unilateral = false, cue = '') => ({
   id,
@@ -14,6 +15,17 @@ const ex = (id, name, sets, min, max, group, basis = 'stack', unilateral = false
 });
 const current = Object.fromEntries(
   [
+    ex(
+      'inclinebarbell',
+      'Incline barbell bench press',
+      4,
+      12,
+      12,
+      'Chest',
+      'total',
+      false,
+      'Comfortable 15–30° incline. Use safeties or a spotter; log total bar plus plates.',
+    ),
     ex(
       'incline',
       'Low-incline dumbbell press',
@@ -301,9 +313,10 @@ export const TEMPLATES = {
       'Close-grip bench first. DB curl ↔ skull crusher; hammer curl ↔ lateral raise. Three rounds per accessory pair.',
   },
   upperB: {
-    name: 'Back, pec deck + arms',
+    name: 'Upper chest, back + arms',
     day: 'Friday',
     ids: [
+      'inclinebarbell',
       'row',
       'lat',
       'pecdeck',
@@ -315,7 +328,7 @@ export const TEMPLATES = {
       'rope',
     ],
     pairing:
-      'Preacher curl ↔ overhead cable extension; cross-body hammer curl ↔ rope pushdown. Three rounds per pair.',
+      'Incline bench, row and pulldown as straight sets. Pec deck ↔ lateral raise if stations are adjacent; preacher curl ↔ overhead extension; cross-body hammer curl ↔ rope pushdown. Three rounds per accessory pair. Allow 110–130 min; stop at the 120-min ceiling and log unfinished sets if needed.',
   },
   lowerB: {
     name: 'Lower B + abs & forearms',
@@ -327,6 +340,7 @@ export const TEMPLATES = {
 };
 export function planFor(version = PLAN_VERSION) {
   if (version === LEGACY_PLAN.version) return LEGACY_PLAN;
+  if (version === PREVIOUS_PLAN.version) return PREVIOUS_PLAN;
   if (version === PLAN_VERSION)
     return { version: PLAN_VERSION, exercises: EXERCISES, templates: TEMPLATES, arms: ARMS };
   throw Error('Unsupported training revision. Preserve your backup and update the app.');
@@ -341,7 +355,9 @@ export function sessionInstructions(s) {
   if ((s.planVersion || LEGACY_PLAN.version) !== PLAN_VERSION)
     return (
       'Earlier prescription: original exercises and set counts are preserved. New sessions use the revised 3-set / 4-set plan.' +
-      (s.week === 7 ? ' This older deload used reduced set counts.' : '')
+      (s.week === 7 && s.planVersion !== PREVIOUS_PLAN.version
+        ? ' This older deload used reduced set counts.'
+        : '')
     );
   if (s.week === 7)
     return 'Easier week: keep 4 sets for compounds and 3 for isolations; use lighter loads and 4–5 RIR. No finishers.';

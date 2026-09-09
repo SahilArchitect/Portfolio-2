@@ -17,14 +17,25 @@ import {
   previousExercise,
   exerciseDefinition,
   sessionName,
+  sessionInstructions,
 } from '../public/trident/core.mjs';
 test('revised templates enforce 3-set isolations, 4×12 compounds and unchanged deload counts', () => {
-  const compounds = ['incline', 'pulldown', 'hack', 'cgbp', 'row', 'lat', 'rdl', 'split'];
+  const compounds = [
+    'incline',
+    'inclinebarbell',
+    'pulldown',
+    'hack',
+    'cgbp',
+    'row',
+    'lat',
+    'rdl',
+    'split',
+  ];
   for (const [name, count] of Object.entries({
     upperA: 26,
     lowerA: 16,
     arms: 28,
-    upperB: 29,
+    upperB: 33,
     lowerB: 20,
   })) {
     const s = createSession('2026-09-08', name);
@@ -68,6 +79,14 @@ test('weekly exercise inventory and muscle totals match the agreed rotation', ()
   assert.equal(count('Core'), 9);
   assert.equal(count('Forearms'), 6);
   assert.equal(weekly.filter((e) => e.id === 'pecdeck').length, 2);
+  assert.equal(count('Chest'), 14);
+  assert.equal(
+    weekly.reduce((n, e) => n + e.sets.length, 0),
+    123,
+  );
+  const friday = createSession('2026-09-11', 'upperB');
+  assert.equal(friday.exercises[0].id, 'inclinebarbell');
+  assert.equal(friday.exercises[0].basis, 'total');
 });
 test('historical sessions and backups retain their original sets, names and rep targets', () => {
   for (const [t, count] of Object.entries({
@@ -98,6 +117,24 @@ test('historical sessions and backups retain their original sets, names and rep 
     'Upper B + arms',
   );
   assert.throws(() => createSession('2026-09-07', 'upperA', 1, 'unknown'));
+});
+test('r2 Friday backups coexist with r3 without adding exercises to saved sessions', () => {
+  const old = createSession('2026-09-11', 'upperB', 7, '2026-09-08-r2');
+  const current = createSession('2026-09-11', 'upperB', 7);
+  Object.assign(old.exercises[0].sets[0], { load: '40', reps: '12', rir: '4', done: true });
+  const data = newState();
+  data.sessions = [old, current];
+  const restored = validateState(JSON.parse(JSON.stringify(data)));
+  assert.equal(progress(old).total, 29);
+  assert.equal(progress(current).total, 33);
+  assert.notEqual(old.id, current.id);
+  assert.equal(old.exercises[0].id, 'row');
+  assert.equal(old.exercises[0].sets[0].load, '40');
+  assert.equal(sessionName(old), 'Back, pec deck + arms');
+  assert.doesNotMatch(sessionInstructions(old), /reduced set counts/);
+  const report = weeklySummary(data, '2026-09-13');
+  assert.match(report, /prescription 2026-09-08-r2/);
+  assert.match(report, /prescription 2026-09-09-r3/);
 });
 test('bodyweight accepts zero external load; unilateral completion needs both sides', () => {
   const lower = createSession('2026-09-08', 'lowerA'),
@@ -144,7 +181,7 @@ test('summary includes actual conventions, prior sessions, omissions, pain, targ
   assert.match(report, /pain: mild/);
   assert.match(report, /target 10–15 reps/);
   assert.match(report, /target 10–12 reps/);
-  assert.match(report, /prescription 2026-09-08-r2/);
+  assert.match(report, /prescription 2026-09-09-r3/);
   assert.equal(previousExercise(state, 'preacher', '2026-09-11').date, '2026-09-07');
 });
 test('backup round-trip and merging preserve newer entries and reject invalid imports', () => {
