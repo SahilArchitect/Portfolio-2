@@ -23,11 +23,14 @@ import {
   recommendedTemplate,
   PLAN_VERSION,
   planFor,
+  isCardio,
+  cardioValid,
+  sessionHasActivity,
 } from '../public/trident/core.mjs';
-test('six-day PPL starts now with movement-specific targets and a genuine deload', () => {
-  const days = ['pushA', 'pullA', 'legsA', 'pushB', 'pullB', 'legsB', ''];
+test('five lifting days and one cardio day start now with movement-specific targets and a genuine deload', () => {
+  const days = ['push', 'pull', 'legs', 'cardio', 'upper', 'lower', ''];
   days.forEach((name, i) => assert.equal(recommendedTemplate(addDays('2026-09-07', i)), name));
-  const counts = { pushA: 15, pullA: 18, legsA: 18, pushB: 15, pullB: 21, legsB: 18 };
+  const counts = { push: 15, pull: 18, legs: 18, cardio: 0, upper: 24, lower: 18 };
   for (const [name, count] of Object.entries(counts)) {
     const s = createSession('2026-09-09', name);
     assert.equal(progress(s).total, count);
@@ -38,7 +41,7 @@ test('six-day PPL starts now with movement-specific targets and a genuine deload
     }
   }
   assert.throws(() => createSession('2026-09-09', 'upperA'));
-  assert.match(sessionInstructions(createSession('2026-09-09', 'pushA', 7)), /2 working sets/);
+  assert.match(sessionInstructions(createSession('2026-09-09', 'push', 7)), /2 working sets/);
 });
 test('weekly inventory retains both hammer curls, shrugs and forearms without a chest press machine', () => {
   const weekly = Object.keys(TEMPLATES).flatMap(
@@ -52,12 +55,10 @@ test('weekly inventory retains both hammer curls, shrugs and forearms without a 
     'hammer',
     'crosshammer',
     'overhead',
-    'skullcrusher',
     'rope',
     'shrug',
     'wristcurl',
     'reversewrist',
-    'cabley',
   ])
     assert.ok(
       weekly.some((e) => e.id === id),
@@ -69,27 +70,27 @@ test('weekly inventory retains both hammer curls, shrugs and forearms without a 
       .reduce((n, e) => n + e.sets.length, 0);
   for (const [group, n] of Object.entries({
     Biceps: 12,
-    Triceps: 12,
+    Triceps: 9,
     Core: 6,
     Forearms: 6,
-    Chest: 12,
+    Chest: 9,
     Back: 12,
-    Traps: 9,
+    Traps: 3,
     Legs: 18,
     Calves: 6,
     Delts: 12,
   }))
     assert.equal(count(group), n, group);
-  assert.equal(weekly.filter((e) => e.id === 'shrug').length, 2);
-  assert.equal(weekly.filter((e) => e.id === 'pecdeck').length, 2);
+  assert.equal(weekly.filter((e) => e.id === 'shrug').length, 1);
+  assert.equal(weekly.filter((e) => e.id === 'pecdeck').length, 1);
   assert.equal(
     weekly.reduce((n, e) => n + e.sets.length, 0),
-    105,
+    93,
   );
-  assert.ok(TEMPLATES.pullA.ids.includes('hammer'));
-  assert.ok(TEMPLATES.pullB.ids.includes('crosshammer'));
+  assert.ok(TEMPLATES.pull.ids.includes('hammer'));
+  assert.ok(TEMPLATES.upper.ids.includes('crosshammer'));
   assert.ok(!weekly.some((e) => /chest press machine/i.test(e.name)));
-  const smith = createSession('2026-09-09', 'pushA').exercises[0];
+  const smith = createSession('2026-09-09', 'push').exercises[0];
   assert.equal(smith.id, 'inclinesmith');
   assert.equal(smith.basis, 'plates');
   const data = newState();
@@ -117,7 +118,7 @@ test('historical sessions and backups retain their original sets, names and rep 
   const old = createSession('2026-09-07', 'upperA', 1, '2026-09-08');
   assert.equal(exerciseDefinition('incline', old.planVersion).min, 6);
   assert.equal(old.exercises[0].sets.length, 2);
-  const updated = createSession('2026-09-07', 'pushA');
+  const updated = createSession('2026-09-07', 'push');
   assert.notEqual(old.id, updated.id);
   const mixed = newState();
   mixed.sessions = [old, updated];
@@ -147,11 +148,11 @@ test('r2 Friday backups coexist with r3 without adding exercises to saved sessio
   assert.match(report, /prescription 2026-09-09-r3/);
 });
 test('bodyweight accepts zero external load; unilateral completion needs both sides', () => {
-  const lower = createSession('2026-09-09', 'legsB'),
+  const lower = createSession('2026-09-09', 'lower'),
     p = lower.exercises.find((e) => e.id === 'kneeraise');
   Object.assign(p.sets[0], { reps: '12', rir: '3', done: true });
   assert.ok(setValid(p.sets[0], p));
-  const b = createSession('2026-09-09', 'pushA').exercises.find((e) => e.id === 'lateral');
+  const b = createSession('2026-09-09', 'push').exercises.find((e) => e.id === 'lateral');
   Object.assign(b.sets[0], { load: '5', reps: '12', rir: '2', done: true });
   assert.equal(setValid(b.sets[0], b), false);
   Object.assign(b.sets[0], { right: '11', rirRight: '1' });
@@ -166,7 +167,7 @@ test('week boundaries stay Monday–Sunday across year/month transitions', () =>
 test('summary includes actual conventions, prior sessions, omissions, pain, targets and weight averages', () => {
   const state = initialStateFromHash('#weight=95.92&date=2026-09-08');
   const old = createSession('2026-09-07', 'upperA', 1, '2026-09-08'),
-    current = createSession('2026-09-11', 'pullB');
+    current = createSession('2026-09-11', 'upper');
   const a = old.exercises.find((e) => e.id === 'preacher'),
     b = current.exercises.find((e) => e.id === 'preacher');
   Object.assign(a.sets[0], { load: '30', reps: '10', rir: '3', done: true });
@@ -191,12 +192,12 @@ test('summary includes actual conventions, prior sessions, omissions, pain, targ
   assert.match(report, /pain: mild/);
   assert.match(report, /target 10–15 reps/);
   assert.match(report, /target 8–12 reps/);
-  assert.match(report, /prescription 2026-09-09-r4/);
+  assert.match(report, /prescription 2026-09-10-r5/);
   assert.equal(previousExercise(state, 'preacher', '2026-09-11').date, '2026-09-07');
 });
 test('backup round-trip and merging preserve newer entries and reject invalid imports', () => {
   const state = newState(),
-    s = createSession('2026-09-09', 'legsA');
+    s = createSession('2026-09-09', 'legs');
   state.sessions.push(s);
   validateState(JSON.parse(JSON.stringify(state)));
   const incoming = structuredClone(state);
@@ -230,7 +231,7 @@ test('effort targets match the new progression while historical RIR guidance sta
     [7, '4–5', '4–5'],
     [8, '2', '2'],
   ]) {
-    const s = createSession('2026-09-09', 'pushA', week);
+    const s = createSession('2026-09-09', 'push', week);
     assert.equal(exerciseRir(s, 'inclinesmith'), press);
     assert.equal(exerciseRir(s, 'rope'), curl);
   }
@@ -242,7 +243,13 @@ test('effort targets match the new progression while historical RIR guidance sta
 
 test('all historical revisions round-trip without rewriting completed logs or deload prescriptions', () => {
   const data = newState();
-  for (const version of ['2026-09-08', '2026-09-08-r2', '2026-09-09-r3', PLAN_VERSION]) {
+  for (const version of [
+    '2026-09-08',
+    '2026-09-08-r2',
+    '2026-09-09-r3',
+    '2026-09-09-r4',
+    PLAN_VERSION,
+  ]) {
     for (const template of Object.keys(planFor(version).templates)) {
       for (const week of [1, 7]) {
         const s = createSession(
@@ -252,14 +259,15 @@ test('all historical revisions round-trip without rewriting completed logs or de
           version,
         );
         const e = s.exercises[0];
-        Object.assign(e.sets[0], {
-          load: '20',
-          reps: '10',
-          right: '10',
-          rir: '3',
-          rirRight: '3',
-          done: true,
-        });
+        if (e)
+          Object.assign(e.sets[0], {
+            load: '20',
+            reps: '10',
+            right: '10',
+            rir: '3',
+            rirRight: '3',
+            done: true,
+          });
         if (version !== PLAN_VERSION) delete s.cardio; // Real older backups have no cardio field.
         data.sessions.push(s);
       }
@@ -269,32 +277,70 @@ test('all historical revisions round-trip without rewriting completed logs or de
   const restored = validateState(JSON.parse(original));
   assert.equal(JSON.stringify(restored), original);
   const merged = mergeState(newState(), restored);
-  assert.equal(merged.sessions.length, 42);
+  assert.equal(merged.sessions.length, 54);
   assert.equal(
     merged.sessions.reduce((n, s) => n + progress(s).done, 0),
-    42,
+    52,
   );
   const bad = structuredClone(data);
-  bad.sessions[0].template = 'pushA';
+  bad.sessions[0].template = 'push';
   assert.throws(() => validateState(bad));
 });
 test('cardio prescription and actual log stay separate from sets and survive export/import', () => {
   const data = newState(),
-    s = createSession('2026-09-12', 'legsB');
+    s = createSession('2026-09-10', 'cardio');
   data.sessions = [s];
   assert.match(sessionCardio(s), /SkiErg/);
-  assert.match(sessionCardio(s), /SUBSTITUTE/);
-  assert.doesNotMatch(sessionCardio(createSession('2026-09-12', 'legsB', 7)), /SkiErg/);
+  assert.match(sessionCardio(s), /replace/);
+  assert.doesNotMatch(sessionCardio(createSession('2026-09-10', 'cardio', 7)), /SkiErg/);
   s.cardio = 'Treadmill 12 min, 4 km/h, 2% incline, RPE 3';
-  assert.equal(progress(s).total, 18);
+  assert.equal(progress(s).total, 0);
   assert.equal(progress(s).done, 0);
   const restored = validateState(JSON.parse(JSON.stringify(data)));
   assert.equal(restored.sessions[0].cardio, s.cardio);
   assert.match(weeklySummary(restored, '2026-09-13'), /Cardio performed: Treadmill 12 min/);
-  assert.match(weeklySummary(restored, '2026-09-13'), /current target: 6\/week/);
+  assert.match(
+    weeklySummary(restored, '2026-09-13'),
+    /current target: 5 lifting \+ 1 cardio\/week/,
+  );
   for (const bad of [5, {}, 'x'.repeat(3001)]) {
     const broken = structuredClone(data);
     broken.sessions[0].cardio = bad;
     assert.throws(() => validateState(broken));
   }
+});
+
+test('completed cardio requires actual activity and duration and counts separately from lifting', () => {
+  const s = createSession('2026-09-10', 'cardio');
+  assert.ok(isCardio(s));
+  assert.deepEqual(s.exercises, []);
+  assert.equal(sessionHasActivity(s), false);
+  s.status = 'finished';
+  assert.throws(() => validateState({ ...newState(), sessions: [s] }));
+  s.duration = '40';
+  s.cardio = 'Treadmill 40 min at RPE 3, 4.5 km/h, 2% incline';
+  assert.ok(cardioValid(s));
+  assert.ok(sessionHasActivity(s));
+  const data = validateState({ ...newState(), sessions: [s] });
+  const report = weeklySummary(data, '2026-09-13');
+  assert.match(report, /Finished lifting sessions: 0\/5; finished cardio sessions: 1\/1/);
+  assert.match(report, /Completed working sets: 0 \/ 0/);
+  assert.match(report, /Cardio · 40 min/);
+  for (const duration of ['', 0, -1, 181, 'not a number']) {
+    const broken = structuredClone(data);
+    broken.sessions[0].duration = duration;
+    assert.throws(() => validateState(broken));
+  }
+  assert.equal(isCardio(createSession('2026-09-10', 'pushB', 1, '2026-09-09-r4')), false);
+});
+test('r4 deload and effort targets remain unchanged after adding a cardio template', () => {
+  const old = createSession('2026-09-10', 'pushB', 7, '2026-09-09-r4');
+  assert.equal(progress(old).total, 10);
+  const current = createSession('2026-09-10', 'cardio', 7);
+  assert.equal(progress(current).total, 0);
+  validateState({ ...newState(), sessions: [old, current] });
+  assert.equal(
+    exerciseRir(createSession('2026-09-10', 'pushA', 3, '2026-09-09-r4'), 'inclinesmith'),
+    '2',
+  );
 });

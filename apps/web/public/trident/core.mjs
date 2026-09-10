@@ -1,131 +1,72 @@
 import { LEGACY_PLAN } from './legacy-plan.mjs';
 import { PREVIOUS_PLAN } from './previous-plan.mjs';
 import { R3_PLAN } from './r3-plan.mjs';
-export const PLAN_VERSION = '2026-09-09-r4';
+import { R4_PLAN } from './r4-plan.mjs';
+export const PLAN_VERSION = '2026-09-10-r5';
 export const STORAGE_KEY = 'trident-forge-v1';
-const ex = (id, min, max, overrides = {}) => ({
-  ...R3_PLAN.exercises[id],
-  id,
-  sets: 3,
-  min,
-  max,
-  ...overrides,
-});
-const current = Object.fromEntries(
-  [
-    ex('inclinesmith', 6, 10, {
-      name: 'Incline Smith bench press',
-      group: 'Chest',
-      basis: 'plates',
-      unilateral: false,
-      cue: '15–30° incline; set safeties. Log plates added only; note machine and effective bar resistance separately. Never copy free-barbell loads.',
-    }),
-    ex('incline', 8, 12, {
-      cue: '15–30° incline. Log kg per dumbbell; controlled, comfortable range.',
-    }),
-    ex('pecdeck', 10, 15),
-    ex('lateral', 12, 20),
-    ex('overhead', 10, 15),
-    ex('rope', 10, 15),
-    ex('skullcrusher', 10, 15),
-    ex('pulldown', 8, 12),
-    ex('row', 8, 12),
-    ex('lat', 10, 15),
-    ex('rear', 12, 20, {
-      name: 'Reverse pec deck',
-      cue: 'Controlled rear-delt fly; keep torso supported.',
-    }),
-    ex('shrug', 10, 15),
-    ex('cabley', 12, 20),
-    ex('inclinecurl', 8, 12),
-    ex('hammer', 10, 15, {
-      cue: 'Normal hammer curl beside torso; neutral grip. This stays in addition to Friday cross-body curls.',
-    }),
-    ex('preacher', 8, 12),
-    ex('crosshammer', 10, 15),
-    ex('hack', 6, 10, {
-      name: 'Hack squat',
-      cue: 'Controlled comfortable depth; log machine and plates-added convention. Leg press is a substitute.',
-    }),
-    ex('legpress', 10, 15, {
-      name: 'Leg press',
-      group: 'Legs',
-      basis: 'plates',
-      unilateral: false,
-      cue: 'Keep pelvis supported; comfortable depth. Log machine and plates added; do not compare different sleds.',
-    }),
-    ex('rdl', 6, 10, {
-      cue: 'Hips back, bar close; stop at controlled hamstring range. Log total bar plus plates.',
-    }),
-    ex('legcurl', 10, 15),
-    ex('extension', 10, 15),
-    ex('calf', 8, 15),
-    ex('calfseat', 12, 20),
-    ex('crunch', 10, 15),
-    ex('kneeraise', 10, 15),
-    ex('wristcurl', 12, 20),
-    ex('reversewrist', 12, 20),
-  ].map((e) => [e.id, e]),
-);
-export const EXERCISES = { ...R3_PLAN.exercises, ...current };
-export const ARMS = R3_PLAN.arms;
-const treadmill =
-  'After lifting: treadmill 20 min at conversational effort, RPE 3–4/10. Adjust speed/incline to breathing; log minutes, speed and incline.';
+export const EXERCISES = { ...R4_PLAN.exercises };
+export const ARMS = R4_PLAN.arms;
 export const TEMPLATES = {
-  pushA: {
-    name: 'Push A · Smith incline',
+  push: {
+    name: 'Push · Smith incline',
     day: 'Monday',
+    kind: 'lifting',
     ids: ['inclinesmith', 'pecdeck', 'lateral', 'overhead', 'rope'],
     pairing:
-      'Press first. Optional lateral raise ↔ rope pushdown after overhead extensions; keep full rest before repeating each exercise.',
-    cardio: treadmill,
+      'Smith press first. Optional lateral raise ↔ rope pushdown after overhead extensions; keep full rest between sets of each muscle.',
+    cardio: 'Optional 10 min easy treadmill after lifting. No intervals.',
   },
-  pullA: {
-    name: 'Pull A · normal hammer curls',
+  pull: {
+    name: 'Pull · normal hammer curls',
     day: 'Tuesday',
+    kind: 'lifting',
     ids: ['pulldown', 'row', 'rear', 'shrug', 'inclinecurl', 'hammer'],
     pairing:
-      'Pulldown and row first; keep curls as separate exercises. Normal hammer curls stay beside the torso.',
-    cardio: 'No required finisher. Comfortable daily walking.',
+      'Pulldown and row first. Normal hammer curls remain separate from Friday cross-body curls. Finish with controlled curls.',
+    cardio: 'Comfortable daily walking; no required finisher.',
   },
-  legsA: {
-    name: 'Legs A · quads, abs & forearms',
+  legs: {
+    name: 'Legs · quads, abs & forearms',
     day: 'Wednesday',
+    kind: 'lifting',
     ids: ['hack', 'legcurl', 'extension', 'calf', 'crunch', 'wristcurl'],
-    pairing: 'Hack squat first. Optional calves ↔ cable crunch; wrist curls last.',
-    cardio:
-      'No required finisher. Comfortable walking; avoid hard intervals around leg sessions.',
+    pairing: 'Hack squat first. Optional calves ↔ cable crunch; supported wrist curls last.',
+    cardio: "No required finisher; save energy for Thursday's easy cardio.",
   },
-  pushB: {
-    name: 'Push B · dumbbell incline',
+  cardio: {
+    name: 'Cardio · treadmill & mobility',
     day: 'Thursday',
-    ids: ['incline', 'pecdeck', 'lateral', 'skullcrusher', 'rope'],
+    kind: 'cardio',
+    ids: [],
     pairing:
-      'Press first. Optional lateral raise ↔ rope pushdown after skull crushers. Start skull crushers light.',
-    cardio: treadmill,
+      'No lifting sets today. Record actual cardio minutes, equipment, effort and any mobility performed.',
+    cardio:
+      '5 min easy warm-up, 30–40 min treadmill at conversational effort (RPE 3–4/10), then 5 min cool-down. Start near 30 min. Optional 5–10 min comfortable mobility. Keep incline gentle after Wednesday legs. From week 3, only if recovered, replace up to 10 min of treadmill with easy SkiErg, light sled push/rope-pull sled, battle ropes, kettlebell carries or a taught slam-rated ball drill, RPE ≤5/10. Choose ONE; no all-out circuit.',
   },
-  pullB: {
-    name: 'Pull B · cross-body hammer curls',
+  upper: {
+    name: 'Upper · chest, back, delts & arms',
     day: 'Friday',
-    ids: ['lat', 'row', 'rear', 'shrug', 'cabley', 'preacher', 'crosshammer'],
+    kind: 'lifting',
+    ids: ['incline', 'row', 'lat', 'lateral', 'rear', 'preacher', 'overhead', 'crosshammer'],
     pairing:
-      'Pulldown and row first. Optional light cable Y-raise ↔ preacher curl after shrugs. Log both sides of cross-body curls.',
-    cardio: 'No required finisher. Save grip and back recovery for Saturday RDLs.',
+      'Press, row and pulldown first. Optional preacher curl ↔ overhead extension; rear-delt fly ↔ cross-body hammer curl. Three rounds per pair. Allow 85–110 min including warm-up; stop within 120 min.',
+    cardio: 'No required finisher. Preserve recovery for Saturday lower.',
   },
-  legsB: {
-    name: 'Legs B · posterior chain, abs & forearms',
+  lower: {
+    name: 'Lower · posterior chain, abs & forearms',
     day: 'Saturday',
+    kind: 'lifting',
     ids: ['rdl', 'legpress', 'legcurl', 'calfseat', 'kneeraise', 'reversewrist'],
     pairing:
-      'RDL and leg press as straight sets; wrist extensions last. Use straps on RDL only if trained to use them and grip is limiting.',
-    cardio:
-      'After lifting: easy treadmill 10–15 min. From week 3, if recovered, optionally SUBSTITUTE 6 rounds of 30 sec moderate work + 90 sec easy recovery on ONE: SkiErg, light sled push/rope-pull sled, battle ropes, light kettlebell carry, or slam-rated weighted-ball slams. RPE ≤6/10, no all-out efforts. Week 7: easy walking only.',
+      'RDL and leg press as straight sets. Wrist extensions last. Use familiar lifting straps if grip limits RDL after Friday upper.',
+    cardio: 'No required finisher. Comfortable walking; Sunday is rest.',
   },
 };
 export function planFor(version = PLAN_VERSION) {
   if (version === LEGACY_PLAN.version) return LEGACY_PLAN;
   if (version === PREVIOUS_PLAN.version) return PREVIOUS_PLAN;
   if (version === R3_PLAN.version) return R3_PLAN;
+  if (version === R4_PLAN.version) return R4_PLAN;
   if (version === PLAN_VERSION)
     return { version: PLAN_VERSION, exercises: EXERCISES, templates: TEMPLATES, arms: ARMS };
   throw Error('Unsupported training revision. Preserve your backup and update the app.');
@@ -137,8 +78,15 @@ export function exerciseDefinition(id, version = PLAN_VERSION) {
   return planFor(version).exercises[id];
 }
 export function sessionInstructions(s) {
+  if (isCardio(s))
+    return (
+      'Cardio day: no lifting sets. Keep effort conversational; record minutes and equipment. ' +
+      (s.week === 7
+        ? 'Deload: 20–30 min easy walking only.'
+        : 'Gym window 07:00–09:00; finish when the session is done.')
+    );
   if ((s.planVersion || LEGACY_PLAN.version) !== PLAN_VERSION)
-    return 'Earlier prescription: saved exercises, reps and set counts are preserved. The six-day PPL plan applies to new sessions only.';
+    return 'Earlier prescription: saved exercises, reps and set counts are preserved. New sessions use five lifting days plus Thursday cardio.';
   if (s.week === 7)
     return 'Deload: 2 working sets per exercise, lighter loads and 4–5 RIR. Easy walking only; no conditioning intervals.';
   return (
@@ -151,12 +99,14 @@ export function sessionCardio(s) {
   if ((s.planVersion || LEGACY_PLAN.version) !== PLAN_VERSION)
     return 'Earlier workout: record only the cardio actually performed.';
   return s.week === 7
-    ? 'Easy walking only; no conditioning intervals.'
+    ? isCardio(s)
+      ? '20–30 min easy walking. No intervals; mobility is optional.'
+      : 'Easy walking only; no conditioning intervals.'
     : TEMPLATES[s.template].cardio;
 }
 export function exerciseRir(s, id) {
   if (s.week === 7) return '4–5';
-  if ((s.planVersion || LEGACY_PLAN.version) !== PLAN_VERSION)
+  if (![PLAN_VERSION, R4_PLAN.version].includes(s.planVersion))
     return s.week === 1 ? '3–4' : s.week === 2 ? '3' : '2–3';
   if (s.week === 1) return '3';
   if (s.week === 2) return '2–3';
@@ -202,7 +152,7 @@ export function monday(date) {
 }
 export function recommendedTemplate(date) {
   return (
-    { 1: 'pushA', 2: 'pullA', 3: 'legsA', 4: 'pushB', 5: 'pullB', 6: 'legsB' }[
+    { 1: 'push', 2: 'pull', 3: 'legs', 4: 'cardio', 5: 'upper', 6: 'lower' }[
       new Date(date + 'T12:00:00').getDay()
     ] || ''
   );
@@ -238,7 +188,8 @@ export function createSession(date, template, week = 1, planVersion = PLAN_VERSI
     throw Error('Choose a valid date, workout and week.');
   const exercises = plan.templates[template].ids.map((id) => {
     const e = plan.exercises[id];
-    let count = planVersion === PLAN_VERSION && week === 7 ? 2 : e.sets;
+    let count =
+      [PLAN_VERSION, R4_PLAN.version].includes(planVersion) && week === 7 ? 2 : e.sets;
     if (planVersion === LEGACY_PLAN.version) {
       if (id === 'legcurl' && template === 'lowerB') count = 2;
       if (week === 7 && !plan.arms.includes(id)) count = count >= 3 ? 2 : 1;
@@ -301,6 +252,25 @@ export function setValid(set, e) {
     numberIn(set.rir, 0, 10) &&
     (!uni || (numberIn(set.right, 1, 200, true) && numberIn(set.rirRight, 0, 10)))
   );
+}
+export function isCardio(s) {
+  return planFor(s.planVersion || LEGACY_PLAN.version).templates[s.template].kind === 'cardio';
+}
+export function cardioValid(s) {
+  return (
+    isCardio(s) &&
+    numberIn(s.duration, 1, 180) &&
+    typeof s.cardio === 'string' &&
+    s.cardio.trim().length > 0
+  );
+}
+export function sessionActivity(s) {
+  if (isCardio(s)) return 'Cardio · ' + (s.duration || '—') + ' min';
+  const p = progress(s);
+  return p.done + '/' + p.total + ' sets';
+}
+export function sessionHasActivity(s) {
+  return isCardio(s) ? s.status === 'finished' && cardioValid(s) : progress(s).done > 0;
 }
 export function progress(s) {
   return {
@@ -405,15 +375,27 @@ export function weeklySummary(state, date) {
       sessions.length +
       '; marked finished: ' +
       sessions.filter((s) => s.status === 'finished').length +
-      '; current target: 6/week (do not make up completed days during the transition)',
+      '; current target: 5 lifting + 1 cardio/week (do not repeat completed days during the transition)',
+    'Finished lifting sessions: ' +
+      sessions.filter((s) => !isCardio(s) && s.status === 'finished').length +
+      '/5; finished cardio sessions: ' +
+      sessions.filter((s) => isCardio(s) && s.status === 'finished' && cardioValid(s)).length +
+      '/1; cardio-session minutes logged: ' +
+      sessions.filter((s) => cardioValid(s)).reduce((n, s) => n + Number(s.duration), 0),
     'Completed working sets: ' +
       sessions.reduce((n, s) => n + progress(s).done, 0) +
       ' / ' +
       sessions.reduce((n, s) => n + progress(s).total, 0) +
       ' planned in recorded sessions',
-    'Current PPL templates not logged (older workouts stay under their original names): ' +
+    'Current templates not logged (older workouts stay under their original names): ' +
       (Object.keys(TEMPLATES)
-        .filter((t) => !sessions.some((s) => s.template === t && progress(s).done > 0))
+        .filter(
+          (t) =>
+            !sessions.some(
+              (s) =>
+                s.template === t && s.planVersion === PLAN_VERSION && sessionHasActivity(s),
+            ),
+        )
         .map((t) => TEMPLATES[t].name)
         .join(', ') || 'none'),
     'Unilateral sets count once after both sides. Warm-ups are not included.',
@@ -446,10 +428,8 @@ export function weeklySummary(state, date) {
         (s.planVersion || LEGACY_PLAN.version),
       'Status: ' +
         s.status +
-        '; sets ' +
-        p.done +
-        '/' +
-        p.total +
+        '; activity ' +
+        sessionActivity(s) +
         '; duration ' +
         (s.duration || 'not logged') +
         ' min; pain: ' +
@@ -542,6 +522,8 @@ export function validateState(data) {
       !Number.isFinite(Date.parse(s.updatedAt))
     )
       throw Error('Invalid workout notes/date.');
+    if (isCardio(s) && s.status === 'finished' && !cardioValid(s))
+      throw Error('Finished cardio requires 1–180 minutes and a description of activity.');
     for (let i = 0; i < s.exercises.length; i++) {
       const e = s.exercises[i],
         ref = expected.exercises[i];

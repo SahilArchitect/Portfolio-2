@@ -5,6 +5,10 @@ import {
   exerciseDefinition,
   exerciseRir,
   sessionInstructions,
+  isCardio,
+  cardioValid,
+  sessionActivity,
+  sessionHasActivity,
   sessionCardio,
   sessionName,
   TEMPLATES,
@@ -78,6 +82,7 @@ function save() {
   }
 }
 function touch(s) {
+  if (isCardio(s) && s.status === 'finished' && !cardioValid(s)) s.status = 'draft';
   s.updatedAt = new Date().toISOString();
   save();
 }
@@ -222,8 +227,11 @@ function renderHome() {
     '</strong><small>latest kg' +
     (weight ? ' · ' + esc(weight.date.slice(5)) : '') +
     '</small></div><div class="stat"><strong>' +
-    weekSessions.filter((s) => s.status === 'finished').length +
-    ' / 6</strong><small>sessions this week</small></div><div class="stat"><strong>' +
+    weekSessions.filter((s) => !isCardio(s) && s.status === 'finished').length +
+    '/5</strong><small>lifts · ' +
+    weekSessions.filter((s) => isCardio(s) && s.status === 'finished' && cardioValid(s))
+      .length +
+    '/1 cardio finished</small></div><div class="stat"><strong>' +
     weekSessions.reduce((n, s) => n + progress(s).done, 0) +
     '</strong><small>working sets logged</small></div></div>' +
     '<div class="weekstrip">' +
@@ -232,13 +240,17 @@ function renderHome() {
       return (
         '<div class="day' +
         (d === today ? ' active' : '') +
-        (state.sessions.some((s) => s.date === d && progress(s).done) ? ' trained' : '') +
+        (state.sessions.some((s) => s.date === d && sessionHasActivity(s)) ? ' trained' : '') +
         '">' +
         ['M', 'T', 'W', 'T', 'F', 'S', 'S'][i] +
         '<strong>' +
         Number(d.slice(8)) +
         '</strong>' +
-        (recommendedTemplate(d) ? 'LIFT' : 'REST') +
+        (recommendedTemplate(d)
+          ? TEMPLATES[recommendedTemplate(d)].kind === 'cardio'
+            ? 'CARDIO'
+            : 'LIFT'
+          : 'REST') +
         '</div>'
       );
     }).join('') +
@@ -255,19 +267,17 @@ function renderHome() {
               '</small><strong>' +
               esc(sessionName(s)) +
               '</strong>' +
-              progress(s).done +
-              '/' +
-              progress(s).total +
-              ' sets · tap to resume or edit</button>',
+              esc(sessionActivity(s)) +
+              ' · tap to resume or edit</button>',
           )
           .join('')
       : '') +
-    '<section class="card"><h2>Open a workout</h2><p class="subtle">Six-day PPL applies to new workouts. Resume earlier workouts from History; do not repeat completed days when changing plans.</p><form id="start-form">' +
+    '<section class="card"><h2>Open a workout</h2><p class="subtle">Five lifting days plus Thursday cardio apply to new workouts. Resume earlier workouts from History; do not repeat completed days when changing plans.</p><form id="start-form">' +
     field('Workout date', 'workout-date', today, 'date', 'required') +
     '<div class="grid"><label>Session<select id="template" required>' +
     options(
       Object.fromEntries(Object.entries(TEMPLATES).map(([id, t]) => [id, t.name])),
-      rec || 'pushA',
+      rec || 'push',
     ) +
     '</select></label><label>Training week<select id="week">' +
     options(
@@ -452,7 +462,7 @@ function exerciseCard(e, i, s) {
 function updateProgress(s) {
   const p = progress(s);
   $('#session-progress').textContent = p.done + ' / ' + p.total + ' sets';
-  $('#progress-bar').style.width = (100 * p.done) / p.total + '%';
+  $('#progress-bar').style.width = (p.total ? (100 * p.done) / p.total : 0) + '%';
   s.exercises.forEach((e, i) => {
     $('#count-' + i).textContent =
       e.sets.filter((x) => x.done && setValid(x, e)).length + '/' + e.sets.length;
@@ -474,15 +484,22 @@ function renderSession() {
     (s.week === 7 ? ' · DELOAD' : '') +
     '</div><h1>' +
     esc(sessionName(s)) +
-    '</h1><p class="subtle">Only working sets go here. RIR means clean reps you could still do. Tap the circle after a complete set.</p><div class="hint">' +
+    '</h1><p class="subtle">' +
+    (isCardio(s)
+      ? 'Record your actual cardio duration, equipment and effort.'
+      : 'Only working sets go here. RIR means clean reps you could still do. Tap the circle after a complete set.') +
+    '</p><div class="hint">' +
     esc(sessionInstructions(s)) +
-    '</div><div class="sticky"><div class="row"><h2 id="session-progress">' +
-    p.done +
-    ' / ' +
-    p.total +
-    ' sets</h2><button data-rest="90">90s rest</button></div><div class="progress"><span id="progress-bar" style="width:' +
-    (p.done / p.total) * 100 +
-    '%"></span></div></div>' +
+    '</div>' +
+    (isCardio(s)
+      ? ''
+      : '<div class="sticky"><div class="row"><h2 id="session-progress">' +
+        p.done +
+        ' / ' +
+        p.total +
+        ' sets</h2><button data-rest="90">90s rest</button></div><div class="progress"><span id="progress-bar" style="width:' +
+        (p.total ? (p.done / p.total) * 100 : 0) +
+        '%"></span></div></div>') +
     s.exercises.map((e, i) => exerciseCard(e, i, s)).join('') +
     '<section class="card"><h2>Cardio</h2><p class="subtle">' +
     esc(sessionCardio(s)) +
@@ -491,11 +508,13 @@ function renderSession() {
     '</textarea></label><p class="subtle">Log minutes, equipment, effort and any load or rounds. Cardio is separate from working-set totals.</p></section>' +
     '<section class="card"><h2>Session reflection</h2><div class="grid">' +
     field(
-      'Duration · minutes',
+      isCardio(s) ? 'Cardio duration · minutes' : 'Duration · minutes',
       'duration',
       s.duration,
       'number',
-      'min="0" max="500" step="1" inputmode="numeric"',
+      isCardio(s)
+        ? 'min="1" max="180" step="1" inputmode="numeric"'
+        : 'min="0" max="500" step="1" inputmode="numeric"',
     ) +
     '<label>Joint discomfort<select id="pain">' +
     options(
@@ -613,6 +632,10 @@ function renderSession() {
     touch(s);
   };
   $('#finish').onclick = () => {
+    if (isCardio(s) && !cardioValid(s)) {
+      toast('Enter 1–180 cardio minutes and describe the activity before finishing.');
+      return;
+    }
     const p = progress(s);
     if (
       p.done < p.total &&
@@ -651,10 +674,7 @@ function renderHistory() {
           '</span></div><strong>' +
           esc(sessionName(s)) +
           '</strong><span class="subtle">' +
-          p.done +
-          '/' +
-          p.total +
-          ' sets' +
+          esc(sessionActivity(s)) +
           (s.pain !== 'none' ? ' · joint discomfort noted' : '') +
           '</span></button>'
         );
@@ -735,7 +755,7 @@ function renderSettings() {
     '<p class="subtle" style="margin:14px 0 0">Logs are stored in this browser on this device. Clearing website data, private browsing, switching app addresses or losing the phone can remove access. There is no automatic cloud sync.</p></section>' +
     '<section class="card"><h2>Restore a backup</h2><p class="subtle">Choose a Trident JSON file. You will review its counts before restoring. Matching sessions/check-ins use the newer edit; other entries are retained.</p><input id="import-file" type="file" accept=".json,application/json" aria-label="Choose Trident backup"><div id="import-preview"></div></section>' +
     '<section class="card"><h2>On your iPhone</h2><ol><li>Open the app in Safari.</li><li>Tap Share, then Add to Home Screen.</li><li>Open it from that icon and use that same place for logging.</li><li>Open once online before relying on offline access.</li></ol><p class="subtle">Offline readiness: <strong id="offline-status">checking…</strong>. Rest timers catch up after you unlock your phone; there are no background alarms.</p></section>' +
-    '<section class="card"><h2>How to log accurately</h2><p><strong>kg:</strong> choose per dumbbell, total bar + plates, machine stack, assistance or bodyweight. Less assistance means a harder rep.</p><p><strong>RIR:</strong> clean reps still available. A set at 10 reps with 2 RIR means you could likely do 12 clean reps.</p><p><strong>Unilateral lifts:</strong> enter both sides, including RIR. One logged set represents the pair. Note unequal loads.</p><p><strong>Equipment:</strong> record your machine or substitution. Numbers from different machines are not automatically comparable.</p><p><strong>Week 7:</strong> choose it when starting a session; new PPL sessions use 2 working sets per exercise, lighter loads and 4–5 RIR. Easy walking only. Older sessions retain their original prescription.</p><p><strong>Next weights:</strong> use the weekly export for coaching. “Use last weights” only copies your record; it does not prescribe an increase.</p></section><footer>TRIDENT FORGE · plan ' +
+    '<section class="card"><h2>How to log accurately</h2><p><strong>kg:</strong> choose per dumbbell, total bar + plates, machine stack, assistance or bodyweight. Less assistance means a harder rep.</p><p><strong>RIR:</strong> clean reps still available. A set at 10 reps with 2 RIR means you could likely do 12 clean reps.</p><p><strong>Unilateral lifts:</strong> enter both sides, including RIR. One logged set represents the pair. Note unequal loads.</p><p><strong>Equipment:</strong> record your machine or substitution. Numbers from different machines are not automatically comparable.</p><p><strong>Week 7:</strong> choose it when starting a session; new lifting sessions use 2 working sets per exercise, lighter loads and 4–5 RIR. Thursday cardio is 20–30 minutes of easy walking. Older sessions retain their original prescription.</p><p><strong>Next weights:</strong> use the weekly export for coaching. “Use last weights” only copies your record; it does not prescribe an increase.</p></section><footer>TRIDENT FORGE · plan ' +
     PLAN_VERSION +
     '<br>No analytics. No workout data is sent to a server by this app.<br>Source and operating guide are in your fitness project.</footer>';
   $('#backup').onclick = async () => {
