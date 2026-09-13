@@ -6,6 +6,8 @@ import {
   exerciseRir,
   sessionInstructions,
   isCardio,
+  requiresCardio,
+  isLifting,
   cardioValid,
   sessionActivity,
   sessionHasActivity,
@@ -82,7 +84,7 @@ function save() {
   }
 }
 function touch(s) {
-  if (isCardio(s) && s.status === 'finished' && !cardioValid(s)) s.status = 'draft';
+  if (requiresCardio(s) && s.status === 'finished' && !cardioValid(s)) s.status = 'draft';
   s.updatedAt = new Date().toISOString();
   save();
 }
@@ -227,11 +229,11 @@ function renderHome() {
     '</strong><small>latest kg' +
     (weight ? ' · ' + esc(weight.date.slice(5)) : '') +
     '</small></div><div class="stat"><strong>' +
-    weekSessions.filter((s) => !isCardio(s) && s.status === 'finished').length +
-    '/5</strong><small>lifts · ' +
-    weekSessions.filter((s) => isCardio(s) && s.status === 'finished' && cardioValid(s))
+    weekSessions.filter((s) => isLifting(s) && s.status === 'finished').length +
+    '/6</strong><small>lifting exposures · ' +
+    weekSessions.filter((s) => requiresCardio(s) && s.status === 'finished' && cardioValid(s))
       .length +
-    '/1 cardio finished</small></div><div class="stat"><strong>' +
+    '/1 cardio dose finished</small></div><div class="stat"><strong>' +
     weekSessions.reduce((n, s) => n + progress(s).done, 0) +
     '</strong><small>working sets logged</small></div></div>' +
     '<div class="weekstrip">' +
@@ -249,6 +251,8 @@ function renderHome() {
         (recommendedTemplate(d)
           ? TEMPLATES[recommendedTemplate(d)].kind === 'cardio'
             ? 'CARDIO'
+            : TEMPLATES[recommendedTemplate(d)].kind === 'hybrid'
+              ? 'BOTH'
             : 'LIFT'
           : 'REST') +
         '</div>'
@@ -272,7 +276,7 @@ function renderHome() {
           )
           .join('')
       : '') +
-    '<section class="card"><h2>Open a workout</h2><p class="subtle">Five lifting days plus Thursday cardio apply to new workouts. Resume earlier workouts from History; do not repeat completed days when changing plans.</p><form id="start-form">' +
+    '<section class="card"><h2>Open a workout</h2><p class="subtle">Six lifting exposures apply to new workouts; Thursday combines arms with the prescribed cardio dose. Resume earlier workouts from History; do not repeat completed days when changing plans.</p><form id="start-form">' +
     field('Workout date', 'workout-date', today, 'date', 'required') +
     '<div class="grid"><label>Session<select id="template" required>' +
     options(
@@ -475,7 +479,8 @@ function renderSession() {
     render();
     return;
   }
-  const p = progress(s);
+  const p = progress(s),
+    hybrid = requiresCardio(s) && !isCardio(s);
   $('#app').innerHTML =
     '<button class="back" id="back">← Workout overview</button><div class="eyebrow">' +
     esc(dateLabel(s.date)) +
@@ -487,7 +492,9 @@ function renderSession() {
     '</h1><p class="subtle">' +
     (isCardio(s)
       ? 'Record your actual cardio duration, equipment and effort.'
-      : 'Only working sets go here. RIR means clean reps you could still do. Tap the circle after a complete set.') +
+      : hybrid
+        ? 'Log the arm, forearm and lower-trap sets plus your actual cardio dose. RIR means clean reps you could still do.'
+        : 'Only working sets go here. RIR means clean reps you could still do. Tap the circle after a complete set.') +
     '</p><div class="hint">' +
     esc(sessionInstructions(s)) +
     '</div>' +
@@ -503,12 +510,22 @@ function renderSession() {
     s.exercises.map((e, i) => exerciseCard(e, i, s)).join('') +
     '<section class="card"><h2>Cardio</h2><p class="subtle">' +
     esc(sessionCardio(s)) +
-    '</p><label>Cardio actually performed<textarea id="session-cardio" maxlength="3000" placeholder="e.g. treadmill 20 min, 4.5 km/h, 4% incline, RPE 4. Or write skipped + reason.">' +
+    '</p>' +
+    (hybrid
+      ? field(
+          'Cardio duration · minutes',
+          'cardio-duration',
+          s.cardioDuration,
+          'number',
+          'min="1" max="180" step="1" inputmode="numeric"',
+        )
+      : '') +
+    '<label>Cardio actually performed<textarea id="session-cardio" maxlength="3000" placeholder="e.g. treadmill 20 min, 4.5 km/h, 4% incline, RPE 4. Or write skipped + reason.">' +
     esc(s.cardio || '') +
     '</textarea></label><p class="subtle">Log minutes, equipment, effort and any load or rounds. Cardio is separate from working-set totals.</p></section>' +
     '<section class="card"><h2>Session reflection</h2><div class="grid">' +
     field(
-      isCardio(s) ? 'Cardio duration · minutes' : 'Duration · minutes',
+      isCardio(s) ? 'Cardio duration · minutes' : 'Total session duration · minutes',
       'duration',
       s.duration,
       'number',
@@ -615,6 +632,11 @@ function renderSession() {
     s.duration = e.target.value;
     touch(s);
   };
+  if (hybrid)
+    $('#cardio-duration').oninput = (e) => {
+      s.cardioDuration = e.target.value;
+      touch(s);
+    };
   $('#pain').onchange = (e) => {
     s.pain = e.target.value;
     touch(s);
@@ -632,7 +654,7 @@ function renderSession() {
     touch(s);
   };
   $('#finish').onclick = () => {
-    if (isCardio(s) && !cardioValid(s)) {
+    if (requiresCardio(s) && !cardioValid(s)) {
       toast('Enter 1–180 cardio minutes and describe the activity before finishing.');
       return;
     }
