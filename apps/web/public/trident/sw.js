@@ -1,4 +1,4 @@
-const CACHE = 'trident-shell-v6';
+const CACHE = 'trident-shell-v7';
 const ASSETS = [
   './index.html',
   './style.css',
@@ -7,6 +7,7 @@ const ASSETS = [
   './previous-plan.mjs',
   './r3-plan.mjs',
   './r4-plan.mjs',
+  './r5-plan.mjs',
   './app.mjs',
   './manifest.webmanifest',
   './icon.svg',
