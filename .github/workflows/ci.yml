@@ -14,16 +14,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
-      - name: Enable pnpm
-        run: |
-          corepack enable
-          corepack prepare pnpm@9.12.0 --activate
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Trident tracker tests
+        run: pnpm --filter @engine-room/web test:trident
       - name: Format check
         run: pnpm format:check
       - name: Lint
