@@ -7,6 +7,7 @@ import {
   sessionInstructions,
   isCardio,
   requiresCardio,
+  cardioLogRequired,
   isLifting,
   cardioValid,
   sessionActivity,
@@ -36,7 +37,14 @@ const $ = (s) => document.querySelector(s),
   esc = (s) =>
     String(s ?? '').replace(
       /[&<>"']/g,
-      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c],
+      (c) =>
+        ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;',
+        })[c],
     );
 let state,
   blocked = false,
@@ -48,9 +56,7 @@ let state,
   toastTimeout;
 try {
   rawBackup = localStorage.getItem(STORAGE_KEY) || '';
-  state = rawBackup
-    ? validateState(JSON.parse(rawBackup))
-    : initialStateFromHash(location.hash);
+  state = rawBackup ? validateState(JSON.parse(rawBackup)) : initialStateFromHash(location.hash);
   if (location.hash.startsWith('#weight='))
     history.replaceState(null, '', location.pathname + location.search);
 } catch {
@@ -77,14 +83,12 @@ function save() {
   } catch {
     $('#save-status').textContent = 'NOT SAVED · export backup';
     $('#save-status').classList.add('error');
-    toast(
-      'Storage is unavailable or full. Export a backup now; current edits are only in memory.',
-    );
+    toast('Storage is unavailable or full. Export a backup now; current edits are only in memory.');
     return false;
   }
 }
 function touch(s) {
-  if (requiresCardio(s) && s.status === 'finished' && !cardioValid(s)) s.status = 'draft';
+  if (cardioLogRequired(s) && s.status === 'finished' && !cardioValid(s)) s.status = 'draft';
   s.updatedAt = new Date().toISOString();
   save();
 }
@@ -231,9 +235,8 @@ function renderHome() {
     '</small></div><div class="stat"><strong>' +
     weekSessions.filter((s) => isLifting(s) && s.status === 'finished').length +
     '/6</strong><small>lifting exposures · ' +
-    weekSessions.filter((s) => requiresCardio(s) && s.status === 'finished' && cardioValid(s))
-      .length +
-    '/1 cardio dose finished</small></div><div class="stat"><strong>' +
+    weekSessions.filter((s) => s.status === 'finished' && cardioValid(s)).length +
+    ' cardio bouts logged · 2 planned</small></div><div class="stat"><strong>' +
     weekSessions.reduce((n, s) => n + progress(s).done, 0) +
     '</strong><small>working sets logged</small></div></div>' +
     '<div class="weekstrip">' +
@@ -253,7 +256,7 @@ function renderHome() {
             ? 'CARDIO'
             : TEMPLATES[recommendedTemplate(d)].kind === 'hybrid'
               ? 'BOTH'
-            : 'LIFT'
+              : 'LIFT'
           : 'REST') +
         '</div>'
       );
@@ -276,12 +279,12 @@ function renderHome() {
           )
           .join('')
       : '') +
-    '<section class="card"><h2>Open a workout</h2><p class="subtle">Six lifting exposures apply to new workouts; Thursday combines arms with the prescribed cardio dose. Resume earlier workouts from History; do not repeat completed days when changing plans.</p><form id="start-form">' +
+    '<section class="card"><h2>Open a workout</h2><p class="subtle">Push/Pull/Legs twice weekly: 82 working sets, with easy cardio after Monday and Thursday push sessions. Most sessions take 60–95 minutes of lifting; 120 minutes is the total ceiling. Resume earlier workouts from History; do not repeat completed days when changing plans.</p><form id="start-form">' +
     field('Workout date', 'workout-date', today, 'date', 'required') +
     '<div class="grid"><label>Session<select id="template" required>' +
     options(
       Object.fromEntries(Object.entries(TEMPLATES).map(([id, t]) => [id, t.name])),
-      rec || 'push',
+      rec || 'pushA',
     ) +
     '</select></label><label>Training week<select id="week">' +
     options(
@@ -373,9 +376,7 @@ function exerciseCard(e, i, s) {
           .map((x) => formatSet(x, previous.exercise))
           .join(' · '),
       ) +
-      (previous.exercise.variation
-        ? '<br>Equipment: ' + esc(previous.exercise.variation)
-        : '') +
+      (previous.exercise.variation ? '<br>Equipment: ' + esc(previous.exercise.variation) : '') +
       '<br><button data-copy="' +
       i +
       '">Use last weights only</button></div>'
@@ -480,7 +481,8 @@ function renderSession() {
     return;
   }
   const p = progress(s),
-    hybrid = requiresCardio(s) && !isCardio(s);
+    hybrid = requiresCardio(s) && !isCardio(s),
+    cardioMinutes = hybrid || s.planVersion === PLAN_VERSION;
   $('#app').innerHTML =
     '<button class="back" id="back">← Workout overview</button><div class="eyebrow">' +
     esc(dateLabel(s.date)) +
@@ -511,13 +513,15 @@ function renderSession() {
     '<section class="card"><h2>Cardio</h2><p class="subtle">' +
     esc(sessionCardio(s)) +
     '</p>' +
-    (hybrid
+    (cardioMinutes
       ? field(
           'Cardio duration · minutes',
           'cardio-duration',
           s.cardioDuration,
           'number',
-          'min="1" max="180" step="1" inputmode="numeric"',
+          s.planVersion === PLAN_VERSION
+            ? 'min="0" max="120" step="1" inputmode="numeric"'
+            : 'min="1" max="180" step="1" inputmode="numeric"',
         )
       : '') +
     '<label>Cardio actually performed<textarea id="session-cardio" maxlength="3000" placeholder="e.g. treadmill 20 min, 4.5 km/h, 4% incline, RPE 4. Or write skipped + reason.">' +
@@ -535,7 +539,11 @@ function renderSession() {
     ) +
     '<label>Joint discomfort<select id="pain">' +
     options(
-      { none: 'None', mild: 'Mild / worth reviewing', stop: 'Stopped or changed exercise' },
+      {
+        none: 'None',
+        mild: 'Mild / worth reviewing',
+        stop: 'Stopped or changed exercise',
+      },
       s.pain,
     ) +
     '</select></label></div><label>Notes for your weekly review<textarea id="session-notes" maxlength="5000" placeholder="Energy, difficult lifts, skipped work, why you stopped…">' +
@@ -632,7 +640,7 @@ function renderSession() {
     s.duration = e.target.value;
     touch(s);
   };
-  if (hybrid)
+  if (cardioMinutes)
     $('#cardio-duration').oninput = (e) => {
       s.cardioDuration = e.target.value;
       touch(s);
@@ -654,8 +662,12 @@ function renderSession() {
     touch(s);
   };
   $('#finish').onclick = () => {
-    if (requiresCardio(s) && !cardioValid(s)) {
-      toast('Enter 1–180 cardio minutes and describe the activity before finishing.');
+    if (cardioLogRequired(s) && !cardioValid(s)) {
+      toast(
+        s.planVersion === PLAN_VERSION
+          ? 'Describe your logged cardio and use 1–120 minutes, or log 0 if skipped.'
+          : 'Enter 1–180 cardio minutes and describe the activity before finishing.',
+      );
       return;
     }
     const p = progress(s);
@@ -746,8 +758,7 @@ function renderReview() {
       try {
         await navigator.share({ title: 'Trident weekly review', text: report });
       } catch (e) {
-        if (e.name !== 'AbortError')
-          toast('Share was unavailable. Use Copy text or Save summary.');
+        if (e.name !== 'AbortError') toast('Share was unavailable. Use Copy text or Save summary.');
       }
     } else $('#copy-report').click();
   };
@@ -777,7 +788,7 @@ function renderSettings() {
     '<p class="subtle" style="margin:14px 0 0">Logs are stored in this browser on this device. Clearing website data, private browsing, switching app addresses or losing the phone can remove access. There is no automatic cloud sync.</p></section>' +
     '<section class="card"><h2>Restore a backup</h2><p class="subtle">Choose a Trident JSON file. You will review its counts before restoring. Matching sessions/check-ins use the newer edit; other entries are retained.</p><input id="import-file" type="file" accept=".json,application/json" aria-label="Choose Trident backup"><div id="import-preview"></div></section>' +
     '<section class="card"><h2>On your iPhone</h2><ol><li>Open the app in Safari.</li><li>Tap Share, then Add to Home Screen.</li><li>Open it from that icon and use that same place for logging.</li><li>Open once online before relying on offline access.</li></ol><p class="subtle">Offline readiness: <strong id="offline-status">checking…</strong>. Rest timers catch up after you unlock your phone; there are no background alarms.</p></section>' +
-    '<section class="card"><h2>How to log accurately</h2><p><strong>kg:</strong> choose per dumbbell, total bar + plates, machine stack, assistance or bodyweight. Less assistance means a harder rep.</p><p><strong>RIR:</strong> clean reps still available. A set at 10 reps with 2 RIR means you could likely do 12 clean reps.</p><p><strong>Unilateral lifts:</strong> enter both sides, including RIR. One logged set represents the pair. Note unequal loads.</p><p><strong>Equipment:</strong> record your machine or substitution. Numbers from different machines are not automatically comparable.</p><p><strong>Week 7:</strong> choose it when starting a session; new lifting sessions use 2 working sets per exercise, lighter loads and 4–5 RIR. Thursday cardio is 20–30 minutes of easy walking. Older sessions retain their original prescription.</p><p><strong>Next weights:</strong> use the weekly export for coaching. “Use last weights” only copies your record; it does not prescribe an increase.</p></section><footer>TRIDENT FORGE · plan ' +
+    '<section class="card"><h2>How to log accurately</h2><p><strong>kg:</strong> choose per dumbbell, total bar + plates, machine stack, assistance or bodyweight. Less assistance means a harder rep.</p><p><strong>RIR:</strong> clean reps still available. A set at 10 reps with 2 RIR means you could likely do 12 clean reps.</p><p><strong>Unilateral lifts:</strong> enter both sides, including RIR. One logged set represents the pair. Note unequal loads.</p><p><strong>Equipment:</strong> record your machine or substitution. Numbers from different machines are not automatically comparable.</p><p><strong>Week 7:</strong> choose it when starting a session; new lifting sessions use half the usual sets rounded up (2→1, 3→2, 4→2) at 4–5 RIR. Monday/Thursday cardio is optional 10–15 minutes of easy walking. Older sessions retain their original prescription.</p><p><strong>Progression:</strong> keep the load until every set reaches the top of its rep range at the intended RIR with consistent technique (both sides for unilateral lifts). Then use the smallest available increase. Deloads do not trigger load increases.</p><p><strong>Next weights:</strong> use the weekly export for coaching. “Use last weights” only copies your record; it does not prescribe an increase.</p></section><footer>TRIDENT FORGE · plan ' +
     PLAN_VERSION +
     '<br>No analytics. No workout data is sent to a server by this app.<br>Source and operating guide are in your fitness project.</footer>';
   $('#backup').onclick = async () => {
@@ -874,18 +885,14 @@ $('#timer-close').onclick = () => {
 };
 setInterval(tick, 500);
 document.addEventListener('visibilitychange', tick);
-document
-  .querySelectorAll('[data-tab]')
-  .forEach((b) => (b.onclick = () => setTab(b.dataset.tab)));
+document.querySelectorAll('[data-tab]').forEach((b) => (b.onclick = () => setTab(b.dataset.tab)));
 window.addEventListener('storage', (e) => {
   if (e.key === STORAGE_KEY) {
     rawBackup = e.newValue || '';
     blocked = true;
     $('#save-status').textContent = 'Another tab changed data';
     $('#save-status').classList.add('error');
-    toast(
-      'Another tab changed your log. Reload this tab before editing. Saving here is paused.',
-    );
+    toast('Another tab changed your log. Reload this tab before editing. Saving here is paused.');
   }
 });
 if (!blocked) save();
