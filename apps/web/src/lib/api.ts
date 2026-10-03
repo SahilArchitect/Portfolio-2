@@ -300,10 +300,16 @@ function filterFallbackPosts(params?: { q?: string; semantic?: string; tag?: str
 }
 
 export async function fetchProjects(): Promise<ProjectView[]> {
+  const localProjects = fallbackProjects.filter((project) => project.slug === 'stride');
+
   try {
     const data = await apiFetchUnknown('/api/projects?status=published', { revalidate: 60 });
     const projects = arrayItems(data).map((item, index) => normalizeProject(item, index));
-    return projects.length ? projects.sort((a, b) => a.displayOrder - b.displayOrder) : fallbackProjects;
+    if (!projects.length) return fallbackProjects;
+
+    const localSlugs = new Set(localProjects.map((project) => project.slug));
+    return [...localProjects, ...projects.filter((project) => !localSlugs.has(project.slug))]
+      .sort((a, b) => a.displayOrder - b.displayOrder);
   } catch {
     return fallbackProjects;
   }

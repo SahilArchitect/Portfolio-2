@@ -12,7 +12,10 @@ const nextConfig = {
     typedRoutes: true,
   },
   async redirects() {
-    return [{ source: '/trident', destination: '/trident/index.html', permanent: false }];
+    return [
+      { source: '/tracker', destination: '/tracker/index.html', permanent: false },
+      { source: '/trident', destination: '/trident/index.html', permanent: false },
+    ];
   },
   async headers() {
     return [

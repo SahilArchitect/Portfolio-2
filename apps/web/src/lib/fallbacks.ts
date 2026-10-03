@@ -12,6 +12,25 @@ const resumeUrl = '/resume/ai-backend-engineer.pdf';
 
 export const fallbackProjects: ProjectView[] = [
   {
+    id: 'project-stride',
+    slug: 'stride',
+    title: 'Stride',
+    summary:
+      'A local-first study command center for daily schedules, focused sessions, progress analytics, and private browser persistence.',
+    body: `## What it is\n\nStride turns structured Bank Exam and GATE CSE schedules into a focused daily workflow. It combines task planning, a completion calendar, progress analytics, assessments, an error log, and a distraction-free focus timer.\n\n## Architecture\n\nThe application is built with Next.js, React, TypeScript, IndexedDB, and deterministic analytics. It is exported as a static application and deployed with this portfolio while preserving a separate source repository.\n\n## Privacy model\n\nProgress stays in the visitor's browser. Stride has no account system, analytics database, or server-side store. JSON backup and restore make the local-first model portable without silently uploading personal study data.`,
+    role: 'Local-first productivity system',
+    stack: ['Next.js', 'TypeScript', 'IndexedDB', 'Recharts'],
+    status: 'published',
+    displayOrder: 0,
+    coverImageUrl: null,
+    repoUrl: 'https://github.com/SahilArchitect/stride-daily-progress',
+    liveUrl: 'https://www.bysahil.dev/tracker',
+    demoUrl: 'https://www.bysahil.dev/tracker',
+    createdAt: '2026-10-03T00:00:00.000Z',
+    updatedAt: '2026-10-03T00:00:00.000Z',
+    featured: true,
+  },
+  {
     id: 'project-llm-gateway',
     slug: 'llm-gateway',
     title: 'LLM Gateway',
