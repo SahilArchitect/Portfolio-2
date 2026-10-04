@@ -14,7 +14,7 @@ export const NUTRITION_PLAN = {
     {
       "id": "pre-workout",
       "name": "Pre-workout banana",
-      "time": "06:30",
+      "time": "06:20",
       "summary": "One banana before the gym; black coffee if wanted.",
       "portion": "100 g peeled banana",
       "ingredients": [
