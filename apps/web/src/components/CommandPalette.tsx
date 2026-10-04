@@ -16,6 +16,7 @@ import { DownloadIcon, MailIcon, PageIcon, SearchIcon } from './Icons';
 const NAVIGATION_ITEMS = [
   { label: 'Home', href: '/', shortcut: 'G H' },
   { label: 'Work', href: '/work', shortcut: 'G W' },
+  { label: 'Trident Forge', href: 'https://www.bysahil.dev/trident/index.html', shortcut: 'G F' },
   { label: 'Writing', href: '/writing', shortcut: 'G B' },
   { label: 'Now', href: '/now', shortcut: 'G N' },
   { label: 'Traces', href: '/traces', shortcut: 'G T' },

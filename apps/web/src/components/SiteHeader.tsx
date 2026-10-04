@@ -6,6 +6,7 @@ const NAV_ITEMS = [
   { label: 'About', href: '/#about' },
   { label: 'Skills', href: '/#skills' },
   { label: 'Projects', href: '/#projects' },
+  { label: 'Trident Forge', href: 'https://www.bysahil.dev/trident/index.html' },
   { label: 'Timeline', href: '/#experience' },
   { label: 'Target', href: '/#target-role' },
   { label: 'Contact', href: '/#contact' },

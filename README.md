@@ -144,3 +144,19 @@ Trident revision 2026-09-09-r3 adds Friday incline barbell bench press (4×12), 
 Stride is available at **/tracker** and is featured in the home-page Mission Logs. Its source lives in the public [`SahilArchitect/stride-daily-progress`](https://github.com/SahilArchitect/stride-daily-progress) repository.
 
 The static export is committed under `apps/web/public/tracker`. Rebuild and sync it from the Stride repository with `npm run build:portfolio` before deploying portfolio updates. Study progress stays in the browser's IndexedDB and is never sent to the portfolio API.
+
+## Trident Forge web companion (2026-10-04)
+
+Open **https://www.bysahil.dev/trident**. Today, Workout, Nutrition and Progress mirror the native app's navigation, palette, imagery and domain workflows. Workout adds focused exercise logging, comparable exercise history, PR markers, Epley estimates on supported loads, and rest timers. Progress shows direct muscle sets, recorded volume, observed bodyweight trends and daily/weekly DeepSeek reviews. Apple Health, Live Activities and native widgets remain iOS capabilities.
+
+The meal source is the agreed 2026-10-04 Markdown plan in the private fitness project: 1,855 kcal and 132.6 g protein as rounded row totals, targets 1,850 kcal / 130–150 g protein. Carbohydrate and fat values remain unknown. Meal snapshots, workouts, check-ins and coaching reviews export together; historical sessions preserve their original prescription. Browser storage is per device, with no cloud sync.
+
+### Private AI configuration
+
+Set **DEEPSEEK_API_KEY**, **TRIDENT_COACH_TOKEN**, and optionally **DEEPSEEK_MODEL** (default deepseek-flash) as private server environment variables in Vercel, then redeploy. Never prefix these with NEXT_PUBLIC or commit .env files. Enter the private coach access code under Settings → DeepSeek coach; this access code is kept in session storage only. The provider key never enters the browser in server-key mode. The optional personal-key connection holds that key in tab memory only. The same-origin POST /trident-coach proxy transmits selected logs to DeepSeek; it persists no workouts or credentials on the server and returns no secrets.
+
+Automatic daily reviews run after finishing workouts, and a due weekly review runs on the next visit after the previous week ends, once a coach connection exists. The browser cannot perform unattended reviews while closed. Reviews can also be generated manually for selected dates. Load guidance requires all prescribed sets and both unilateral sides at target reps/RIR; pain, deloads and incomplete sets cannot qualify for progression. Exact next loads require the athlete's actual equipment increment, bounded conservatively. Unknown increments are never invented. Assistance decreases for progression.
+
+Split changes require at least twelve finished sessions spanning three weeks with repeated recovery or pain signals. The model must also justify a balanced supported schedule. Apply an offered change from the next Monday; completed and draft sessions retain their original plan. Future exercise hints stay tied to exercise, load basis and equipment, and expire after fourteen days.
+
+Validation: **pnpm --filter @engine-room/web test:trident**. Production build: **pnpm --filter @engine-room/web build**. Mobile and desktop integration checks cover meals, persistence, set logging, coaching rendering, JSON export and layout. Live DeepSeek daily and weekly integration checks use synthetic training fixtures only. Service-worker shell cache is trident-shell-v9; close old tabs and reopen online to activate an update.

@@ -107,6 +107,7 @@ export default async function HomePage() {
   return (
     <main id="content" className="cyber-page">
       <Hero />
+      <div className="mx-auto max-w-6xl px-5 py-6 md:px-10"><a href="/trident/index.html" className="font-mono text-sm text-accent">Open Trident Forge → Strength training, nutrition & DeepSeek coaching</a></div>
       <Divider />
 
       <CyberSection id="about" number="01" title="System Profile">
