@@ -1,3 +1,5 @@
+import { recordBadge, openExerciseHistory } from './analytics.mjs';
+import { renderToday, renderProgress, renderNutrition, mountCoach, coachSettings, coachHint, automaticReviews, scheduledTemplate, scheduleFor } from './companion.mjs';
 import {
   PLAN_VERSION,
   STORAGE_KEY,
@@ -49,7 +51,7 @@ const $ = (s) => document.querySelector(s),
 let state,
   blocked = false,
   rawBackup = '',
-  tab = 'train',
+  tab = 'today',
   activeId = null,
   reviewDate = localDate(),
   timerEnd = 0,
@@ -147,6 +149,8 @@ function render() {
     $('#recover').onclick = () => setTab('settings');
     return;
   }
+  if (tab === 'today') renderToday(state, setTab, save, toast);
+  if (tab === 'nutrition') renderNutrition(state, save, toast);
   if (tab === 'train') activeId ? renderSession() : renderHome();
   if (tab === 'history') renderHistory();
   if (tab === 'review') renderReview();
@@ -209,7 +213,7 @@ function bindCheckin() {
 }
 function renderHome() {
   const today = localDate(),
-    rec = recommendedTemplate(today),
+    rec = scheduledTemplate(state, today),
     weekStart = monday(today);
   const todaySessions = state.sessions.filter((s) => s.date === today),
     weekSessions = state.sessions.filter(
@@ -251,10 +255,10 @@ function renderHome() {
         '<strong>' +
         Number(d.slice(8)) +
         '</strong>' +
-        (recommendedTemplate(d)
-          ? TEMPLATES[recommendedTemplate(d)].kind === 'cardio'
+        (scheduledTemplate(state, d)
+          ? TEMPLATES[scheduledTemplate(state, d)].kind === 'cardio'
             ? 'CARDIO'
-            : TEMPLATES[recommendedTemplate(d)].kind === 'hybrid'
+            : TEMPLATES[scheduledTemplate(state, d)].kind === 'hybrid'
               ? 'BOTH'
               : 'LIFT'
           : 'REST') +
@@ -300,6 +304,10 @@ function renderHome() {
     '<section class="card"><h2>Daily check-in</h2>' +
     checkinForm(today) +
     '</section><p class="subtle">No prescribed starting loads: use your warm-ups to find a weight with the planned reps in reserve. Record your actual working sets.</p>';
+  const planPreview = document.createElement('section');
+  planPreview.className = 'muscle-preview';
+  planPreview.innerHTML = '<div><img src="./art/chest.png" alt="Chest muscle illustration"><span>Push</span></div><div><img src="./art/back.png" alt="Back muscle illustration"><span>Pull</span></div><div><img src="./art/legs.png" alt="Quadriceps muscle illustration"><span>Legs</span></div>';
+  $('#start-form').closest('section').before(planPreview);
   $('#start-form').onsubmit = (e) => {
     e.preventDefault();
     const date = $('#workout-date').value,
@@ -318,7 +326,7 @@ function renderHome() {
     window.scrollTo(0, 0);
   };
   $('#workout-date').onchange = (e) => {
-    const r = recommendedTemplate(e.target.value);
+    const r = scheduledTemplate(state, e.target.value);
     if (r) $('#template').value = r;
   };
   document
@@ -363,6 +371,8 @@ function exerciseCard(e, i, s) {
     ' · ' +
     exerciseRir(s, e.id) +
     ' RIR</p>';
+  text += '<p class="pr-badge" id="pr-'+i+'">'+esc(recordBadge(state,e,s))+'</p><button type="button" data-exercise-history="'+i+'">Exercise history ↗</button>';
+  text += coachHint(state, e, s);
   if (def.cue) text += '<p class="subtle">' + esc(def.cue) + '</p>';
   text += previous
     ? '<div class="last">LAST · ' +
@@ -606,6 +616,7 @@ function renderSession() {
         b.textContent = x.done ? '✓' : '○';
         $('#set-' + ei + '-' + si).classList.toggle('done', x.done);
         updateProgress(s);
+        $('#pr-'+ei).textContent=recordBadge(state,e,s);
       }),
   );
   document.querySelectorAll('[data-copy]').forEach(
@@ -686,7 +697,14 @@ function renderSession() {
     render();
     window.scrollTo(0, 0);
     toast('Session saved. Review or edit it in History.');
+    void automaticReviews(state, save, toast, s);
   };
+  document.querySelectorAll('[data-exercise-history]').forEach(button=>button.onclick=()=>openExerciseHistory(state,s.exercises[Number(button.dataset.exerciseHistory)]));
+  const focusButton=document.createElement('button');focusButton.id='focus-mode';focusButton.className='wide';focusButton.textContent='Enter focused workout mode';
+  $('#app').prepend(focusButton);let focused=false,index=0;
+  const navigation=document.createElement('div');navigation.className='focus-navigation';navigation.hidden=true;navigation.innerHTML='<button id="focus-prev" type="button">← Previous exercise</button><span id="focus-count"></span><button id="focus-next" type="button">Next exercise →</button>';focusButton.after(navigation);
+  const focusDraw=()=>{document.querySelectorAll('.exercise-card').forEach((card,i)=>card.hidden=focused&&i!==index);navigation.hidden=!focused;focusButton.textContent=focused?'Show complete workout':'Enter focused workout mode';$('#focus-count').textContent=(index+1)+' / '+s.exercises.length;$('#focus-prev').disabled=index===0;$('#focus-next').disabled=index===s.exercises.length-1;};
+  focusButton.onclick=()=>{focused=!focused;focusDraw();};$('#focus-prev').onclick=()=>{index=Math.max(0,index-1);focusDraw();};$('#focus-next').onclick=()=>{index=Math.min(s.exercises.length-1,index+1);focusDraw();};
   bindTimers();
 }
 function renderHistory() {
@@ -722,13 +740,15 @@ function renderHistory() {
 function renderReview() {
   const report = weeklySummary(state, reviewDate);
   $('#app').innerHTML =
-    '<div class="eyebrow">LIFT → LOG → REVIEW</div><h1>Your next week<br>starts here.</h1><p class="muted">Send this summary to your coach for specific next-load guidance. It includes actual lifts, prior entries, RIR, missing sets and recovery.</p><div class="card">' +
+    '<div class="eyebrow">LIFT → LOG → REVIEW</div><h1>Your next week<br>starts here.</h1><p class="muted">Your daily and weekly training intelligence. Actual lifts, honest effort, recovery and meals inform the next step.</p><div class="card">' +
     field('Select any date in the review week', 'review-date', reviewDate, 'date') +
     '<div class="row"><button id="prev-week">← Previous</button><span class="subtle">' +
     esc(monday(reviewDate)) +
     '</span><button id="next-week">Next →</button></div></div><div class="grid" style="margin-bottom:12px"><button class="primary" id="share-report">Share summary ↥</button><button id="copy-report">Copy text</button></div><button class="wide" id="download-report">Save summary as a file</button><p class="subtle" style="margin-top:12px">Share or paste this into our chat each week. Save a backup in Backup & help as well.</p><textarea id="report" class="report" aria-label="Weekly coaching summary" readonly>' +
     esc(report) +
-    '</textarea>';
+    '</textarea>' + renderProgress(state, reviewDate) + '<section class="card" id="ai-coach"></section><button id="open-history" class="wide">Workout history →</button>';
+  mountCoach(state, save, toast, reviewDate, $('#ai-coach'));
+  $('#open-history').onclick = () => setTab('history');
   $('#review-date').onchange = (e) => {
     if (e.target.value) {
       reviewDate = e.target.value;
@@ -790,7 +810,11 @@ function renderSettings() {
     '<section class="card"><h2>On your iPhone</h2><ol><li>Open the app in Safari.</li><li>Tap Share, then Add to Home Screen.</li><li>Open it from that icon and use that same place for logging.</li><li>Open once online before relying on offline access.</li></ol><p class="subtle">Offline readiness: <strong id="offline-status">checking…</strong>. Rest timers catch up after you unlock your phone; there are no background alarms.</p></section>' +
     '<section class="card"><h2>How to log accurately</h2><p><strong>kg:</strong> choose per dumbbell, total bar + plates, machine stack, assistance or bodyweight. Less assistance means a harder rep.</p><p><strong>RIR:</strong> clean reps still available. A set at 10 reps with 2 RIR means you could likely do 12 clean reps.</p><p><strong>Unilateral lifts:</strong> enter both sides, including RIR. One logged set represents the pair. Note unequal loads.</p><p><strong>Equipment:</strong> record your machine or substitution. Numbers from different machines are not automatically comparable.</p><p><strong>Week 7:</strong> choose it when starting a session; new lifting sessions use half the usual sets rounded up (2→1, 3→2, 4→2) at 4–5 RIR. Monday/Thursday cardio is optional 10–15 minutes of easy walking. Older sessions retain their original prescription.</p><p><strong>Progression:</strong> keep the load until every set reaches the top of its rep range at the intended RIR with consistent technique (both sides for unilateral lifts). Then use the smallest available increase. Deloads do not trigger load increases.</p><p><strong>Next weights:</strong> use the weekly export for coaching. “Use last weights” only copies your record; it does not prescribe an increase.</p></section><footer>TRIDENT FORGE · plan ' +
     PLAN_VERSION +
-    '<br>No analytics. No workout data is sent to a server by this app.<br>Source and operating guide are in your fitness project.</footer>';
+    '<br>No analytics. AI reviews send your selected training and nutrition records to DeepSeek when enabled.<br>Source and operating guide are in your fitness project.</footer>';
+  const coachPanel = document.createElement('section');
+  coachPanel.className = 'card';
+  $('#app').prepend(coachPanel);
+  coachSettings(state, save, toast, coachPanel);
   $('#backup').onclick = async () => {
     const content = JSON.stringify(state, null, 2),
       name = 'trident-backup-' + localDate() + '.json';
@@ -898,6 +922,7 @@ window.addEventListener('storage', (e) => {
 if (!blocked) save();
 else $('#save-status').textContent = 'Recovery needed';
 render();
+window.addEventListener('focus', () => { if (!blocked) void automaticReviews(state, save, toast); });
 if ('serviceWorker' in navigator && location.protocol !== 'file:')
   navigator.serviceWorker.register('./sw.js').catch(() => {
     if ($('#offline-status')) $('#offline-status').textContent = 'not ready';

@@ -745,6 +745,34 @@ export function validateState(data) {
       throw Error('Invalid check-in in backup.');
     dates.add(c.date);
   }
+  if (data.mealLogs !== undefined) {
+    if (!Array.isArray(data.mealLogs) || data.mealLogs.length > 20000) throw Error('Invalid meal backup.');
+    const mealIDs = new Set();
+    for (const meal of data.mealLogs) {
+      const unique = meal.date + '_' + meal.mealID;
+      if (!meal || !validDate(meal.date) || typeof meal.id !== 'string' || typeof meal.mealID !== 'string' ||
+          typeof meal.name !== 'string' || typeof meal.revision !== 'string' || typeof meal.calories !== 'number' || typeof meal.protein !== 'number' || !numberIn(meal.portion,0.25,3) ||
+          !numberIn(meal.calories,0,10000) || !numberIn(meal.protein,0,1000) || mealIDs.has(unique) || !Number.isFinite(Date.parse(meal.updatedAt))) throw Error('Invalid meal record.');
+      mealIDs.add(unique);
+    }
+  }
+  if (data.coach !== undefined) {
+    if (!data.coach || typeof data.coach !== 'object' || !Array.isArray(data.coach.reviews) || data.coach.reviews.length > 60 ||
+        JSON.stringify(data.coach).length > 500000 || /"(?:apiKey|accessCode|DEEPSEEK_API_KEY)"/.test(JSON.stringify(data.coach))) throw Error('Invalid coaching backup.');
+    for (const review of data.coach.reviews) {
+      if (!review || !['daily','weekly'].includes(review.mode) || !validDate(review.period?.start) || !validDate(review.period?.end) ||
+          typeof review.createdAt !== 'string' || !Number.isFinite(Date.parse(review.createdAt)) ||
+          ['summary','dailyAnalysis','nutrition','recovery'].some(k=>typeof review[k] !== 'string') || !Array.isArray(review.targets) || !review.split || typeof review.split.reason !== 'string') throw Error('Invalid coaching review.');
+    }
+    for (const review of data.coach.reviews) for (const target of review.targets) {
+      if (!target || typeof target.exerciseID !== 'string' || !Object.hasOwn(EXERCISES,target.exerciseID) ||
+          typeof target.name !== 'string' || typeof target.action !== 'string' || !Object.hasOwn(BASES,target.basis) || typeof target.equipment !== 'string' ||
+          !(target.targetLoad === null || (typeof target.targetLoad === 'number' && numberIn(target.targetLoad,0,2000))) ||
+          !numberIn(target.minReps,1,200,true) || !numberIn(target.maxReps,1,200,true)) throw Error('Invalid coaching target.');
+    }
+    const active = data.coach.activeSplit;
+    if (active && (!validDate(active.effectiveDate) || !Array.isArray(active.schedule) || active.schedule.length !== 7 || active.schedule.some(id=>id!==null&&!Object.hasOwn(TEMPLATES,id)))) throw Error('Invalid future split.');
+  }
   return data;
 }
 export function mergeState(local, incoming) {
@@ -761,5 +789,11 @@ export function mergeState(local, incoming) {
     ...local,
     sessions: merge(local.sessions, incoming.sessions, 'id'),
     checkins: merge(local.checkins, incoming.checkins, 'date'),
+    mealLogs: merge((local.mealLogs || []).map(m=>({...m,mergeKey:m.date+'_'+m.mealID})), (incoming.mealLogs || []).map(m=>({...m,mergeKey:m.date+'_'+m.mealID})), 'mergeKey').map(({mergeKey,...m})=>m),
+    coach: (local.coach || incoming.coach) ? {
+      ...(incoming.coach || {}), ...(local.coach || {}),
+      reviews: merge((local.coach?.reviews || []).map(r=>({...r,updatedAt:r.createdAt})), (incoming.coach?.reviews || []).map(r=>({...r,updatedAt:r.createdAt})), 'id').sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(0,60).map(({updatedAt,...r})=>r)
+    } : undefined,
+    preferences: local.preferences || incoming.preferences,
   };
 }
