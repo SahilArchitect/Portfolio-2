@@ -16,7 +16,8 @@ export function recordBadge(state,exercise,session){
  const prior=history(state,exercise,session.date).flatMap(h=>h.sets);if(!prior.length)return 'First comparable performance';
  if(exercise.basis==='assistance'){if(Math.min(...current.map(x=>Number(x.load)))<Math.min(...prior.map(x=>Number(x.load))))return 'Less assistance recorded';return '';}
  if(exercise.basis!=='bodyweight'&&Math.max(...current.map(x=>Number(x.load)))>Math.max(...prior.map(x=>Number(x.load))))return 'Load PR · same equipment';
- if(current.some(x=>Number(x.reps)>Math.max(...prior.filter(p=>Number(p.load)===Number(x.load)).map(p=>Number(p.reps)),0)) && current.some(x=>prior.some(p=>Number(p.load)===Number(x.load))))return 'Rep PR · same load';
+ const repetitions = x => exerciseDefinition(exercise.id).unilateral ? Math.min(Number(x.reps),Number(x.right)) : Number(x.reps);
+ if(current.some(x=>{const matches=prior.filter(p=>Number(p.load)===Number(x.load));return matches.length>0 && repetitions(x)>Math.max(...matches.map(repetitions));}))return 'Rep PR · same load';
  return '';
 }
 export function openExerciseHistory(state,exercise){

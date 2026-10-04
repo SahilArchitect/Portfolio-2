@@ -55,3 +55,12 @@ test('ramping sets keep their individual reference loads instead of prescribing 
  const data=state();data.sessions[0].exercises[0].sets[0].load=10;
  const target=loadTargets(data,'2026-10-04')[0];assert.equal(target.targetLoad,null);assert.equal(target.action,'repeat comparable set loads');assert.equal(target.referenceSets[0].load,10);
 });
+
+test('PR markers compare reps at the same load and both unilateral sides',async()=>{
+ const {recordBadge,estimatedMax}=await import('../public/trident/analytics.mjs');
+ const data=state(),previous=data.sessions[0],current=structuredClone(previous);current.date='2026-10-04';
+ const ex=current.exercises[0];previous.exercises[0].sets.forEach(x=>{x.load=30;x.reps=10;});ex.sets.forEach(x=>{x.load=30;x.reps=8;});ex.sets[0].load=20;
+ assert.equal(recordBadge(data,ex,current),'');ex.sets[1].reps=11;assert.equal(recordBadge(data,ex,current),'Rep PR · same load');
+ const unilateral=current.exercises.find(e=>e.id==='lateral');previous.exercises.find(e=>e.id==='lateral').sets.forEach(x=>{x.reps=20;x.right=20;});unilateral.sets.forEach(x=>{x.reps=21;x.right=10;});assert.equal(recordBadge(data,unilateral,current),'');
+ assert.equal(estimatedMax({...ex.sets[0],load:100,reps:5,rir:2}, {...ex,basis:'total'}),100*(1+5/30));assert.equal(estimatedMax({...ex.sets[0],load:100,reps:12,rir:2},{...ex,basis:'total'}),null);
+});
