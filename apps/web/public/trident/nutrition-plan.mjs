@@ -1,134 +1,138 @@
-// Current master plan: near-1,850 kcal version; rounded food estimates, C/F unverified.
+// Current master plan: approximately 1,850 kcal; food-composition estimates.
 export const NUTRITION_PLAN = {
-  "revision": "2026-10-04-dal-black-beans-low-soy",
-  "calorieTarget": 1850,
-  "proteinMinimum": 130,
-  "proteinRange": [
-    130,
-    150
+  revision: '2026-10-05-budget-paneer-masoor',
+  calorieTarget: 1850,
+  proteinMinimum: 130,
+  proteinRange: [130, 150],
+  estimated: true,
+  carbohydrates: 258.9,
+  fat: 37.4,
+  description:
+    'Budget vegetarian cutting plan with one soya pulao, two paneer meals and pulse-based chaat. No whey, edamame, palak or carrot.',
+  batch:
+    'Weigh pulses, soya and rice dry before soaking or cooking. Daily totals: 60 g whole moong, 197 g whole masoor, 75 g dry soya chunks, 25 g dry rice, 100 g Verka paneer, 50 g plain buffalo-milk dahi, 125 g onion, 225 g tomato, 10 g ground flaxseed and about 3.06 g oil. Cook the masoor fully, cool the chaat portion promptly and refrigerate prepared food safely.',
+  meals: [
+    {
+      id: 'pre-workout',
+      name: 'Pre-workout banana',
+      time: '06:25',
+      summary: 'A light banana before the 07:00 gym session; black coffee is optional.',
+      portion: '100 g peeled banana',
+      ingredients: ['100 g peeled banana', 'Optional black coffee without milk or sugar'],
+      preparation: [
+        'Measure 100 g after removing the peel.',
+        'Finish coffee by about 06:35 if it is already well tolerated.',
+      ],
+      calories: 89,
+      protein: 1.1,
+      carbohydrates: 22.8,
+      fat: 0.3,
+      style: 'sunrise',
+      symbol: 'sunrise.fill',
+    },
+    {
+      id: 'breakfast',
+      name: 'Moong–paneer chilla tacos',
+      time: '08:45',
+      summary: 'Post-workout green-moong chilla folded around paneer bhurji with mint dahi.',
+      portion: '60 g dry whole moong + 50 g paneer',
+      ingredients: [
+        '60 g dry whole moong, soaked',
+        '50 g Verka paneer',
+        '25 g plain homemade buffalo-milk dahi',
+        '25 g onion',
+        '25 g tomato',
+        '1.5 g cooking oil',
+        'Mint, coriander, chilli, cumin, lemon and iodized salt',
+      ],
+      preparation: [
+        'Blend the soaked moong with spices and enough water for a thin batter.',
+        'Cook measured chilla in a non-stick pan using the allocated oil.',
+        'Fill with paneer bhurji and finish with mint mixed into the measured dahi.',
+      ],
+      calories: 405,
+      protein: 25,
+      carbohydrates: 43.7,
+      fat: 15.2,
+      style: 'griddle',
+      symbol: 'sun.max.fill',
+    },
+    {
+      id: 'lunch',
+      name: 'Smoky minced-soya pulao',
+      time: '13:00',
+      summary: 'The day’s only soya meal, minced into a tomato pulao to soften its texture.',
+      portion: '75 g dry soya + 25 g dry rice',
+      ingredients: [
+        '75 g dry soya chunks',
+        '25 g dry rice',
+        '25 g plain homemade buffalo-milk dahi',
+        '25 g onion',
+        '50 g tomato',
+        'About 1.56 g cooking oil',
+        'Ginger, garlic, roasted cumin, paprika or chilli, coriander, lemon and iodized salt',
+      ],
+      preparation: [
+        'Boil soya according to its packet, rinse, squeeze firmly and mince.',
+        'Cook the mince with onion, tomato and spices before folding in the measured rice.',
+        'Serve the measured dahi as a mint raita; do not add unmeasured oil or ghee.',
+      ],
+      calories: 407,
+      protein: 42.4,
+      carbohydrates: 50.3,
+      fat: 3.9,
+      style: 'bowl',
+      symbol: 'fork.knife',
+    },
+    {
+      id: 'snack',
+      name: 'Masoor protein chaat',
+      time: '16:30',
+      summary: 'A chilled whole-masoor chaat with tomato, onion, lemon and ground flaxseed.',
+      portion: '100 g dry whole masoor before cooking',
+      ingredients: [
+        '100 g dry whole masoor, fully cooked and drained',
+        '50 g tomato',
+        '50 g onion',
+        '10 g ground flaxseed',
+        'Lemon, coriander, chilli, chaat masala and iodized salt',
+      ],
+      preparation: [
+        'Cook masoor until tender but intact, drain and cool promptly.',
+        'Toss with the measured vegetables, flaxseed, lemon and seasonings.',
+        'Increase toward this pulse portion gradually if current fibre intake is much lower.',
+      ],
+      calories: 434,
+      protein: 27.4,
+      carbohydrates: 72.9,
+      fat: 5.4,
+      style: 'snack',
+      symbol: 'leaf.fill',
+    },
+    {
+      id: 'dinner',
+      name: 'Creamy tomato-paneer masoor bowl',
+      time: '19:30',
+      summary: 'Tomato masoor, partly blended for creaminess and topped with seared paneer.',
+      portion: '97 g dry whole masoor + 50 g paneer',
+      ingredients: [
+        '97 g dry whole masoor',
+        '50 g Verka paneer',
+        '100 g tomato',
+        '25 g onion',
+        'Garlic, ginger, cumin, chilli, coriander and iodized salt',
+      ],
+      preparation: [
+        'Simmer masoor with tomato, onion and spices until fully cooked.',
+        'Blend part of the dal, then return it to the pot for a creamy texture.',
+        'Sear paneer in a non-stick pan using its own fat; finish dinner by about 20:00.',
+      ],
+      calories: 515,
+      protein: 34.3,
+      carbohydrates: 69.2,
+      fat: 12.5,
+      style: 'evening',
+      symbol: 'moon.stars.fill',
+    },
   ],
-  "estimated": true,
-  "carbohydrates": null,
-  "fat": null,
-  "description": "Dal, black beans, dahi and small soy portions. One scoop. One banana. One small roti.",
-  "batch": "150 g dry split yellow moong + 50 g dry soy + 200 g cooking vegetables + 2 g oil total, including tadka, plus seasonings. Divide equally between lunch and dinner. Each meal adds 50 g cooked drained black beans, 150 g salad and 50 g plain buffalo-milk dahi. Lunch alone adds one roti from 25 g dry atta. Refrigerate the dinner portion promptly and reheat thoroughly.",
-  "meals": [
-    {
-      "id": "pre-workout",
-      "name": "Pre-workout banana",
-      "time": "06:20",
-      "summary": "One banana before the gym; black coffee if wanted.",
-      "portion": "100 g peeled banana",
-      "ingredients": [
-        "100 g peeled banana",
-        "Optional black coffee without milk or sugar"
-      ],
-      "preparation": [
-        "Measure the banana without its peel.",
-        "This is the only banana allocated for the day."
-      ],
-      "calories": 91,
-      "protein": 1.4,
-      "style": "sunrise",
-      "symbol": "sunrise.fill"
-    },
-    {
-      "id": "post-workout",
-      "name": "Post-workout shake",
-      "time": "08:30",
-      "summary": "One 36 g OWN cocoa scoop in water, immediately after returning.",
-      "portion": "36 g OWN plant protein + 300 ml water",
-      "ingredients": [
-        "36 g OWN cocoa plant protein",
-        "300 ml water",
-        "Usual 3–5 g creatine, if continuing"
-      ],
-      "preparation": [
-        "Mix the measured scoop with water.",
-        "This is the only protein scoop allocated for the day."
-      ],
-      "calories": 132,
-      "protein": 24,
-      "style": "snack",
-      "symbol": "cup.and.saucer.fill"
-    },
-    {
-      "id": "breakfast",
-      "name": "Buffalo-milk protein oats",
-      "time": "08:45",
-      "summary": "Pintola HP oats with measured buffalo milk.",
-      "portion": "50 g oats + 250 ml milk",
-      "ingredients": [
-        "50 g Pintola high-protein oats",
-        "250 ml local dairy buffalo milk"
-      ],
-      "preparation": [
-        "Prepare oats with the measured buffalo milk.",
-        "No breakfast banana, honey, added nuts, peanut butter or sugar are allocated in this near-1,850 kcal version."
-      ],
-      "calories": 464,
-      "protein": 21.2,
-      "style": "griddle",
-      "symbol": "sun.max.fill"
-    },
-    {
-      "id": "lunch",
-      "name": "Lunch · dal, roti and bean salad",
-      "time": "13:00",
-      "summary": "Moong dal, small soy keema, black-bean salad and dahi, with one small roti.",
-      "portion": "75 g dry dal + 25 g dry soy + 50 g cooked black beans + one 25 g-atta roti",
-      "ingredients": [
-        "25 g dry ordinary atta (one small roti)",
-        "75 g dry split yellow moong dal",
-        "25 g dry soy chunks (maximum per meal)",
-        "50 g cooked, drained black beans",
-        "100 g cooking vegetables (including onion and tomato)",
-        "150 g salad",
-        "50 g plain homemade buffalo-milk dahi",
-        "1 g oil total, including dal tadka and soy cooking",
-        "Spices, ginger-garlic and lemon; 10 kcal allowance"
-      ],
-      "preparation": [
-        "Cook the measured dry dal until soft. Weigh beans cooked and drained.",
-        "Boil soy as directed, rinse, squeeze firmly and mince finely.",
-        "Cook the dal and keema using the shared 1 g oil allowance; no extra tadka oil or ghee.",
-        "Mix the fully cooked beans into the salad and serve dahi alongside.",
-        "Make one small roti from 25 g dry atta, without ghee.",
-        "For a daily batch, use 150 g dry dal, 50 g dry soy, 200 g vegetables and 2 g oil. Split equally and refrigerate dinner promptly."
-      ],
-      "calories": 633,
-      "protein": 43.3,
-      "style": "bowl",
-      "symbol": "fork.knife"
-    },
-    {
-      "id": "dinner",
-      "name": "Dinner · dal and bean salad",
-      "time": "19:30",
-      "summary": "Moong dal, small soy keema, black-bean salad and dahi; no roti allocated.",
-      "portion": "75 g dry dal + 25 g dry soy + 50 g cooked black beans",
-      "ingredients": [
-        "75 g dry split yellow moong dal",
-        "25 g dry soy chunks (maximum per meal)",
-        "50 g cooked, drained black beans",
-        "100 g cooking vegetables (including onion and tomato)",
-        "150 g salad",
-        "50 g plain homemade buffalo-milk dahi",
-        "1 g oil total, including dal tadka and soy cooking",
-        "Spices, ginger-garlic and lemon; 10 kcal allowance"
-      ],
-      "preparation": [
-        "Cook the measured dry dal until soft. Weigh beans cooked and drained.",
-        "Boil soy as directed, rinse, squeeze firmly and mince finely.",
-        "Cook the dal and keema using the shared 1 g oil allowance; no extra tadka oil or ghee.",
-        "Mix the fully cooked beans into the salad and serve dahi alongside.",
-        "Reheat the refrigerated dinner portion thoroughly. No extra oil or roti is allocated.",
-        "For a daily batch, use 150 g dry dal, 50 g dry soy, 200 g vegetables and 2 g oil. Split equally and refrigerate dinner promptly."
-      ],
-      "calories": 542,
-      "protein": 40.7,
-      "style": "evening",
-      "symbol": "moon.stars.fill"
-    }
-  ]
 };

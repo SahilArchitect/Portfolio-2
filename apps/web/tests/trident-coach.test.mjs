@@ -7,25 +7,23 @@ const session=()=>{const s=createSession('2026-10-01','pushA',1);s.status='finis
 const state=()=>{const x=newState();x.sessions=[session()];return x;};
 const output={summary:'Controlled training.',dailyAnalysis:'Keep the same equipment.',nutrition:'Log measured meals.',recovery:'Recover between sessions.',split:{changeNeeded:true,reason:'Change requested by model',schedule:['pushA','pullA','legsA',null,null,null,null]}};
 const mocked=async()=>Response.json({choices:[{finish_reason:'stop',message:{content:JSON.stringify(output)}}]});
-test('diet stays within the requested protein range and soy cap without paneer or a second scoop',()=>{
- assert.equal(NUTRITION_PLAN.revision,'2026-10-04-dal-black-beans-low-soy');
+test('budget diet matches the agreed schedule, macros and ingredient exclusions',()=>{
+ assert.equal(NUTRITION_PLAN.revision,'2026-10-05-budget-paneer-masoor');
  assert.equal(NUTRITION_PLAN.meals.length,5);
- assert.equal(NUTRITION_PLAN.meals.reduce((n,m)=>n+m.calories,0),1862);
+ assert.equal(NUTRITION_PLAN.meals.reduce((n,m)=>n+m.calories,0),1850);
  const protein=NUTRITION_PLAN.meals.reduce((n,m)=>n+m.protein,0);
  assert.ok(protein>=130&&protein<=150);
- assert.equal(NUTRITION_PLAN.carbohydrates,null);assert.equal(NUTRITION_PLAN.fat,null);
- assert.equal(NUTRITION_PLAN.meals.find(m=>m.id==='post-workout').time,'08:30');
- for(const id of ['lunch','dinner']) {
-  const meal=NUTRITION_PLAN.meals.find(m=>m.id===id);
-  assert.ok(meal.ingredients.includes('25 g dry soy chunks (maximum per meal)'));
-  assert.ok(meal.ingredients.includes('75 g dry split yellow moong dal'));
-  assert.ok(meal.ingredients.includes('50 g cooked, drained black beans'));
-  assert.ok(meal.ingredients.includes('50 g plain homemade buffalo-milk dahi'));
- }
+ assert.equal(NUTRITION_PLAN.carbohydrates,258.9);assert.equal(NUTRITION_PLAN.fat,37.4);
+ assert.equal(NUTRITION_PLAN.meals.find(m=>m.id==='pre-workout').time,'06:25');
+ assert.equal(NUTRITION_PLAN.meals.find(m=>m.id==='breakfast').time,'08:45');
+ assert.ok(NUTRITION_PLAN.meals.find(m=>m.id==='lunch').ingredients.includes('75 g dry soya chunks'));
+ assert.ok(NUTRITION_PLAN.meals.find(m=>m.id==='snack').ingredients.includes('100 g dry whole masoor, fully cooked and drained'));
+ assert.ok(NUTRITION_PLAN.meals.find(m=>m.id==='dinner').ingredients.includes('97 g dry whole masoor'));
  const ingredients=NUTRITION_PLAN.meals.flatMap(m=>m.ingredients);
- assert.equal(ingredients.filter(i=>i.includes('OWN')).length,1);
- assert.ok(ingredients.every(i=>!i.toLowerCase().includes('paneer')));
- assert.equal(ingredients.filter(i=>i.includes('atta')).length,1);
+ assert.equal(ingredients.filter(i=>i.toLowerCase().includes('soya chunks')).length,1);
+ assert.equal(ingredients.filter(i=>i.includes('Verka paneer')).length,2);
+ for(const excluded of ['own','whey','edamame','palak','spinach','carrot'])
+  assert.ok(ingredients.every(i=>!i.toLowerCase().includes(excluded)),excluded);
 });
 test('all sets and both unilateral sides must meet targets; no invented weight increments',()=>{
  const data=state();const targets=loadTargets(data,'2026-10-04');assert.ok(targets.some(t=>t.action==='smallest equipment increment'));assert.ok(targets.filter(t=>t.action==='smallest equipment increment').every(t=>t.targetLoad===null));
