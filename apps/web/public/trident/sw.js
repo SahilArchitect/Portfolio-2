@@ -1,4 +1,4 @@
-const CACHE = 'trident-shell-v9';
+const CACHE = 'trident-shell-v10';
 const ASSETS = [
   './index.html',
   './style.css',
