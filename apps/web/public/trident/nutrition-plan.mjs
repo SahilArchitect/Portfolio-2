@@ -1,6 +1,6 @@
-// Mirrors the agreed 2026-10-04 master plan; C/F remain unverified.
+// Current master plan: near-1,850 kcal version; rounded food estimates, C/F unverified.
 export const NUTRITION_PLAN = {
-  "revision": "2026-10-04-buffalo-oats-soya-wraps",
+  "revision": "2026-10-04-dal-black-beans-low-soy",
   "calorieTarget": 1850,
   "proteinMinimum": 130,
   "proteinRange": [
@@ -10,6 +10,8 @@ export const NUTRITION_PLAN = {
   "estimated": true,
   "carbohydrates": null,
   "fat": null,
+  "description": "Dal, black beans, dahi and small soy portions. One scoop. One banana. One small roti.",
+  "batch": "150 g dry split yellow moong + 50 g dry soy + 200 g cooking vegetables + 2 g oil total, including tadka, plus seasonings. Divide equally between lunch and dinner. Each meal adds 50 g cooked drained black beans, 150 g salad and 50 g plain buffalo-milk dahi. Lunch alone adds one roti from 25 g dry atta. Refrigerate the dinner portion promptly and reheat thoroughly.",
   "meals": [
     {
       "id": "pre-workout",
@@ -23,7 +25,7 @@ export const NUTRITION_PLAN = {
       ],
       "preparation": [
         "Measure the banana without its peel.",
-        "Keep the second banana for breakfast."
+        "This is the only banana allocated for the day."
       ],
       "calories": 91,
       "protein": 1.4,
@@ -52,77 +54,79 @@ export const NUTRITION_PLAN = {
     },
     {
       "id": "breakfast",
-      "name": "Banana–honey oats",
+      "name": "Buffalo-milk protein oats",
       "time": "08:45",
-      "summary": "Pintola HP oats with buffalo milk, banana and measured honey.",
-      "portion": "50 g oats + 250 ml milk + 100 g banana + 5 g honey",
+      "summary": "Pintola HP oats with measured buffalo milk.",
+      "portion": "50 g oats + 250 ml milk",
       "ingredients": [
         "50 g Pintola high-protein oats",
-        "250 ml local dairy buffalo milk",
-        "100 g peeled banana",
-        "5 g honey"
+        "250 ml local dairy buffalo milk"
       ],
       "preparation": [
         "Prepare oats with the measured buffalo milk.",
-        "Add sliced banana and honey.",
-        "No extra nuts, peanut butter, sugar or milk are included."
+        "No breakfast banana, honey, added nuts, peanut butter or sugar are allocated in this near-1,850 kcal version."
       ],
-      "calories": 570,
-      "protein": 22.6,
+      "calories": 464,
+      "protein": 21.2,
       "style": "griddle",
       "symbol": "sun.max.fill"
     },
     {
       "id": "lunch",
-      "name": "Lunch · two soya-keema wraps",
+      "name": "Lunch · dal, roti and bean salad",
       "time": "13:00",
-      "summary": "Two small rotis with soya keema, salad and dahi sauce.",
-      "portion": "Two wraps; 50 g dry atta + 65 g dry soya",
+      "summary": "Moong dal, small soy keema, black-bean salad and dahi, with one small roti.",
+      "portion": "75 g dry dal + 25 g dry soy + 50 g cooked black beans + one 25 g-atta roti",
       "ingredients": [
-        "50 g dry ordinary atta (2 rotis, 25 g each)",
-        "65 g dry soya chunks",
+        "25 g dry ordinary atta (one small roti)",
+        "75 g dry split yellow moong dal",
+        "25 g dry soy chunks (maximum per meal)",
+        "50 g cooked, drained black beans",
         "100 g cooking vegetables (including onion and tomato)",
-        "100 g salad",
-        "20 g homemade buffalo-milk dahi",
-        "10 g ketchup + 5 g chilli sauce",
-        "2 g oil",
+        "150 g salad",
+        "50 g plain homemade buffalo-milk dahi",
+        "1 g oil total, including dal tadka and soy cooking",
         "Spices, ginger-garlic and lemon; 10 kcal allowance"
       ],
       "preparation": [
-        "Boil, rinse, firmly squeeze and mince the soya.",
-        "Cook vegetables and mince in the measured oil with spices.",
-        "Make two rotis without ghee; divide filling, sauces and salad evenly.",
-        "For a daily batch, use 130 g dry soya, 200 g vegetables and 4 g oil. Split equally and refrigerate dinner promptly."
+        "Cook the measured dry dal until soft. Weigh beans cooked and drained.",
+        "Boil soy as directed, rinse, squeeze firmly and mince finely.",
+        "Cook the dal and keema using the shared 1 g oil allowance; no extra tadka oil or ghee.",
+        "Mix the fully cooked beans into the salad and serve dahi alongside.",
+        "Make one small roti from 25 g dry atta, without ghee.",
+        "For a daily batch, use 150 g dry dal, 50 g dry soy, 200 g vegetables and 2 g oil. Split equally and refrigerate dinner promptly."
       ],
-      "calories": 531,
-      "protein": 42.3,
+      "calories": 633,
+      "protein": 43.3,
       "style": "bowl",
       "symbol": "fork.knife"
     },
     {
       "id": "dinner",
-      "name": "Dinner · two soya-keema wraps",
+      "name": "Dinner · dal and bean salad",
       "time": "19:30",
-      "summary": "Two small rotis with soya keema, salad and dahi sauce.",
-      "portion": "Two wraps; 50 g dry atta + 65 g dry soya",
+      "summary": "Moong dal, small soy keema, black-bean salad and dahi; no roti allocated.",
+      "portion": "75 g dry dal + 25 g dry soy + 50 g cooked black beans",
       "ingredients": [
-        "50 g dry ordinary atta (2 rotis, 25 g each)",
-        "65 g dry soya chunks",
+        "75 g dry split yellow moong dal",
+        "25 g dry soy chunks (maximum per meal)",
+        "50 g cooked, drained black beans",
         "100 g cooking vegetables (including onion and tomato)",
-        "100 g salad",
-        "20 g homemade buffalo-milk dahi",
-        "10 g ketchup + 5 g chilli sauce",
-        "2 g oil",
+        "150 g salad",
+        "50 g plain homemade buffalo-milk dahi",
+        "1 g oil total, including dal tadka and soy cooking",
         "Spices, ginger-garlic and lemon; 10 kcal allowance"
       ],
       "preparation": [
-        "Boil, rinse, firmly squeeze and mince the soya.",
-        "Cook vegetables and mince in the measured oil with spices.",
-        "Make two rotis without ghee; divide filling, sauces and salad evenly.",
-        "Reheat the refrigerated dinner half thoroughly. Do not add oil or seasonings again."
+        "Cook the measured dry dal until soft. Weigh beans cooked and drained.",
+        "Boil soy as directed, rinse, squeeze firmly and mince finely.",
+        "Cook the dal and keema using the shared 1 g oil allowance; no extra tadka oil or ghee.",
+        "Mix the fully cooked beans into the salad and serve dahi alongside.",
+        "Reheat the refrigerated dinner portion thoroughly. No extra oil or roti is allocated.",
+        "For a daily batch, use 150 g dry dal, 50 g dry soy, 200 g vegetables and 2 g oil. Split equally and refrigerate dinner promptly."
       ],
-      "calories": 531,
-      "protein": 42.3,
+      "calories": 542,
+      "protein": 40.7,
       "style": "evening",
       "symbol": "moon.stars.fill"
     }
