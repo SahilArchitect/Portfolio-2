@@ -309,7 +309,7 @@ function renderHome() {
       week,
     ) +
     '</select></label></div><label>Volume phase<select id="volume-phase">' +
-    options(VOLUME_PHASES, defaultVolumePhase(Number(week))) +
+    options(VOLUME_PHASES, last?.volumePhase || defaultVolumePhase(Number(week))) +
     '</select></label><p class="subtle">Typical start: Foundation in cycle 1, Build in cycle 2, Full from cycle 3. Advance only after stable lifts, manageable soreness and no joint pain. Deload halves the full plan regardless of phase. Set Day 1 in Settings → Eight-day rotation; weekdays shift each cycle.</p><button class="primary wide">Open workout ↗</button></form></section>' +
     '<section class="card"><h2>Daily check-in</h2>' +
     checkinForm(today) +
