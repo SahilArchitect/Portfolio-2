@@ -1,11 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  PLAN_VERSION,
-  EXERCISES,
-  TEMPLATES,
+  PLAN_VERSION as ACTIVE_VERSION,
   planFor,
-  createSession,
+  createSession as activeCreateSession,
   progress,
   recommendedTemplate,
   exerciseRir,
@@ -21,6 +19,9 @@ import {
   previousExercise,
   addDays,
 } from '../public/trident/core.mjs';
+const PLAN_VERSION = '2026-09-29-r7';
+const { exercises: EXERCISES, templates: TEMPLATES } = planFor(PLAN_VERSION);
+const createSession = (date, template, week = 1, version = PLAN_VERSION) => activeCreateSession(date, template, week, version);
 
 test('r7 schedules PPL twice with 82 normal and 49 deload sets, balanced muscle coverage', () => {
   assert.equal(PLAN_VERSION, '2026-09-29-r7');
@@ -32,8 +33,7 @@ test('r7 schedules PPL twice with 82 normal and 49 deload sets, balanced muscle 
     pullB: [13, 8],
     legsB: [14, 9],
   };
-  const schedule = [...Object.keys(counts), ''];
-  schedule.forEach((t, i) => assert.equal(recommendedTemplate(addDays('2026-09-28', i)), t));
+  assert.deepEqual(Object.values(TEMPLATES).map(t => t.day), ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']);
   let total = 0,
     deloadTotal = 0;
   for (const [template, [normal, light]] of Object.entries(counts)) {

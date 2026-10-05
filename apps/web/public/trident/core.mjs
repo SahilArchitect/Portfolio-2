@@ -4,11 +4,12 @@ import { R3_PLAN } from './r3-plan.mjs';
 import { R4_PLAN } from './r4-plan.mjs';
 import { R5_PLAN } from './r5-plan.mjs';
 import { R6_PLAN } from './r6-plan.mjs';
-export const PLAN_VERSION = '2026-09-29-r7';
+import { R7_PLAN } from './r7-plan.mjs';
+export const PLAN_VERSION = '2026-10-05-r8';
 export const STORAGE_KEY = 'trident-forge-v1';
 // Retain historical IDs for validation and load references; only template IDs prescribe work.
 export const EXERCISES = {
-  ...R6_PLAN.exercises,
+  ...R7_PLAN.exercises,
   inclinesmith: {
     ...R6_PLAN.exercises.inclinesmith,
     sets: 3,
@@ -26,10 +27,10 @@ export const EXERCISES = {
     group: 'Side delts',
     cue: 'Raise in a comfortable plane without heaving or shrugging. Log both sides; one set includes both arms. Dumbbells are a practical substitute.',
   },
-  overhead: { ...R6_PLAN.exercises.overhead, sets: 2, min: 10, max: 15 },
+  overhead: { ...R6_PLAN.exercises.overhead, sets: 3, min: 10, max: 15 },
   rope: {
     ...R6_PLAN.exercises.rope,
-    sets: 2,
+    sets: 3,
     min: 10,
     max: 15,
     cue: 'Keep upper arms steady; extend the elbows without leaning your body into the stack.',
@@ -55,7 +56,7 @@ export const EXERCISES = {
     max: 20,
     group: 'Rear delts',
   },
-  inclinecurl: { ...R6_PLAN.exercises.inclinecurl, sets: 2, min: 8, max: 12 },
+  inclinecurl: { ...R6_PLAN.exercises.inclinecurl, sets: 3, min: 8, max: 12 },
   preacher: {
     ...R6_PLAN.exercises.preacher,
     sets: 2,
@@ -102,7 +103,7 @@ export const EXERCISES = {
   },
   extension: {
     ...R6_PLAN.exercises.extension,
-    sets: 2,
+    sets: 3,
     min: 10,
     max: 15,
     cue: 'Align the knee with the machine pivot; lift and lower under control in a tolerable range.',
@@ -129,6 +130,36 @@ export const EXERCISES = {
     cue: 'Flex the trunk by bringing ribs toward pelvis; avoid turning this into a hip hinge.',
   },
   kneeraise: { ...R6_PLAN.exercises.kneeraise, sets: 2, min: 10, max: 15 },
+  chestpress: {
+    id: 'chestpress', name: 'Machine chest press', sets: 2, min: 8, max: 12,
+    group: 'Chest', basis: 'stack', unilateral: false,
+    cue: 'Choose a comfortable horizontal press path and record the machine. A flat dumbbell press is a substitute; select per-dumbbell load and note the change.',
+  },
+  straightlat: {
+    id: 'straightlat', name: 'Straight-arm cable pulldown', sets: 2, min: 12, max: 15,
+    group: 'Back', basis: 'stack', unilateral: false,
+    cue: 'Keep a small fixed elbow bend and bring arms toward hips without turning it into a pushdown or swinging the torso.',
+  },
+  shoulderpress: {
+    id: 'shoulderpress', name: 'Seated machine shoulder press', sets: 2, min: 8, max: 12,
+    group: 'Shoulders', basis: 'stack', unilateral: false,
+    cue: 'Use a comfortable grip and controlled overhead range; no forced depth. Record the machine; stop if shoulder symptoms appear.',
+  },
+  lowhighfly: {
+    id: 'lowhighfly', name: 'Low-to-high cable fly', sets: 2, min: 12, max: 15,
+    group: 'Chest', basis: 'stack', unilateral: false,
+    cue: 'Bring both handles up and inward in a controlled arc; use a comfortable shoulder range. Log stack kg per side consistently.',
+  },
+  widerow: {
+    id: 'widerow', name: 'Wide-grip seated cable row', sets: 3, min: 8, max: 12,
+    group: 'Back', basis: 'stack', unilateral: false,
+    cue: 'Use a comfortable wider handle and supported upright torso; let shoulder blades move without heaving. Record handle and machine.',
+  },
+  lateralpull: {
+    ...R7_PLAN.exercises.lateral,
+    id: 'lateralpull', sets: 3, min: 15, max: 20,
+    cue: 'Light cable lateral raise after pulling. Record both sides; one set includes both arms. Match the setup across pull days.',
+  },
 };
 export const ARMS = R6_PLAN.arms;
 const pushCardio =
@@ -136,25 +167,25 @@ const pushCardio =
 export const TEMPLATES = {
   pushA: {
     name: 'Push A · upper chest & side delts',
-    day: 'Monday',
+    day: 'Day 1',
     kind: 'lifting',
-    ids: ['inclinesmith', 'lateral', 'pecdeck', 'overhead', 'rope'],
+    ids: ['inclinesmith', 'lateral', 'chestpress', 'pecdeck', 'overhead'],
     pairing:
-      'Smith press first, then lateral raises. Optional pec deck ↔ pushdown after straight sets for priority lifts. No supersets required.',
+      'Smith press first, then lateral raises and horizontal chest press. Optional pec deck ↔ overhead extension. Keep priority lifts as straight sets.',
     cardio: pushCardio,
   },
   pullA: {
-    name: 'Pull A · lats, rear delts & upper traps',
-    day: 'Tuesday',
+    name: 'Pull A · lats, rear delts & side delts',
+    day: 'Day 2',
     kind: 'lifting',
-    ids: ['pulldown', 'row', 'rear', 'inclinecurl', 'hammer', 'shrug'],
+    ids: ['pulldown', 'row', 'straightlat', 'rear', 'inclinecurl', 'lateralpull'],
     pairing:
-      'Pulldown and supported row as straight sets. Curls follow back work; shrugs last. Use straps if grip limits the target muscle.',
+      'Pulldown and supported row as straight sets, then straight-arm pulldown. Curl after back work; light lateral raises last. No shrugs.',
     cardio: 'No required finisher. Keep normal daily walking consistent.',
   },
   legsA: {
     name: 'Legs A · quads, hamstrings & calves',
-    day: 'Wednesday',
+    day: 'Day 3',
     kind: 'lifting',
     ids: ['hack', 'legcurl', 'extension', 'calf', 'crunch'],
     pairing:
@@ -163,30 +194,30 @@ export const TEMPLATES = {
   },
   pushB: {
     name: 'Push B · upper chest & side delts',
-    day: 'Thursday',
+    day: 'Day 5',
     kind: 'lifting',
-    ids: ['incline', 'lateral', 'pecdeck', 'overhead', 'rope'],
+    ids: ['incline', 'lateral', 'shoulderpress', 'lowhighfly', 'rope'],
     pairing:
-      'Incline dumbbells first, then lateral raises. Repeat familiar accessories; optional pec deck ↔ pushdown. Keep each equipment/load convention consistent.',
+      'Incline dumbbells first, then lateral raises and machine shoulder press. Optional cable fly ↔ rope pushdown. No extra Y-raise or duplicate lateral slot.',
     cardio: pushCardio,
   },
   pullB: {
     name: 'Pull B · lats, rear delts & arms',
-    day: 'Friday',
+    day: 'Day 6',
     kind: 'lifting',
-    ids: ['lat', 'row', 'rear', 'preacher', 'hammer'],
+    ids: ['lat', 'widerow', 'rear', 'preacher', 'hammer', 'lateralpull'],
     pairing:
-      'Single-arm pulldown and supported row first. One unilateral set includes both sides. Optional rear-delt fly ↔ preacher curl; No extra trap-isolation slot.',
-    cardio: 'No required finisher. Preserve recovery for Saturday legs.',
+      'Single-arm pulldown and wide cable row first. One unilateral set includes both sides. Optional rear fly ↔ preacher curl; light lateral raises last.',
+    cardio: 'No required finisher. Preserve recovery for the next leg session.',
   },
   legsB: {
     name: 'Legs B · posterior chain & quads',
-    day: 'Saturday',
+    day: 'Day 7',
     kind: 'lifting',
     ids: ['rdl', 'legpress', 'legcurl', 'calfseat', 'kneeraise'],
     pairing:
       'RDL and leg press as straight sets. Optional seated calves ↔ knee raises. Use familiar straps if grip limits RDL; do not force a lower-back stretch.',
-    cardio: 'No required finisher. Sunday is rest.',
+    cardio: 'No required finisher. Day 8 is rest.',
   },
 };
 export function planFor(version = PLAN_VERSION) {
@@ -196,6 +227,7 @@ export function planFor(version = PLAN_VERSION) {
   if (version === R4_PLAN.version) return R4_PLAN;
   if (version === R5_PLAN.version) return R5_PLAN;
   if (version === R6_PLAN.version) return R6_PLAN;
+  if (version === R7_PLAN.version) return R7_PLAN;
   if (version === PLAN_VERSION)
     return {
       version: PLAN_VERSION,
@@ -211,6 +243,29 @@ export function sessionName(s) {
 export function exerciseDefinition(id, version = PLAN_VERSION) {
   return planFor(version).exercises[id];
 }
+export const VOLUME_PHASES = {
+  entry: 'Entry · 2 sets per exercise (64/cycle)',
+  foundation: 'Foundation · 10 side-delt sets (85/cycle)',
+  build: 'Build · 12 side-delt sets (87/cycle)',
+  full: 'Full · 14 side-delt sets (89/cycle)',
+};
+export function defaultVolumePhase(week) {
+  return week === 1 ? 'foundation' : week === 2 ? 'build' : 'full';
+}
+export function prescribedSets(version, template, id, week, phase = defaultVolumePhase(week)) {
+  const e = exerciseDefinition(id, version);
+  if (version === R7_PLAN.version) return week === 7 ? Math.ceil(e.sets / 2) : e.sets;
+  if (version !== PLAN_VERSION) return e.sets;
+  if (!Object.hasOwn(VOLUME_PHASES, phase)) throw Error('Choose a valid volume phase.');
+  if (week === 7) return Math.ceil(e.sets / 2);
+  if (phase === 'entry') return Math.min(2, e.sets);
+  if (id === 'lateral') return phase === 'foundation' ? 3 : 4;
+  if (id === 'lateralpull') return phase === 'full' ? 3 : 2;
+  return e.sets;
+}
+export function supportsOptionalCardio(s) {
+  return [PLAN_VERSION, R7_PLAN.version].includes(s.planVersion);
+}
 export function sessionInstructions(s) {
   if (isCardio(s))
     return (
@@ -219,28 +274,33 @@ export function sessionInstructions(s) {
         ? 'Deload: 20–30 min easy walking only.'
         : 'Gym window 07:00–09:00; finish when the session is done.')
     );
+  if (s.planVersion === R7_PLAN.version)
+    return s.week === 7
+      ? 'Deload: half the normal sets, rounded up (2→1, 3→2, 4→2), at 4–5 RIR. Reduce load as needed.'
+      : 'Earlier r7 prescription: Week 1: 3 RIR; week 2: 2–3; weeks 3–6: compounds 2–3, accessories 1–2; week 8: 2. Add load only when all sets reach the rep ceiling at target RIR. ' + R7_PLAN.templates[s.template].pairing;
   if ((s.planVersion || LEGACY_PLAN.version) !== PLAN_VERSION)
-    return 'Earlier prescription: saved exercises, reps and set counts are preserved. New sessions use Push/Pull/Legs twice weekly; resume saved workouts without repeating completed days.';
+    return 'Earlier prescription: saved exercises, reps and set counts are preserved. New sessions use an eight-day Push/Pull/Legs/rest rotation; resume saved workouts without repeating completed days.';
   if (s.week === 7)
     return 'Deload: half the normal sets, rounded up (2→1, 3→2, 4→2), at 4–5 RIR. Reduce load as needed. Easy cardio only.';
   return (
-    'Week 1: 3 RIR; week 2: 2–3; weeks 3–6: compounds 2–3, accessories 1–2; week 8: 2. Add load only when all sets reach the rep ceiling at target RIR. ' +
+    VOLUME_PHASES[s.volumePhase || defaultVolumePhase(s.week)] + '. Advance volume only after a full cycle of stable performance, tolerable soreness and no joint pain; hold the phase if recovery is poor. Cycle 1: 3 RIR; cycle 2: 2–3; cycles 3–6: compounds 2–3, accessories 1–2; cycle 8: 2. Entry sessions always use 3 RIR. Add load only when all sets reach the rep ceiling at target RIR. ' +
     TEMPLATES[s.template].pairing +
     ' Rest 2–3 min for compounds (up to 4 if needed), 90–120 sec for accessories. Budget 60–95 min lifting; finish within 120 min including cardio.'
   );
 }
 export function sessionCardio(s) {
-  if ((s.planVersion || LEGACY_PLAN.version) !== PLAN_VERSION)
+  if (![PLAN_VERSION, R7_PLAN.version].includes(s.planVersion || LEGACY_PLAN.version))
     return 'Earlier workout: record only the cardio actually performed.';
   if (s.week === 7)
     return ['pushA', 'pushB'].includes(s.template)
       ? 'Optional 10–15 min easy walking; reduce or skip if tired. Log actual minutes, 0 if skipped.'
       : 'Comfortable walking only; no required finisher.';
-  return TEMPLATES[s.template].cardio;
+  return planFor(s.planVersion).templates[s.template].cardio;
 }
 export function exerciseRir(s, id) {
   if (s.week === 7) return '4–5';
-  if (![PLAN_VERSION, R6_PLAN.version, R5_PLAN.version, R4_PLAN.version].includes(s.planVersion))
+  if (s.planVersion === PLAN_VERSION && s.volumePhase === 'entry') return '3';
+  if (![PLAN_VERSION, R7_PLAN.version, R6_PLAN.version, R5_PLAN.version, R4_PLAN.version].includes(s.planVersion))
     return s.week === 1 ? '3–4' : s.week === 2 ? '3' : '2–3';
   if (s.week === 1) return '3';
   if (s.week === 2) return '2–3';
@@ -255,8 +315,11 @@ export function exerciseRir(s, id) {
     'legpress',
     'rdl',
     'cgbp',
+    'chestpress',
+    'shoulderpress',
+    'widerow',
   ].includes(id)
-    ? s.planVersion === PLAN_VERSION
+    ? supportsOptionalCardio(s)
       ? '2–3'
       : '2'
     : '1–2';
@@ -287,12 +350,33 @@ export function monday(date) {
   const day = new Date(date + 'T12:00:00').getDay();
   return addDays(date, -((day + 6) % 7));
 }
-export function recommendedTemplate(date) {
-  return (
-    { 1: 'pushA', 2: 'pullA', 3: 'legsA', 4: 'pushB', 5: 'pullB', 6: 'legsB' }[
-      new Date(date + 'T12:00:00').getDay()
-    ] || ''
-  );
+export const CYCLE_START = '2026-10-05';
+export const CYCLE_SCHEDULE = ['pushA', 'pullA', 'legsA', null, 'pushB', 'pullB', 'legsB', null];
+export function cycleDay(date, anchor = CYCLE_START) {
+  if (!validDate(date) || !validDate(anchor)) throw Error('Choose valid cycle dates.');
+  const elapsed = Math.round((Date.parse(date + 'T12:00:00Z') - Date.parse(anchor + 'T12:00:00Z')) / 86400000);
+  return ((elapsed % 8) + 8) % 8;
+}
+export function recommendedTemplate(date, anchor = CYCLE_START) {
+  return CYCLE_SCHEDULE[cycleDay(date, anchor)] || '';
+}
+export function scheduleFor(state, date) {
+  const change = state.coach?.activeSplit;
+  if (change && change.schedule.length === 8 && date >= change.effectiveDate) return change.schedule;
+  return CYCLE_SCHEDULE;
+}
+export function scheduledTemplate(state, date) {
+  const schedule = scheduleFor(state, date);
+  if (schedule.length === 7) return schedule[(new Date(date + 'T12:00:00').getDay() + 6) % 7];
+  const change = state.coach?.activeSplit;
+  const anchor = change && change.schedule.length === 8 && date >= change.effectiveDate ? change.effectiveDate : state.preferences?.cycleStart || CYCLE_START;
+  return schedule[cycleDay(date, anchor)];
+}
+export function scheduledSessions(state, start, days = 7) {
+  return Array.from({ length: days }, (_, i) => scheduledTemplate(state, addDays(start, i))).filter(Boolean).length;
+}
+export function blockLabel(s) {
+  return (s.planVersion === PLAN_VERSION ? 'Cycle ' : 'Week ') + s.week;
 }
 export function newState() {
   return { version: 1, planVersion: PLAN_VERSION, sessions: [], checkins: [] };
@@ -313,7 +397,7 @@ export function initialStateFromHash(hash) {
     });
   return data;
 }
-export function createSession(date, template, week = 1, planVersion = PLAN_VERSION) {
+export function createSession(date, template, week = 1, planVersion = PLAN_VERSION, volumePhase = defaultVolumePhase(week)) {
   const plan = planFor(planVersion);
   if (
     !plan.templates[template] ||
@@ -329,7 +413,8 @@ export function createSession(date, template, week = 1, planVersion = PLAN_VERSI
       [R6_PLAN.version, R5_PLAN.version, R4_PLAN.version].includes(planVersion) && week === 7
         ? 2
         : e.sets;
-    if (planVersion === PLAN_VERSION && week === 7) count = Math.ceil(e.sets / 2);
+    if ([PLAN_VERSION, R7_PLAN.version].includes(planVersion))
+      count = prescribedSets(planVersion, template, id, week, volumePhase);
     if (planVersion === LEGACY_PLAN.version) {
       if (id === 'legcurl' && template === 'lowerB') count = 2;
       if (week === 7 && !plan.arms.includes(id)) count = count >= 3 ? 2 : 1;
@@ -364,7 +449,8 @@ export function createSession(date, template, week = 1, planVersion = PLAN_VERSI
     status: 'draft',
     updatedAt: new Date().toISOString(),
   };
-  if (plan.templates[template].kind === 'hybrid' || planVersion === PLAN_VERSION)
+  if (planVersion === PLAN_VERSION) session.volumePhase = volumePhase;
+  if (plan.templates[template].kind === 'hybrid' || supportsOptionalCardio(session))
     session.cardioDuration = '';
   return session;
 }
@@ -410,11 +496,11 @@ export function isLifting(s) {
 }
 export function cardioValid(s) {
   return (
-    (requiresCardio(s) || s.planVersion === PLAN_VERSION) &&
+    (requiresCardio(s) || supportsOptionalCardio(s)) &&
     numberIn(
       isCardio(s) ? s.duration : s.cardioDuration,
       1,
-      s.planVersion === PLAN_VERSION ? 120 : 180,
+      supportsOptionalCardio(s) ? 120 : 180,
     ) &&
     typeof s.cardio === 'string' &&
     s.cardio.trim().length > 0
@@ -423,7 +509,7 @@ export function cardioValid(s) {
 export function cardioLogRequired(s) {
   return (
     requiresCardio(s) ||
-    (s.planVersion === PLAN_VERSION &&
+    (supportsOptionalCardio(s) &&
       s.cardioDuration !== '' &&
       s.cardioDuration !== undefined &&
       Number(s.cardioDuration) !== 0)
@@ -542,16 +628,19 @@ export function weeklySummary(state, date) {
       (mean(checks.filter((c) => numberIn(c.sleep, 0, 24)).map((c) => c.sleep))?.toFixed(1) ??
         'not logged') +
       ' hours',
+    'Average steps: ' +
+      (mean(checks.filter((c) => numberIn(c.steps, 0, 100000, true)).map((c) => c.steps))?.toFixed(0) ?? 'not logged') +
+      '; build gradually from the reported 5,000/day baseline toward 8,000–10,000/day as recovery permits',
     'Recorded sessions: ' +
       sessions.length +
       '; marked finished: ' +
       sessions.filter((s) => s.status === 'finished').length +
-      '; current target: 6 lifting sessions/week (PPL twice); 2 easy cardio bouts planned after push days, reduced or skipped if recovery requires; do not repeat completed days during transition',
+      '; current target: ' + scheduledSessions(state, start) + ' lifting sessions in this calendar week; 6 per eight-day PPL/rest cycle; easy cardio after push sessions, reduced or skipped if recovery requires; do not repeat completed days during transition',
     'Finished lifting sessions: ' +
       sessions.filter((s) => isLifting(s) && s.status === 'finished').length +
-      '/6; finished cardio bouts: ' +
+      '/' + scheduledSessions(state, start) + '; finished cardio bouts: ' +
       sessions.filter((s) => s.status === 'finished' && cardioValid(s)).length +
-      ' (2 planned); cardio minutes logged: ' +
+      ' (optional after push sessions); cardio minutes logged: ' +
       sessions
         .filter((s) => cardioValid(s))
         .reduce((n, s) => n + Number(isCardio(s) ? s.duration : s.cardioDuration), 0),
@@ -593,8 +682,7 @@ export function weeklySummary(state, date) {
         s.date +
         ' · ' +
         sessionName(s) +
-        ' · week ' +
-        s.week +
+        ' · ' + blockLabel(s) +
         (s.week === 7 ? ' (DELOAD)' : '') +
         ' · prescription ' +
         (s.planVersion || LEGACY_PLAN.version),
@@ -678,6 +766,7 @@ export function validateState(data) {
       s.template,
       s.week,
       s.planVersion || LEGACY_PLAN.version,
+      s.volumePhase,
     );
     if (s.id !== expected.id) throw Error('Invalid workout identifier.');
     if (
@@ -696,8 +785,8 @@ export function validateState(data) {
           s.cardioDuration === '' ||
           numberIn(
             s.cardioDuration,
-            s.planVersion === PLAN_VERSION ? 0 : 1,
-            s.planVersion === PLAN_VERSION ? 120 : 180,
+            supportsOptionalCardio(s) ? 0 : 1,
+            supportsOptionalCardio(s) ? 120 : 180,
           )
         )) ||
       !Number.isFinite(Date.parse(s.updatedAt))
@@ -739,6 +828,7 @@ export function validateState(data) {
       !(c.weight === '' || numberIn(c.weight, 20, 400)) ||
       !(c.sleep === '' || numberIn(c.sleep, 0, 24)) ||
       !(c.waist === '' || numberIn(c.waist, 30, 250)) ||
+      !(c.steps === undefined || c.steps === '' || numberIn(c.steps, 0, 100000, true)) ||
       typeof c.notes !== 'string' ||
       !Number.isFinite(Date.parse(c.updatedAt))
     )
@@ -771,8 +861,9 @@ export function validateState(data) {
           !numberIn(target.minReps,1,200,true) || !numberIn(target.maxReps,1,200,true)) throw Error('Invalid coaching target.');
     }
     const active = data.coach.activeSplit;
-    if (active && (!validDate(active.effectiveDate) || !Array.isArray(active.schedule) || active.schedule.length !== 7 || active.schedule.some(id=>id!==null&&!Object.hasOwn(TEMPLATES,id)))) throw Error('Invalid future split.');
+    if (active && (!validDate(active.effectiveDate) || !Array.isArray(active.schedule) || ![7,8].includes(active.schedule.length) || active.schedule.some(id=>id!==null&&!Object.hasOwn(TEMPLATES,id)))) throw Error('Invalid future split.');
   }
+  if (data.preferences?.cycleStart !== undefined && !validDate(data.preferences.cycleStart)) throw Error('Invalid cycle start date.');
   return data;
 }
 export function mergeState(local, incoming) {

@@ -2,6 +2,12 @@ import { recordBadge, openExerciseHistory } from './analytics.mjs';
 import { renderToday, renderProgress, renderNutrition, mountCoach, coachSettings, coachHint, automaticReviews, scheduledTemplate, scheduleFor } from './companion.mjs';
 import {
   PLAN_VERSION,
+  VOLUME_PHASES,
+  defaultVolumePhase,
+  supportsOptionalCardio,
+  CYCLE_START,
+  scheduledSessions,
+  blockLabel,
   STORAGE_KEY,
   EXERCISES,
   exerciseDefinition,
@@ -182,6 +188,7 @@ function checkinForm(date) {
       'number',
       'inputmode="decimal" step="0.1" min="30" max="250"',
     ) +
+    field('Steps · actual daily total', 'check-steps', c.steps, 'number', 'inputmode="numeric" step="1" min="0" max="100000"') +
     '</div><label>Recovery / food / symptoms<textarea id="check-notes" maxlength="3000" placeholder="Energy, soreness, digestion, or anything worth reviewing…">' +
     esc(c.notes || '') +
     '</textarea></label><button class="primary wide">Save check-in</button></form>'
@@ -190,7 +197,7 @@ function checkinForm(date) {
 function bindCheckin() {
   $('#check-date').onchange = (e) => {
     const c = state.checkins.find((c) => c.date === e.target.value) || {};
-    for (const f of ['weight', 'sleep', 'waist', 'notes']) $('#check-' + f).value = c[f] ?? '';
+    for (const f of ['weight', 'sleep', 'waist', 'steps', 'notes']) $('#check-' + f).value = c[f] ?? '';
   };
   $('#checkin-form').onsubmit = (e) => {
     e.preventDefault();
@@ -199,10 +206,11 @@ function bindCheckin() {
       weight: $('#check-weight').value,
       sleep: $('#check-sleep').value,
       waist: $('#check-waist').value,
+      steps: $('#check-steps').value,
       notes: $('#check-notes').value,
       updatedAt: new Date().toISOString(),
     };
-    if (!c.weight && !c.sleep && !c.waist && !c.notes) {
+    if (!c.weight && !c.sleep && !c.waist && !c.steps && !c.notes) {
       toast('Enter at least one check-in value.');
       return;
     }
@@ -222,12 +230,12 @@ function renderHome() {
   const weight = state.checkins
     .filter((c) => numberIn(c.weight, 20, 400))
     .sort((a, b) => b.date.localeCompare(a.date))[0];
-  const last = state.sessions.slice().sort((a, b) => b.date.localeCompare(a.date))[0];
+  const last = state.sessions.filter(s => s.planVersion === PLAN_VERSION).sort((a, b) => b.date.localeCompare(a.date))[0];
   const week = Math.min(8, Math.max(1, last?.week || 1));
   $('#app').innerHTML =
     '<div class="eyebrow">' +
     esc(dateLabel(today)) +
-    ' · THE WORK IS YOURS</div><section class="hero"><div class="mark">Ψ</div><span class="pill">8-WEEK GREEK-PHYSIQUE BLOCK</span><h1 style="margin-top:20px">Build with<br>intention.</h1><p style="margin-bottom:0">' +
+    ' · THE WORK IS YOURS</div><section class="hero"><div class="mark">Ψ</div><span class="pill">EIGHT-DAY PPL · EIGHT-CYCLE BLOCK</span><h1 style="margin-top:20px">Build with<br>intention.</h1><p style="margin-bottom:0">' +
     (rec
       ? esc(TEMPLATES[rec].name) + ' is on the plan today.'
       : 'A recovery day. Walk, rest and come back ready.') +
@@ -238,9 +246,9 @@ function renderHome() {
     (weight ? ' · ' + esc(weight.date.slice(5)) : '') +
     '</small></div><div class="stat"><strong>' +
     weekSessions.filter((s) => isLifting(s) && s.status === 'finished').length +
-    '/6</strong><small>lifting exposures · ' +
+    '/' + scheduledSessions(state, weekStart) + '</strong><small>lifting exposures · ' +
     weekSessions.filter((s) => s.status === 'finished' && cardioValid(s)).length +
-    ' cardio bouts logged · 2 planned</small></div><div class="stat"><strong>' +
+    ' cardio bouts logged · optional after push</small></div><div class="stat"><strong>' +
     weekSessions.reduce((n, s) => n + progress(s).done, 0) +
     '</strong><small>working sets logged</small></div></div>' +
     '<div class="weekstrip">' +
@@ -283,24 +291,26 @@ function renderHome() {
           )
           .join('')
       : '') +
-    '<section class="card"><h2>Open a workout</h2><p class="subtle">Push/Pull/Legs twice weekly: 82 working sets, with easy cardio after Monday and Thursday push sessions. Most sessions take 60–95 minutes of lifting; 120 minutes is the total ceiling. Resume earlier workouts from History; do not repeat completed days when changing plans.</p><form id="start-form">' +
+    '<section class="card"><h2>Open a workout</h2><p class="subtle">S+ eight-day PPL: Push A → Pull A → Legs A → Rest → Push B → Pull B → Legs B → Rest. 85 → 87 → 89 sets per cycle; side delts 10 → 12 → 14. Hold your volume phase if recovery needs it. Cycle 7 is a 55-set deload checkpoint. Resume saved workouts from History.</p><form id="start-form">' +
     field('Workout date', 'workout-date', today, 'date', 'required') +
     '<div class="grid"><label>Session<select id="template" required>' +
     options(
       Object.fromEntries(Object.entries(TEMPLATES).map(([id, t]) => [id, t.name])),
       rec || 'pushA',
     ) +
-    '</select></label><label>Training week<select id="week">' +
+    '</select></label><label>Training cycle · 8 days<select id="week">' +
     options(
       Object.fromEntries(
         Array.from({ length: 8 }, (_, i) => [
           String(i + 1),
-          'Week ' + (i + 1) + (i === 6 ? ' · deload' : ''),
+          'Cycle ' + (i + 1) + (i === 6 ? ' · deload' : ''),
         ]),
       ),
       week,
     ) +
-    '</select></label></div><button class="primary wide">Open workout ↗</button></form></section>' +
+    '</select></label></div><label>Volume phase<select id="volume-phase">' +
+    options(VOLUME_PHASES, defaultVolumePhase(Number(week))) +
+    '</select></label><p class="subtle">Typical start: Foundation in cycle 1, Build in cycle 2, Full from cycle 3. Advance only after stable lifts, manageable soreness and no joint pain. Deload halves the full plan regardless of phase. Set Day 1 in Settings → Eight-day rotation; weekdays shift each cycle.</p><button class="primary wide">Open workout ↗</button></form></section>' +
     '<section class="card"><h2>Daily check-in</h2>' +
     checkinForm(today) +
     '</section><p class="subtle">No prescribed starting loads: use your warm-ups to find a weight with the planned reps in reserve. Record your actual working sets.</p>';
@@ -317,7 +327,7 @@ function renderHome() {
       (s) => s.date === date && s.template === t && s.planVersion === PLAN_VERSION,
     );
     if (!s) {
-      s = createSession(date, t, w);
+      s = createSession(date, t, w, PLAN_VERSION, $('#volume-phase').value);
       state.sessions.push(s);
       save();
     }
@@ -492,12 +502,11 @@ function renderSession() {
   }
   const p = progress(s),
     hybrid = requiresCardio(s) && !isCardio(s),
-    cardioMinutes = hybrid || s.planVersion === PLAN_VERSION;
+    cardioMinutes = hybrid || supportsOptionalCardio(s);
   $('#app').innerHTML =
     '<button class="back" id="back">← Workout overview</button><div class="eyebrow">' +
     esc(dateLabel(s.date)) +
-    ' · WEEK ' +
-    s.week +
+    ' · ' + blockLabel(s).toUpperCase() +
     (s.week === 7 ? ' · DELOAD' : '') +
     '</div><h1>' +
     esc(sessionName(s)) +
@@ -529,7 +538,7 @@ function renderSession() {
           'cardio-duration',
           s.cardioDuration,
           'number',
-          s.planVersion === PLAN_VERSION
+          supportsOptionalCardio(s)
             ? 'min="0" max="120" step="1" inputmode="numeric"'
             : 'min="1" max="180" step="1" inputmode="numeric"',
         )
@@ -675,7 +684,7 @@ function renderSession() {
   $('#finish').onclick = () => {
     if (cardioLogRequired(s) && !cardioValid(s)) {
       toast(
-        s.planVersion === PLAN_VERSION
+        supportsOptionalCardio(s)
           ? 'Describe your logged cardio and use 1–120 minutes, or log 0 if skipped.'
           : 'Enter 1–180 cardio minutes and describe the activity before finishing.',
       );
@@ -719,8 +728,7 @@ function renderHistory() {
           s.id +
           '"><div class="row"><small>' +
           esc(dateLabel(s.date)) +
-          ' · week ' +
-          s.week +
+          ' · ' + blockLabel(s) +
           '</small><span class="pill">' +
           esc(s.status) +
           '</span></div><strong>' +
@@ -808,13 +816,22 @@ function renderSettings() {
     '<p class="subtle" style="margin:14px 0 0">Logs are stored in this browser on this device. Clearing website data, private browsing, switching app addresses or losing the phone can remove access. There is no automatic cloud sync.</p></section>' +
     '<section class="card"><h2>Restore a backup</h2><p class="subtle">Choose a Trident JSON file. You will review its counts before restoring. Matching sessions/check-ins use the newer edit; other entries are retained.</p><input id="import-file" type="file" accept=".json,application/json" aria-label="Choose Trident backup"><div id="import-preview"></div></section>' +
     '<section class="card"><h2>On your iPhone</h2><ol><li>Open the app in Safari.</li><li>Tap Share, then Add to Home Screen.</li><li>Open it from that icon and use that same place for logging.</li><li>Open once online before relying on offline access.</li></ol><p class="subtle">Offline readiness: <strong id="offline-status">checking…</strong>. Rest timers catch up after you unlock your phone; there are no background alarms.</p></section>' +
-    '<section class="card"><h2>How to log accurately</h2><p><strong>kg:</strong> choose per dumbbell, total bar + plates, machine stack, assistance or bodyweight. Less assistance means a harder rep.</p><p><strong>RIR:</strong> clean reps still available. A set at 10 reps with 2 RIR means you could likely do 12 clean reps.</p><p><strong>Unilateral lifts:</strong> enter both sides, including RIR. One logged set represents the pair. Note unequal loads.</p><p><strong>Equipment:</strong> record your machine or substitution. Numbers from different machines are not automatically comparable.</p><p><strong>Week 7:</strong> choose it when starting a session; new lifting sessions use half the usual sets rounded up (2→1, 3→2, 4→2) at 4–5 RIR. Monday/Thursday cardio is optional 10–15 minutes of easy walking. Older sessions retain their original prescription.</p><p><strong>Progression:</strong> keep the load until every set reaches the top of its rep range at the intended RIR with consistent technique (both sides for unilateral lifts). Then use the smallest available increase. Deloads do not trigger load increases.</p><p><strong>Next weights:</strong> use the weekly export for coaching. “Use last weights” only copies your record; it does not prescribe an increase.</p></section><footer>TRIDENT FORGE · plan ' +
+    '<section class="card"><h2>How to log accurately</h2><p><strong>kg:</strong> choose per dumbbell, total bar + plates, machine stack, assistance or bodyweight. Less assistance means a harder rep.</p><p><strong>RIR:</strong> clean reps still available. A set at 10 reps with 2 RIR means you could likely do 12 clean reps.</p><p><strong>Unilateral lifts:</strong> enter both sides, including RIR. One logged set represents the pair. Note unequal loads.</p><p><strong>Equipment:</strong> record your machine or substitution. Numbers from different machines are not automatically comparable.</p><p><strong>Cycle 7:</strong> use it as a recovery checkpoint, or select it earlier for widespread fatigue. New sessions halve the full plan at 4–5 RIR. Push-day cardio is optional 10–15 minutes of easy walking. Older sessions retain their original prescription.</p><p><strong>Progression:</strong> keep the load until every set reaches the top of its rep range at the intended RIR with consistent technique (both sides for unilateral lifts). Then use the smallest available increase. Deloads do not trigger load increases.</p><p><strong>Next weights:</strong> use the weekly export for coaching. “Use last weights” only copies your record; it does not prescribe an increase.</p></section><footer>TRIDENT FORGE · plan ' +
     PLAN_VERSION +
     '<br>No analytics. AI reviews send your selected training and nutrition records to DeepSeek when enabled.<br>Source and operating guide are in your fitness project.</footer>';
   const coachPanel = document.createElement('section');
   coachPanel.className = 'card';
   $('#app').prepend(coachPanel);
   coachSettings(state, save, toast, coachPanel);
+  const rotationPanel = document.createElement('section');
+  rotationPanel.className = 'card';
+  rotationPanel.innerHTML = '<h2>Eight-day rotation</h2><p>Push A → Pull A → Legs A → Rest → Push B → Pull B → Legs B → Rest. Day 1 anchors future suggestions; saved workouts keep their dates and targets.</p><form id="rotation-form">' + field('Day 1 · Push A date', 'cycle-start', state.preferences?.cycleStart || CYCLE_START, 'date', 'required') + '<button class="primary wide">Save rotation start</button></form><p class="subtle">If you miss a day, resume the next unfinished workout without doubling up. Shift Day 1 by the missed days to move future suggestions.</p>';
+  coachPanel.after(rotationPanel);
+  $('#rotation-form').onsubmit = (event) => {
+    event.preventDefault();
+    state.preferences = { ...state.preferences, cycleStart: $('#cycle-start').value };
+    if (save()) toast('Eight-day rotation start saved.');
+  };
   $('#backup').onclick = async () => {
     const content = JSON.stringify(state, null, 2),
       name = 'trident-backup-' + localDate() + '.json';
