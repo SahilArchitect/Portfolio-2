@@ -33,7 +33,7 @@ const createSession = (date, template, week = 1, version = PLAN_VERSION) =>
   activeCreateSession(date, template, week, version);
 const exerciseDefinition = (id, version = PLAN_VERSION) => activeExerciseDefinition(id, version);
 test('six lifting exposures include hybrid Thursday, four-set compounds and a genuine deload', () => {
-  const days = ['pushA', 'pullA', 'legsA', '', 'pushB', 'pullB', 'legsB', ''];
+  const days = ['pushA', 'pullA', 'legsA', '', 'pushB', 'pullB', '', 'legsB', ''];
   days.forEach((name, i) => assert.equal(recommendedTemplate(addDays('2026-10-05', i)), name));
   const counts = {
     push: 22,
@@ -344,7 +344,7 @@ test('completed cardio requires actual activity and duration and counts separate
   assert.ok(sessionHasActivity(s));
   const data = validateState({ ...newState(), sessions: [s] });
   const report = weeklySummary(data, '2026-09-13');
-  assert.match(report, /Finished lifting sessions: 0\/6; finished cardio bouts: 1/);
+  assert.match(report, /Finished lifting sessions: 0\/5; finished cardio bouts: 1/);
   assert.match(report, /Completed working sets: 0 \/ 0/);
   assert.match(report, /Cardio · 40 min/);
   for (const duration of ['', 0, -1, 181, 'not a number']) {
@@ -386,7 +386,7 @@ test('hybrid completion requires cardio-specific minutes; backups preserve both 
   assert.equal(data.sessions[0].duration, '115');
   assert.equal(data.sessions[0].cardioDuration, '40');
   const report = weeklySummary(data, '2026-09-20');
-  assert.match(report, /Finished lifting sessions: 1\/5; finished cardio bouts: 1/);
+  assert.match(report, /Finished lifting sessions: 1\/4; finished cardio bouts: 1/);
   assert.match(report, /cardio minutes logged: 40/);
   assert.match(report, /Completed working sets: 1 \/ 24/);
   for (const bad of ['', 0, -1, 181, {}, []]) {

@@ -3,26 +3,30 @@ import assert from 'node:assert/strict';
 import {
   PLAN_VERSION, EXERCISES, TEMPLATES, CYCLE_SCHEDULE, CYCLE_START,
   createSession, planFor, progress, recommendedTemplate, scheduledTemplate,
-  scheduledSessions, addDays, cycleDay, newState, validateState, mergeState,
+  scheduledSessions, addDays, cycleDay, isGymClosed, newState, validateState, mergeState,
   exerciseRir, sessionInstructions, cardioValid, cardioLogRequired, weeklySummary,
 } from '../public/trident/core.mjs';
 import { validateSchedule, analyze } from '../src/lib/trident/coach.mjs';
 
-test('eight-day PPL rolls across weeks, months and leap/year boundaries with two rests', () => {
+test('PPL pauses on Sundays across anchors, months, leap days and year boundaries', () => {
   assert.equal(PLAN_VERSION, '2026-10-05-r8');
-  for (const anchor of [CYCLE_START, '2026-12-29', '2028-02-26']) {
-    for (let day = -8; day < 24; day++) {
+  for (const anchor of [CYCLE_START, '2026-12-29', '2028-02-26', '2026-10-11']) {
+    let expectedDay = -Array.from({length: 20}, (_, i) => addDays(anchor, i - 20)).filter(d => !isGymClosed(d)).length;
+    for (let day = -20; day < 80; day++) {
       const date = addDays(anchor, day);
-      assert.equal(recommendedTemplate(date, anchor), CYCLE_SCHEDULE[((day % 8) + 8) % 8] || '');
+      assert.equal(cycleDay(date, anchor), ((expectedDay % 8) + 8) % 8);
+      assert.equal(recommendedTemplate(date, anchor), isGymClosed(date) ? '' : CYCLE_SCHEDULE[((expectedDay % 8) + 8) % 8] || '');
+      if (!isGymClosed(date)) expectedDay++;
     }
   }
-  assert.equal(recommendedTemplate('2026-10-12'), '');
-  assert.equal(recommendedTemplate('2026-10-13'), 'pushA');
-  assert.equal(recommendedTemplate('2026-10-15'), 'legsA');
+  assert.equal(recommendedTemplate('2026-10-11'), '');
+  assert.equal(recommendedTemplate('2026-10-12'), 'legsB');
+  assert.equal(recommendedTemplate('2026-10-13'), '');
+  assert.equal(recommendedTemplate('2026-10-14'), 'pushA');
   assert.throws(() => cycleDay('2026-02-30'));
 });
 
-test('anchor changes future suggestions, preserves old sessions and counts five or six calendar-week visits', () => {
+test('anchor changes preserve saved sessions and exclude Sunday from weekly targets', () => {
   const data = newState();
   const saved = createSession('2026-10-05', 'pushA', 1);
   data.sessions.push(saved);
@@ -31,10 +35,27 @@ test('anchor changes future suggestions, preserves old sessions and counts five 
   assert.equal(scheduledTemplate(data, '2026-10-06'), 'pushA');
   assert.equal(scheduledTemplate(data, '2026-10-09'), null);
   assert.equal(JSON.stringify(saved), original);
-  assert.equal(scheduledSessions(newState(), '2026-10-05'), 6);
-  assert.equal(scheduledSessions(newState(), '2026-10-12'), 5);
+  assert.equal(scheduledSessions(newState(), '2026-10-05'), 5);
+  assert.equal(scheduledSessions(newState(), '2026-10-12'), 4);
   data.preferences.cycleStart = 'bad';
   assert.throws(() => validateState(data));
+});
+
+test('Sunday pauses accepted splits too, preserves historical Sunday logs and keeps both cycle rests', () => {
+  const data = newState();
+  data.sessions.push(createSession('2026-10-11', 'legsB', 1));
+  const saved = JSON.stringify(data.sessions);
+  data.coach = {reviews: [], activeSplit: {effectiveDate: '2026-10-11', schedule: [...CYCLE_SCHEDULE]}};
+  assert.equal(scheduledTemplate(data, '2026-10-11'), null);
+  assert.equal(scheduledTemplate(data, '2026-10-12'), 'pushA');
+  assert.equal(scheduledTemplate(data, '2026-10-15'), null);
+  assert.equal(scheduledTemplate(data, '2026-10-18'), null);
+  assert.equal(scheduledTemplate(data, '2026-10-19'), 'legsB');
+  assert.equal(scheduledTemplate(data, '2026-10-20'), null);
+  assert.equal(scheduledTemplate(data, '2026-10-21'), 'pushA');
+  const restored = validateState(JSON.parse(JSON.stringify(data)));
+  assert.equal(JSON.stringify(restored.sessions), saved);
+  assert.match(weeklySummary(data, '2026-10-12'), /Sunday is fixed rest because the gym is closed/);
 });
 
 test('volume phases prescribe 64/85/87/89 cycle sets, with 55 deload sets and correct muscle inventory', () => {
@@ -98,7 +119,7 @@ test('actual steps validate, merge and appear in weekly summaries without invent
 
 test('new reports use cycle labels and calendar-week targets; preserved seven-day proposals do not override new rotation', () => {
   const data=newState(); data.sessions.push(createSession('2026-10-13','pushA',2));
-  assert.match(weeklySummary(data,'2026-10-13'),/current target: 5 lifting sessions in this calendar week/);
+  assert.match(weeklySummary(data,'2026-10-13'),/current target: 4 lifting sessions in this calendar week/);
   assert.match(weeklySummary(data,'2026-10-13'),/Cycle 2/);
   data.coach={reviews:[],activeSplit:{effectiveDate:'2026-10-05',schedule:['pushA','pullA','legsA','pushB','pullB','legsB',null]}};
   validateState(data);
@@ -120,5 +141,6 @@ test('coach uses current diet targets and eight-day context, and rejects compres
   assert.deepEqual(context.currentSchedule,CYCLE_SCHEDULE);
   assert.match(prompt,/supplied plan calorieTarget/);
   assert.match(prompt,/never compress the cycle into seven days/);
+  assert.match(prompt,/Sunday is fixed rest because the gym is closed/);
   assert.equal(response.split.changeNeeded,false);
 });

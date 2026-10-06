@@ -7,6 +7,7 @@ import {
   supportsOptionalCardio,
   CYCLE_START,
   scheduledSessions,
+  isGymClosed,
   blockLabel,
   STORAGE_KEY,
   EXERCISES,
@@ -238,7 +239,7 @@ function renderHome() {
     ' · THE WORK IS YOURS</div><section class="hero"><div class="mark">Ψ</div><span class="pill">EIGHT-DAY PPL · EIGHT-CYCLE BLOCK</span><h1 style="margin-top:20px">Build with<br>intention.</h1><p style="margin-bottom:0">' +
     (rec
       ? esc(TEMPLATES[rec].name) + ' is on the plan today.'
-      : 'A recovery day. Walk, rest and come back ready.') +
+      : isGymClosed(today) ? 'Sunday rest · gym closed. The rotation resumes Monday.' : 'A recovery day. Walk, rest and come back ready.') +
     '</p></section>' +
     '<div class="stats"><div class="stat"><strong>' +
     esc(weight?.weight || '—') +
@@ -291,14 +292,14 @@ function renderHome() {
           )
           .join('')
       : '') +
-    '<section class="card"><h2>Open a workout</h2><p class="subtle">S+ eight-day PPL: Push A → Pull A → Legs A → Rest → Push B → Pull B → Legs B → Rest. 85 → 87 → 89 sets per cycle; side delts 10 → 12 → 14. Hold your volume phase if recovery needs it. Cycle 7 is a 55-set deload checkpoint. Resume saved workouts from History.</p><form id="start-form">' +
+    '<section class="card"><h2>Open a workout</h2><p class="subtle">S+ eight-day PPL: Push A → Pull A → Legs A → Rest → Push B → Pull B → Legs B → Rest. Sundays are fixed rest because the gym is closed; pause the rotation and resume Monday. Keep both rotation recovery days. 85 → 87 → 89 sets per cycle; side delts 10 → 12 → 14. Hold your volume phase if recovery needs it. Cycle 7 is a 55-set deload checkpoint. Resume saved workouts from History.</p><form id="start-form">' +
     field('Workout date', 'workout-date', today, 'date', 'required') +
     '<div class="grid"><label>Session<select id="template" required>' +
     options(
       Object.fromEntries(Object.entries(TEMPLATES).map(([id, t]) => [id, t.name])),
       rec || 'pushA',
     ) +
-    '</select></label><label>Training cycle · 8 days<select id="week">' +
+    '</select></label><label>Training cycle · 8 rotation days<select id="week">' +
     options(
       Object.fromEntries(
         Array.from({ length: 8 }, (_, i) => [
@@ -310,7 +311,7 @@ function renderHome() {
     ) +
     '</select></label></div><label>Volume phase<select id="volume-phase">' +
     options(VOLUME_PHASES, last?.volumePhase || defaultVolumePhase(Number(week))) +
-    '</select></label><p class="subtle">Typical start: Foundation in cycle 1, Build in cycle 2, Full from cycle 3. Advance only after stable lifts, manageable soreness and no joint pain. Deload halves the full plan regardless of phase. Set Day 1 in Settings → Eight-day rotation; weekdays shift each cycle.</p><button class="primary wide">Open workout ↗</button></form></section>' +
+    '</select></label><p class="subtle">Typical start: Foundation in cycle 1, Build in cycle 2, Full from cycle 3. Advance only after stable lifts, manageable soreness and no joint pain. Deload halves the full plan regardless of phase. Set Day 1 in Settings → Eight-day rotation; Sundays pause the rotation.</p><p id="schedule-notice" class="subtle" aria-live="polite"></p><button class="primary wide">Open workout ↗</button></form></section>' +
     '<section class="card"><h2>Daily check-in</h2>' +
     checkinForm(today) +
     '</section><p class="subtle">No prescribed starting loads: use your warm-ups to find a weight with the planned reps in reserve. Record your actual working sets.</p>';
@@ -323,6 +324,10 @@ function renderHome() {
     const date = $('#workout-date').value,
       t = $('#template').value,
       w = Number($('#week').value);
+    if (isGymClosed(date)) {
+      toast('Sunday is rest because the gym is closed. Resume the rotation Monday.');
+      return;
+    }
     let s = state.sessions.find(
       (s) => s.date === date && s.template === t && s.planVersion === PLAN_VERSION,
     );
@@ -335,10 +340,17 @@ function renderHome() {
     render();
     window.scrollTo(0, 0);
   };
-  $('#workout-date').onchange = (e) => {
-    const r = scheduledTemplate(state, e.target.value);
+  const updateSuggestion = () => {
+    const date = $('#workout-date').value;
+    if (!date) return;
+    const r = scheduledTemplate(state, date), closed = isGymClosed(date);
     if (r) $('#template').value = r;
+    $('#start-form button').disabled = closed;
+    $('#template').disabled = closed;
+    $('#schedule-notice').textContent = closed ? 'Sunday rest · gym closed. Resume the rotation Monday. Saved workouts remain available in History.' : r ? '' : 'Rotation recovery day. Rest and resume the next planned workout afterward.';
   };
+  $('#workout-date').onchange = updateSuggestion;
+  updateSuggestion();
   document
     .querySelectorAll('[data-open]')
     .forEach((b) => (b.onclick = () => openSession(b.dataset.open)));
@@ -825,7 +837,7 @@ function renderSettings() {
   coachSettings(state, save, toast, coachPanel);
   const rotationPanel = document.createElement('section');
   rotationPanel.className = 'card';
-  rotationPanel.innerHTML = '<h2>Eight-day rotation</h2><p>Push A → Pull A → Legs A → Rest → Push B → Pull B → Legs B → Rest. Day 1 anchors future suggestions; saved workouts keep their dates and targets.</p><form id="rotation-form">' + field('Day 1 · Push A date', 'cycle-start', state.preferences?.cycleStart || CYCLE_START, 'date', 'required') + '<button class="primary wide">Save rotation start</button></form><p class="subtle">If you miss a day, resume the next unfinished workout without doubling up. Shift Day 1 by the missed days to move future suggestions.</p>';
+  rotationPanel.innerHTML = '<h2>Eight-day rotation</h2><p>Push A → Pull A → Legs A → Rest → Push B → Pull B → Legs B → Rest. Eight rotation days exclude Sundays: the gym is closed, so Sunday is fixed rest and the rotation resumes Monday. Both rotation recovery days remain. Day 1 anchors future suggestions; saved workouts keep their dates and targets.</p><form id="rotation-form">' + field('Day 1 · Push A date', 'cycle-start', state.preferences?.cycleStart || CYCLE_START, 'date', 'required') + '<button class="primary wide">Save rotation start</button></form><p class="subtle">A Sunday start begins on Monday. Sundays pause automatically; do not shift Day 1 for them. For other missed days, resume the next unfinished workout without doubling up and adjust Day 1 to align future suggestions.</p>';
   coachPanel.after(rotationPanel);
   $('#rotation-form').onsubmit = (event) => {
     event.preventDefault();

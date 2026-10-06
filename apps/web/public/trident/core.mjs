@@ -352,13 +352,24 @@ export function monday(date) {
 }
 export const CYCLE_START = '2026-10-05';
 export const CYCLE_SCHEDULE = ['pushA', 'pullA', 'legsA', null, 'pushB', 'pullB', 'legsB', null];
+export function isGymClosed(date) {
+  if (!validDate(date)) throw Error('Choose a valid date.');
+  return new Date(date + 'T12:00:00Z').getUTCDay() === 0;
+}
 export function cycleDay(date, anchor = CYCLE_START) {
   if (!validDate(date) || !validDate(anchor)) throw Error('Choose valid cycle dates.');
   const elapsed = Math.round((Date.parse(date + 'T12:00:00Z') - Date.parse(anchor + 'T12:00:00Z')) / 86400000);
-  return ((elapsed % 8) + 8) % 8;
+  // Count rotation days in [anchor, date), excluding Sundays. Reverse the
+  // interval for dates before the anchor so past-date suggestions stay stable.
+  const days = Math.abs(elapsed), first = elapsed < 0 ? date : anchor;
+  const weekday = new Date(first + 'T12:00:00Z').getUTCDay();
+  const sundays = Math.floor(days / 7) + (days % 7 > (7 - weekday) % 7 ? 1 : 0);
+  const rotationDays = elapsed - Math.sign(elapsed) * sundays;
+  return ((rotationDays % 8) + 8) % 8;
 }
 export function recommendedTemplate(date, anchor = CYCLE_START) {
-  return CYCLE_SCHEDULE[cycleDay(date, anchor)] || '';
+  const day = cycleDay(date, anchor);
+  return isGymClosed(date) ? '' : CYCLE_SCHEDULE[day] || '';
 }
 export function scheduleFor(state, date) {
   const change = state.coach?.activeSplit;
@@ -367,10 +378,10 @@ export function scheduleFor(state, date) {
 }
 export function scheduledTemplate(state, date) {
   const schedule = scheduleFor(state, date);
-  if (schedule.length === 7) return schedule[(new Date(date + 'T12:00:00').getDay() + 6) % 7];
   const change = state.coach?.activeSplit;
   const anchor = change && change.schedule.length === 8 && date >= change.effectiveDate ? change.effectiveDate : state.preferences?.cycleStart || CYCLE_START;
-  return schedule[cycleDay(date, anchor)];
+  const day = cycleDay(date, anchor);
+  return isGymClosed(date) ? null : schedule[day];
 }
 export function scheduledSessions(state, start, days = 7) {
   return Array.from({ length: days }, (_, i) => scheduledTemplate(state, addDays(start, i))).filter(Boolean).length;
@@ -635,7 +646,7 @@ export function weeklySummary(state, date) {
       sessions.length +
       '; marked finished: ' +
       sessions.filter((s) => s.status === 'finished').length +
-      '; current target: ' + scheduledSessions(state, start) + ' lifting sessions in this calendar week; 6 per eight-day PPL/rest cycle; easy cardio after push sessions, reduced or skipped if recovery requires; do not repeat completed days during transition',
+      '; current target: ' + scheduledSessions(state, start) + ' lifting sessions in this calendar week; 6 per eight-day PPL/rest cycle (eight rotation days, excluding Sundays); Sunday is fixed rest because the gym is closed; pause the rotation and resume Monday, retaining both rotation recovery days; easy cardio after push sessions, reduced or skipped if recovery requires; do not repeat completed days during transition',
     'Finished lifting sessions: ' +
       sessions.filter((s) => isLifting(s) && s.status === 'finished').length +
       '/' + scheduledSessions(state, start) + '; finished cardio bouts: ' +
