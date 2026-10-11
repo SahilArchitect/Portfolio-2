@@ -1,67 +1,57 @@
-import type { Metadata } from 'next';
-import { MotionConfig } from 'framer-motion';
+import type { Metadata, Viewport } from 'next';
+import { JetBrains_Mono, Source_Serif_4 } from 'next/font/google';
 
-import { Cursor } from '@engine-room/ui';
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from '@/lib/site';
 
-import { CyberChrome } from '@/components/CyberChrome';
-import { SiteHeader } from '@/components/SiteHeader';
-import { SITE_URL } from '@/lib/site';
+import './globals.css';
 
-import '@engine-room/ui/styles/globals.css';
-import '@engine-room/ui/styles/cursor.css';
-import './fonts.css';
+const serif = Source_Serif_4({
+  subsets: ['latin'],
+  variable: '--font-source-serif',
+  // 'optional': no late re-paint when the font arrives (keeps LCP low); falls back to
+  // a metric-matched local serif on very slow first loads.
+  display: 'optional',
+});
+
+const mono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains-mono',
+  // 'optional': no late re-paint when the font arrives (keeps LCP low); falls back to
+  // a metric-matched local serif on very slow first loads.
+  display: 'optional',
+});
+
+const THEME_SCRIPT = `try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}`;
 
 export const metadata: Metadata = {
-  title: {
-    template: '%s - Sahil Bhatti',
-    default: 'Sahil Bhatti - AI Backend / LLM Infrastructure Engineer',
-  },
-  description:
-    'AI backend engineer building LLM gateways, RAG pipelines, inference APIs, and vector search systems.',
   metadataBase: new URL(SITE_URL),
-  openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    url: SITE_URL,
-    siteName: 'Sahil Bhatti',
-  },
+  title: { default: SITE_TITLE, template: `%s — ${SITE_NAME}` },
+  description: SITE_DESCRIPTION,
+  openGraph: { type: 'website', siteName: SITE_NAME, locale: 'en_GB' },
+  twitter: { card: 'summary_large_image' },
+  alternates: { types: { 'application/rss+xml': '/feed.xml' } },
 };
 
-const themeScript = `(function(){
-  try {
-    var stored = localStorage.getItem('theme');
-    var theme = stored === 'light' ? 'light' : 'dark';
-    document.documentElement.classList.toggle('light', theme === 'light');
-    if (window.self !== window.top) document.documentElement.dataset.embedded = 'true';
-  } catch(e) {}
-})();`;
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#fbfaf7' },
+    { media: '(prefers-color-scheme: dark)', color: '#141413' },
+  ],
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={`${serif.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
-        <link
-          rel="preload"
-          href="/fonts/Sohne.ttf"
-          as="font"
-          type="font/ttf"
-          crossOrigin="anonymous"
-        />
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        {/* Applies the saved theme before first paint (inline: no extra request). */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body>
-        <MotionConfig reducedMotion="user">
-          <CyberChrome />
-          <Cursor />
-          <a
-            href="#content"
-            className="focus:z-modal focus:border-border-strong focus:bg-bg-elev focus:text-mono-sm focus:text-fg sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:rounded-md focus:border focus:px-3 focus:py-2 focus:font-mono"
-          >
-            Skip to content
-          </a>
-          <SiteHeader />
-          {children}
-        </MotionConfig>
+        {children}
+        {/* Cookieless Vercel Web Analytics, same-origin; off unless explicitly enabled. */}
+        {process.env.NEXT_PUBLIC_ANALYTICS === 'true' && (
+          <script defer src="/_vercel/insights/script.js" />
+        )}
       </body>
     </html>
   );
