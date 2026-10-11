@@ -101,8 +101,8 @@ Current production setup of the `portfolio-2-web` project (done 2026-10-11):
 | Files     | Vercel Blob store `bysahil-files` (fra1) → `BLOB_READ_WRITE_TOKEN`                    |
 | Auth      | `AUTH_SECRET`, `ADMIN_ALLOWED_IDENTITY`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`       |
 
-The Neon database also still holds the retired FastAPI tables (`projects`, `posts`,
-`admin_users`, …). The new schema doesn't touch them; drop them once you no longer want them.
+The retired FastAPI backend's tables were dropped on 2026-10-11 after a SQL backup was saved
+outside the repo (`../Portfolio-2-backups/`).
 
 To recreate this from scratch:
 
