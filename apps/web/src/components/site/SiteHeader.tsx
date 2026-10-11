@@ -12,7 +12,25 @@ const NAV = [
 export function SiteHeader() {
   return (
     <header className="mx-auto flex max-w-measure flex-wrap items-baseline justify-between gap-x-6 gap-y-2 px-4 pt-6 pb-4 sm:px-0 sm:pt-10">
-      <Link href="/" className="font-semibold text-fg no-underline hover:text-accent">
+      <Link
+        href="/"
+        className="flex items-center gap-2 self-center font-semibold text-fg no-underline hover:text-accent"
+      >
+        {/* Same SB mark as the favicon (src/app/icon.svg), drawn in theme colours. */}
+        <svg viewBox="0 0 32 32" aria-hidden="true" className="h-7 w-7 shrink-0">
+          <rect width="32" height="32" rx="6" fill="var(--fg)" />
+          <text
+            x="16"
+            y="22.5"
+            fontFamily="Georgia, serif"
+            fontSize="18"
+            fontWeight="600"
+            textAnchor="middle"
+            fill="var(--bg)"
+          >
+            SB
+          </text>
+        </svg>
         Sahil Bhatti
       </Link>
       <nav

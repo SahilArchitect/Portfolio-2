@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { uploadAssetAction, type AssetState } from '@/app/admin/actions';
 
@@ -35,6 +36,9 @@ export function UploadDialog({
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
+    // React events bubble through the portal to the entry editor's form;
+    // letting this one through would also save (and remount) the editor.
+    event.stopPropagation();
     if (!file) return setError('Choose a file');
     if (file.size > CLIENT_LIMIT) return setError('Files must be 4 MB or smaller');
     if (isImage && !alt.trim()) return setError('Alt text is required for images');
@@ -59,7 +63,9 @@ export function UploadDialog({
     }
   }
 
-  return (
+  // Portalled so this <form> is never nested inside the entry editor's <form>:
+  // the browser would then submit natively and reload the page mid-upload.
+  return createPortal(
     <dialog
       ref={dialog}
       onClose={onClose}
@@ -119,6 +125,7 @@ export function UploadDialog({
           </button>
         </div>
       </form>
-    </dialog>
+    </dialog>,
+    document.body,
   );
 }

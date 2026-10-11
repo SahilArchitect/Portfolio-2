@@ -355,6 +355,7 @@ export function EntryEditor({ initial, assets }: { initial: EntryState; assets: 
             error={errors[field.path]}
             errors={errors}
             onChange={(value) => update(field.path, value)}
+            onAltChange={field.altPath ? (alt) => update(field.altPath as string, alt) : undefined}
             assets={assets}
           />
         ))}

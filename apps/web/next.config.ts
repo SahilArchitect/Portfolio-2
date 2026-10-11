@@ -27,6 +27,19 @@ const nextConfig: NextConfig = {
         destination: 'https://www.bysahil.dev/admin',
         permanent: true,
       },
+      // Short links to thesis PDFs uploaded through the admin (temporary, so the files can be replaced).
+      {
+        source: '/thesis-summary',
+        destination:
+          'https://pec5tppdvo6ecvw5.public.blob.vercel-storage.com/uploads/LUVAEvqSFSD5eFDm.pdf',
+        permanent: false,
+      },
+      {
+        source: '/thesis',
+        destination:
+          'https://pec5tppdvo6ecvw5.public.blob.vercel-storage.com/uploads/8x0qIEyFxDLnJSIl.pdf',
+        permanent: false,
+      },
       { source: '/tracker', destination: '/tracker/index.html', permanent: false },
       { source: '/trident', destination: '/trident/index.html', permanent: false },
     ];

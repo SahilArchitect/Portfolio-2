@@ -43,6 +43,8 @@ type Props = {
   error?: string;
   errors: Record<string, string>;
   onChange: (value: unknown) => void;
+  /** Image fields with `altPath`: receives the chosen asset's alt text. */
+  onAltChange?: (alt: string) => void;
   assets: AssetOption[];
 };
 
@@ -257,11 +259,17 @@ function RowsField({ field, value, errors, onChange }: Props) {
   );
 }
 
-function ImageField({ field, value, error, onChange, assets }: Props) {
+function ImageField({ field, value, error, onChange, onAltChange, assets }: Props) {
   const id = useId();
   const images = assets.filter((a) => a.contentType.startsWith('image/'));
   const current = typeof value === 'string' ? value : '';
   const [uploading, setUploading] = useState(false);
+  // The alt text entered at upload belongs with the image; without it a
+  // published entry fails the publish check and every save is rejected.
+  function choose(url: string, altText?: string) {
+    onChange(url);
+    if (url && altText) onAltChange?.(altText);
+  }
   return (
     <div>
       <Label field={field} htmlFor={id} />
@@ -269,7 +277,12 @@ function ImageField({ field, value, error, onChange, assets }: Props) {
         <select
           id={id}
           value={current}
-          onChange={(event) => onChange(event.target.value)}
+          onChange={(event) =>
+            choose(
+              event.target.value,
+              images.find((asset) => asset.url === event.target.value)?.altText,
+            )
+          }
           className={`${inputClass} mt-0 max-w-md`}
         >
           <option value="">— none —</option>
@@ -298,7 +311,7 @@ function ImageField({ field, value, error, onChange, assets }: Props) {
           onClose={() => setUploading(false)}
           onUploaded={(asset) => {
             setUploading(false);
-            onChange(asset.url);
+            choose(asset.url, asset.altText);
           }}
         />
       )}

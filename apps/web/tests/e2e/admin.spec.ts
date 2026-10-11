@@ -108,6 +108,46 @@ test.describe('owner workflow', () => {
     expect((await page.request.get(publicPath)).status()).not.toBe(200);
   });
 
+  test('a thumbnail uploaded to a published project saves and shows publicly', async ({ page }) => {
+    page.on('dialog', (dialog) => void dialog.accept());
+    const title = `E2E project ${Date.now()}`;
+    // 1x1 PNG
+    const png = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+      'base64',
+    );
+
+    await page.goto('/admin/project');
+    await page.getByRole('button', { name: '+ New project' }).click();
+    await expect(page).toHaveURL(/\/admin\/project\/[0-9a-f-]{36}$/);
+    await page.getByLabel('Title', { exact: true }).fill(title);
+    await page.getByLabel('Summary (3–4 sentences)').fill('A test project.');
+    await page.getByLabel('Start month', { exact: true }).fill('2026-01');
+    await page.keyboard.press('ControlOrMeta+s');
+    await expect(page.getByTestId('save-status')).toContainText('Saved');
+    await page.getByRole('button', { name: 'Publish' }).click();
+    await expect(page.getByTestId('entry-status')).toHaveText('published');
+
+    // Alt text is entered once, in the upload dialog.
+    await page.getByRole('button', { name: 'upload new' }).click();
+    const dialog = page.getByRole('dialog');
+    await dialog.locator('input[type="file"]').setInputFiles({
+      name: 'thumb.png',
+      mimeType: 'image/png',
+      buffer: png,
+    });
+    await dialog.getByLabel('Alt text (required)').fill('E2E thumbnail');
+    await dialog.getByRole('button', { name: 'Upload' }).click();
+    await expect(page.getByLabel('Thumbnail alt text')).toHaveValue('E2E thumbnail');
+    await page.keyboard.press('ControlOrMeta+s');
+    await expect(page.getByTestId('save-status')).toContainText('Saved');
+
+    await expect(async () => {
+      await page.goto('/research');
+      await expect(page.getByAltText('E2E thumbnail')).toBeVisible({ timeout: 1_000 });
+    }).toPass({ timeout: 20_000 });
+  });
+
   test('refuses to publish an entry that still contains TODO:', async ({ page }) => {
     page.on('dialog', (dialog) => void dialog.accept());
     await page.goto('/admin/project?status=draft');

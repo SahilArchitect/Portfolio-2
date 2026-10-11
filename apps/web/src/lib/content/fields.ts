@@ -33,6 +33,8 @@ export type FieldSpec = {
   maxLength?: number;
   /** Optional numeric fields: empty input stores undefined instead of 0. */
   optional?: boolean;
+  /** Image fields: sibling field that takes the chosen asset's alt text. */
+  altPath?: string;
 };
 
 export const TYPE_LABELS: Record<
@@ -121,7 +123,7 @@ export const FIELDS: Record<ContentType, FieldSpec[]> = {
     },
     { path: 'tags', label: 'Tags', kind: 'tags' },
     { path: 'featured', label: 'Featured on home page', kind: 'bool' },
-    { path: 'thumbnailUrl', label: 'Thumbnail', kind: 'image' },
+    { path: 'thumbnailUrl', label: 'Thumbnail', kind: 'image', altPath: 'thumbnailAlt' },
     {
       path: 'thumbnailAlt',
       label: 'Thumbnail alt text',
