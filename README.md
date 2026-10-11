@@ -125,8 +125,8 @@ To recreate this from scratch:
    the code that needs it.
 6. Deploy. Public pages are prerendered at build time, so the build needs `DATABASE_URL`.
 
-The old `portfolio-2-admin` project (admin.bysahil.dev) is no longer needed. Point that domain at
-a redirect to `https://www.bysahil.dev/admin`, or remove it.
+`admin.bysahil.dev` is attached to this project and redirects to `https://www.bysahil.dev/admin`
+(see `next.config.ts`); the old `portfolio-2-admin` project has been removed.
 
 ## Using the admin
 

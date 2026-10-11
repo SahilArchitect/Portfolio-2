@@ -20,6 +20,13 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // The old admin subdomain now points at this project.
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'admin.bysahil.dev' }],
+        destination: 'https://www.bysahil.dev/admin',
+        permanent: true,
+      },
       { source: '/tracker', destination: '/tracker/index.html', permanent: false },
       { source: '/trident', destination: '/trident/index.html', permanent: false },
     ];
