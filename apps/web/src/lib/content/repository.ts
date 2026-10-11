@@ -29,8 +29,7 @@ export type Snapshot = {
 };
 
 export type MutationResult<T = Entry> =
-  | { ok: true; value: T }
-  | { ok: false; errors: Record<string, string> };
+  { ok: true; value: T } | { ok: false; errors: Record<string, string> };
 
 /** Autosaves within this window update the previous autosave revision instead of adding one. */
 const AUTOSAVE_COALESCE_MS = 10 * 60 * 1000;
@@ -49,7 +48,9 @@ async function takenSlugs(type: ContentType, exceptId?: string): Promise<Set<str
   const rows = await db
     .select({ slug: entries.slug })
     .from(entries)
-    .where(exceptId ? and(eq(entries.type, type), ne(entries.id, exceptId)) : eq(entries.type, type));
+    .where(
+      exceptId ? and(eq(entries.type, type), ne(entries.id, exceptId)) : eq(entries.type, type),
+    );
   return new Set(rows.map((row) => row.slug));
 }
 
@@ -62,7 +63,9 @@ export async function listEntries(type: ContentType, status?: Status) {
   return db
     .select()
     .from(entries)
-    .where(status ? and(eq(entries.type, type), eq(entries.status, status)) : eq(entries.type, type))
+    .where(
+      status ? and(eq(entries.type, type), eq(entries.status, status)) : eq(entries.type, type),
+    )
     .orderBy(entries.sortOrder, desc(entries.updatedAt));
 }
 
@@ -111,7 +114,11 @@ export async function saveEntry(
   if (!valid.ok) return valid;
   if (current.status === 'published') {
     const problems = publishProblems(type, valid.data as Record<string, unknown>);
-    if (problems.length) return { ok: false, errors: { _: `Published entries must stay publishable: ${problems.join('; ')}` } };
+    if (problems.length)
+      return {
+        ok: false,
+        errors: { _: `Published entries must stay publishable: ${problems.join('; ')}` },
+      };
   }
 
   const slug = type === 'profile' ? current.slug : input.slug;
@@ -194,7 +201,8 @@ export async function setStatus(id: string, status: Status): Promise<MutationRes
     .update(entries)
     .set({
       status,
-      publishedAt: status === 'published' ? (current.publishedAt ?? new Date()) : current.publishedAt,
+      publishedAt:
+        status === 'published' ? (current.publishedAt ?? new Date()) : current.publishedAt,
       updatedAt: new Date(),
     })
     .where(eq(entries.id, id))
@@ -264,7 +272,9 @@ export async function entryForPreviewToken(token: string): Promise<Entry | null>
     .select({ entry: entries })
     .from(previewTokens)
     .innerJoin(entries, eq(previewTokens.entryId, entries.id))
-    .where(and(eq(previewTokens.tokenHash, hashToken(token)), gt(previewTokens.expiresAt, new Date())))
+    .where(
+      and(eq(previewTokens.tokenHash, hashToken(token)), gt(previewTokens.expiresAt, new Date())),
+    )
     .limit(1);
   return row?.entry ?? null;
 }

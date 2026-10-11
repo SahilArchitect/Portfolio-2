@@ -83,7 +83,11 @@ export function BitflipCurve({ data, caption }: { data: BitflipData; caption?: s
 
   const xLabel = data.xLabel ?? 'Flipped bits';
   const yLabel = data.yLabel ?? 'Accuracy';
-  const readings = series.map((s, i) => ({ name: s.name, slot: i + 1, value: valueAt(s.points, selectedX) }));
+  const readings = series.map((s, i) => ({
+    name: s.name,
+    slot: i + 1,
+    value: valueAt(s.points, selectedX),
+  }));
 
   return (
     <figure className={styles.root}>
@@ -92,7 +96,11 @@ export function BitflipCurve({ data, caption }: { data: BitflipData; caption?: s
         <ul className={styles.legend} aria-label="Series">
           {series.map((s, i) => (
             <li key={s.name}>
-              <span className={styles.swatch} style={{ background: `var(--series-${i + 1})` }} aria-hidden="true" />
+              <span
+                className={styles.swatch}
+                style={{ background: `var(--series-${i + 1})` }}
+                aria-hidden="true"
+              />
               {s.name}
             </li>
           ))}
@@ -110,17 +118,35 @@ export function BitflipCurve({ data, caption }: { data: BitflipData; caption?: s
         {yTicks.map((t) => (
           <g key={`y${t}`}>
             <line x1={M.left} x2={W - M.right} y1={sy(t)} y2={sy(t)} className={styles.grid} />
-            <text x={M.left - 8} y={sy(t)} className={styles.tick} textAnchor="end" dominantBaseline="middle">
+            <text
+              x={M.left - 8}
+              y={sy(t)}
+              className={styles.tick}
+              textAnchor="end"
+              dominantBaseline="middle"
+            >
               {fmt(t)}
             </text>
           </g>
         ))}
         {xTicks.map((t) => (
-          <text key={`x${t}`} x={sx(t)} y={H - M.bottom + 18} className={styles.tick} textAnchor="middle">
+          <text
+            key={`x${t}`}
+            x={sx(t)}
+            y={H - M.bottom + 18}
+            className={styles.tick}
+            textAnchor="middle"
+          >
             {fmt(t)}
           </text>
         ))}
-        <line x1={M.left} x2={W - M.right} y1={M.top + PH} y2={M.top + PH} className={styles.axis} />
+        <line
+          x1={M.left}
+          x2={W - M.right}
+          y1={M.top + PH}
+          y2={M.top + PH}
+          className={styles.axis}
+        />
         <text x={M.left + PW / 2} y={H - 4} className={styles.axisLabel} textAnchor="middle">
           {xLabel}
         </text>
@@ -132,7 +158,13 @@ export function BitflipCurve({ data, caption }: { data: BitflipData; caption?: s
           {yLabel}
         </text>
 
-        <line x1={sx(selectedX)} x2={sx(selectedX)} y1={M.top} y2={M.top + PH} className={styles.crosshair} />
+        <line
+          x1={sx(selectedX)}
+          x2={sx(selectedX)}
+          y1={M.top}
+          y2={M.top + PH}
+          className={styles.crosshair}
+        />
 
         {series.map((s, i) => (
           <polyline
@@ -186,7 +218,11 @@ export function BitflipCurve({ data, caption }: { data: BitflipData; caption?: s
         <output htmlFor={`${id}-slider`} className={`meta ${styles.readings}`} aria-live="polite">
           {readings.map((r) => (
             <span key={r.name}>
-              <span className={styles.swatch} style={{ background: `var(--series-${r.slot})` }} aria-hidden="true" />
+              <span
+                className={styles.swatch}
+                style={{ background: `var(--series-${r.slot})` }}
+                aria-hidden="true"
+              />
               {r.name}: {r.value === null ? '—' : fmt(r.value)}
             </span>
           ))}

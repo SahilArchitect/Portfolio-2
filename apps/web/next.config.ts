@@ -1,6 +1,6 @@
 import type { NextConfig } from 'next';
 
-import { baseHeaders, publicCsp } from './src/lib/security-headers';
+import { baseHeaders, siteCsp } from './src/lib/security-headers';
 
 const noindex = [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }];
 
@@ -24,11 +24,9 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
-      { source: '/:path*', headers: baseHeaders },
-      // Admin pages get a nonce-based CSP from the proxy instead.
       {
-        source: '/((?!admin|api/admin).*)',
-        headers: [{ key: 'Content-Security-Policy', value: publicCsp() }],
+        source: '/:path*',
+        headers: [...baseHeaders, { key: 'Content-Security-Policy', value: siteCsp() }],
       },
       // Unlinked side projects: reachable by direct URL, never indexed.
       { source: '/trident/:path*', headers: noindex },

@@ -2,6 +2,7 @@ import 'server-only';
 
 import { and, eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
 import { cache } from 'react';
 
 import { auth } from '@/auth';
@@ -18,6 +19,8 @@ export class UnauthorizedError extends Error {
 
 /** The owner's user id when the current request carries a valid owner session, else null. */
 export const getOwnerId = cache(async (): Promise<string | null> => {
+  // Session checks are always request-time work, never part of a prerender.
+  await connection();
   const session = await auth();
   const userId = session?.user?.id;
   const allowed = allowedGithubId();

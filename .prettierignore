@@ -10,3 +10,11 @@ coverage/
 playwright-report/
 test-results/
 *.pdf
+sahil_portfolio.html
+instructions.pdf
+docs/
+.agents/
+apps/web/next-env.d.ts
+apps/web/.next/
+apps/web/src/app/trident-coach/
+apps/web/tests/e2e/.auth/

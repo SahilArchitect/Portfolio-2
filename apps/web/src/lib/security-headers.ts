@@ -1,8 +1,9 @@
 /**
- * Security headers. Public pages are prerendered, so they cannot carry a
- * per-request nonce; their CSP allows Next's inline bootstrap scripts but
- * nothing from other origins. /admin is always dynamic and gets a nonce-based
- * policy from the proxy instead (see adminCsp).
+ * Security headers. Cache Components prerenders a static shell for every
+ * route (admin included), and static shells cannot carry a per-request
+ * nonce, so script-src allows Next's inline bootstrap scripts — but nothing
+ * from other origins. Markdown never passes raw HTML and is sanitized, which
+ * is the primary XSS defence.
  */
 const BLOB_ORIGIN = 'https://*.public.blob.vercel-storage.com';
 const ANALYTICS = process.env.NEXT_PUBLIC_ANALYTICS === 'true';
@@ -14,37 +15,26 @@ function join(directives: Record<string, string[]>): string {
     .join('; ');
 }
 
-export function publicCsp(): string {
+export function siteCsp(): string {
   return join({
     'default-src': ["'self'"],
-    'script-src': ["'self'", "'unsafe-inline'", ...(DEV ? ["'unsafe-eval'"] : []), ...(ANALYTICS ? ['https://va.vercel-scripts.com'] : [])],
+    'script-src': [
+      "'self'",
+      "'unsafe-inline'",
+      ...(DEV ? ["'unsafe-eval'"] : []),
+      ...(ANALYTICS ? ['https://va.vercel-scripts.com'] : []),
+    ],
     'style-src': ["'self'", "'unsafe-inline'"],
-    'img-src': ["'self'", 'data:', BLOB_ORIGIN],
+    'img-src': ["'self'", 'data:', 'blob:', BLOB_ORIGIN, 'https://avatars.githubusercontent.com'],
     'font-src': ["'self'", 'data:'],
     'connect-src': ["'self'", ...(ANALYTICS ? ['https://va.vercel-scripts.com'] : [])],
     'frame-src': ["'self'", BLOB_ORIGIN],
     'object-src': ["'none'"],
     'base-uri': ["'self'"],
-    'form-action': ["'self'"],
-    'frame-ancestors': ["'none'"],
-    ...(DEV ? {} : { 'upgrade-insecure-requests': [] }),
-  });
-}
-
-export function adminCsp(nonce: string): string {
-  return join({
-    'default-src': ["'self'"],
-    'script-src': ["'self'", `'nonce-${nonce}'`, ...(DEV ? ["'unsafe-eval'"] : [])],
-    // KaTeX and Shiki emit inline style attributes in the preview.
-    'style-src': ["'self'", "'unsafe-inline'"],
-    'img-src': ["'self'", 'data:', 'blob:', BLOB_ORIGIN, 'https://avatars.githubusercontent.com'],
-    'font-src': ["'self'", 'data:'],
-    'connect-src': ["'self'"],
-    'frame-src': ["'self'", BLOB_ORIGIN],
-    'object-src': ["'none'"],
-    'base-uri': ["'self'"],
+    // GitHub is the OAuth sign-in target.
     'form-action': ["'self'", 'https://github.com'],
     'frame-ancestors': ["'none'"],
+    ...(DEV ? {} : { 'upgrade-insecure-requests': [] }),
   });
 }
 

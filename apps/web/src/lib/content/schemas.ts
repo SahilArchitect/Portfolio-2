@@ -225,8 +225,7 @@ export function hasTodo(value: unknown): boolean {
 }
 
 export type ValidationResult<T> =
-  | { ok: true; data: T }
-  | { ok: false; errors: Record<string, string> };
+  { ok: true; data: T } | { ok: false; errors: Record<string, string> };
 
 export function validateData<T extends ContentType>(
   type: T,

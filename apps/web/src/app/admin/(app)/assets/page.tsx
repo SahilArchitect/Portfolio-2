@@ -18,8 +18,12 @@ export default async function AssetsPage() {
     <div className="max-w-4xl">
       <h1 className="text-xl font-semibold">Assets</h1>
       <p className="mt-1 text-sm text-muted">
-        Figures, write-up PDFs and figure data. File names are randomised; SVG is not accepted. A figure JSON looks like{' '}
-        <code className="font-mono text-xs">{'{ "series": [{ "name": "random", "points": [[0, 0.93], [10, 0.71]] }] }'}</code>.
+        Figures, write-up PDFs and figure data. File names are randomised; SVG is not accepted. A
+        figure JSON looks like{' '}
+        <code className="font-mono text-xs">
+          {'{ "series": [{ "name": "random", "points": [[0, 0.93], [10, 0.71]] }] }'}
+        </code>
+        .
       </p>
       <div className="mt-4">
         <AssetManager

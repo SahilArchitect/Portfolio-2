@@ -1,7 +1,13 @@
 import Link from 'next/link';
 
 /** Monospace metadata line: parts joined by a middle dot, empty parts dropped. */
-export function MetaLine({ parts, className = '' }: { parts: (string | null | undefined | false)[]; className?: string }) {
+export function MetaLine({
+  parts,
+  className = '',
+}: {
+  parts: (string | null | undefined | false)[];
+  className?: string;
+}) {
   const visible = parts.filter((part): part is string => Boolean(part));
   if (visible.length === 0) return null;
   return <p className={`meta ${className}`}>{visible.join(' · ')}</p>;

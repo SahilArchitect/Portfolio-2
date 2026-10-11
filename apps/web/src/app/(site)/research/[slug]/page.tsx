@@ -2,13 +2,21 @@ import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
 
 import { ProjectArticle } from '@/components/content/ProjectArticle';
-import { getProfile, getPublic, getSlugRedirect, listPublic, slugParams } from '@/lib/content/public';
+import {
+  getProfile,
+  getPublic,
+  getSlugRedirect,
+  listPublic,
+  slugParams,
+} from '@/lib/content/public';
 
 export async function generateStaticParams() {
   return slugParams(await listPublic('project'));
 }
 
-export async function generateMetadata({ params }: PageProps<'/research/[slug]'>): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<'/research/[slug]'>): Promise<Metadata> {
   const { slug } = await params;
   const project = await getPublic('project', slug);
   if (!project) return {};

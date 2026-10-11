@@ -33,7 +33,10 @@ export default async function Revisions(props: PageProps<'/admin/[type]/[id]/rev
       <div className="mt-4 grid gap-6 lg:grid-cols-[22rem_1fr]">
         <ol className="space-y-1 text-sm" data-testid="revision-list">
           {revisions.map((rev) => (
-            <li key={rev.id} className={`flex flex-wrap items-baseline gap-x-2 rounded px-2 py-1 ${rev.id === b?.id || rev.id === a?.id ? 'bg-bg-subtle' : ''}`}>
+            <li
+              key={rev.id}
+              className={`flex flex-wrap items-baseline gap-x-2 rounded px-2 py-1 ${rev.id === b?.id || rev.id === a?.id ? 'bg-bg-subtle' : ''}`}
+            >
               <time className="meta" dateTime={rev.createdAt.toISOString()}>
                 {rev.createdAt.toISOString().slice(0, 16).replace('T', ' ')}
               </time>
@@ -52,13 +55,20 @@ export default async function Revisions(props: PageProps<'/admin/[type]/[id]/rev
           {a && b ? (
             <>
               <p className="meta mb-2">
-                diff {a.createdAt.toISOString().slice(0, 16)} ({a.kind}) → {b.createdAt.toISOString().slice(0, 16)} ({b.kind})
+                diff {a.createdAt.toISOString().slice(0, 16)} ({a.kind}) →{' '}
+                {b.createdAt.toISOString().slice(0, 16)} ({b.kind})
               </p>
               <pre className="overflow-x-auto rounded border border-rule p-2 font-mono text-xs leading-relaxed whitespace-pre-wrap">
                 {parts.map((part, i) => (
                   <span
                     key={i}
-                    className={part.added ? 'bg-green-500/15 text-fg' : part.removed ? 'bg-red-500/15 text-fg line-through decoration-red-500/40' : 'text-muted'}
+                    className={
+                      part.added
+                        ? 'bg-green-500/15 text-fg'
+                        : part.removed
+                          ? 'bg-red-500/15 text-fg line-through decoration-red-500/40'
+                          : 'text-muted'
+                    }
                   >
                     {part.added ? '+ ' : part.removed ? '- ' : ''}
                     {part.value}

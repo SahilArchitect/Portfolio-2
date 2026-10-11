@@ -18,28 +18,30 @@ export async function ogImage({ title, label }: { title: string; label: string }
     font('jetbrains-mono-latin-400-normal.woff'),
   ]);
   return new ImageResponse(
-    (
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          padding: '72px 80px',
-          background: '#fbfaf7',
-          color: '#1b1b1a',
-          fontFamily: 'Source Serif',
-        }}
-      >
-        <div style={{ fontFamily: 'JetBrains Mono', fontSize: 26, color: '#595752' }}>{label}</div>
-        <div style={{ fontSize: title.length > 60 ? 56 : 68, fontWeight: 600, lineHeight: 1.15 }}>{title}</div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 30 }}>
-          <span>Sahil Bhatti</span>
-          <span style={{ fontFamily: 'JetBrains Mono', fontSize: 24, color: '#1d4f91' }}>bysahil.dev</span>
-        </div>
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        padding: '72px 80px',
+        background: '#fbfaf7',
+        color: '#1b1b1a',
+        fontFamily: 'Source Serif',
+      }}
+    >
+      <div style={{ fontFamily: 'JetBrains Mono', fontSize: 26, color: '#595752' }}>{label}</div>
+      <div style={{ fontSize: title.length > 60 ? 56 : 68, fontWeight: 600, lineHeight: 1.15 }}>
+        {title}
       </div>
-    ),
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 30 }}>
+        <span>Sahil Bhatti</span>
+        <span style={{ fontFamily: 'JetBrains Mono', fontSize: 24, color: '#1d4f91' }}>
+          bysahil.dev
+        </span>
+      </div>
+    </div>,
     {
       ...OG_SIZE,
       fonts: [

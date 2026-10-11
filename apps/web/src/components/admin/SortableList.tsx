@@ -6,7 +6,13 @@ import { useState } from 'react';
  * Editable, reorderable list of strings. Drag-and-drop on desktop; ↑/↓
  * buttons work everywhere (touch screens, keyboard, screen readers).
  */
-export function SortableList({ items, onChange }: { items: string[]; onChange: (items: string[]) => void }) {
+export function SortableList({
+  items,
+  onChange,
+}: {
+  items: string[];
+  onChange: (items: string[]) => void;
+}) {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
 
   function move(from: number, to: number) {
@@ -37,23 +43,44 @@ export function SortableList({ items, onChange }: { items: string[]; onChange: (
             </span>
             <input
               value={item}
-              onChange={(event) => onChange(items.map((v, i) => (i === index ? event.target.value : v)))}
+              onChange={(event) =>
+                onChange(items.map((v, i) => (i === index ? event.target.value : v)))
+              }
               className="w-full rounded border border-rule bg-bg px-2 py-1 text-[15px]"
               aria-label={`Item ${index + 1}`}
             />
-            <button type="button" onClick={() => move(index, index - 1)} aria-label={`Move item ${index + 1} up`} className="px-1 text-muted hover:text-fg">
+            <button
+              type="button"
+              onClick={() => move(index, index - 1)}
+              aria-label={`Move item ${index + 1} up`}
+              className="px-1 text-muted hover:text-fg"
+            >
               ↑
             </button>
-            <button type="button" onClick={() => move(index, index + 1)} aria-label={`Move item ${index + 1} down`} className="px-1 text-muted hover:text-fg">
+            <button
+              type="button"
+              onClick={() => move(index, index + 1)}
+              aria-label={`Move item ${index + 1} down`}
+              className="px-1 text-muted hover:text-fg"
+            >
               ↓
             </button>
-            <button type="button" onClick={() => onChange(items.filter((_, i) => i !== index))} aria-label={`Remove item ${index + 1}`} className="px-1 text-muted hover:text-red-700">
+            <button
+              type="button"
+              onClick={() => onChange(items.filter((_, i) => i !== index))}
+              aria-label={`Remove item ${index + 1}`}
+              className="px-1 text-muted hover:text-red-700"
+            >
               ×
             </button>
           </li>
         ))}
       </ol>
-      <button type="button" onClick={() => onChange([...items, ''])} className="text-sm text-accent underline">
+      <button
+        type="button"
+        onClick={() => onChange([...items, ''])}
+        className="text-sm text-accent underline"
+      >
         + add item
       </button>
     </div>

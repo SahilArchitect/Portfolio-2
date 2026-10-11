@@ -7,7 +7,13 @@ import { formatMonth } from '@/lib/dates';
 
 import { ChipRow, MetaLine, StatusBadge } from './bits';
 
-export function ProjectCard({ project, dims }: { project: PublicEntry<'project'>; dims: ImageDims }) {
+export function ProjectCard({
+  project,
+  dims,
+}: {
+  project: PublicEntry<'project'>;
+  dims: ImageDims;
+}) {
   const { data } = project;
   const thumb = data.thumbnailUrl ? dims[data.thumbnailUrl] : undefined;
   return (
@@ -26,7 +32,10 @@ export function ProjectCard({ project, dims }: { project: PublicEntry<'project'>
       )}
       <div className="min-w-0 space-y-1.5">
         <h3 className="leading-snug font-semibold">
-          <Link href={`/research/${project.slug}`} className="text-fg no-underline hover:text-accent hover:underline">
+          <Link
+            href={`/research/${project.slug}`}
+            className="text-fg no-underline hover:text-accent hover:underline"
+          >
             {data.title}
           </Link>
         </h3>

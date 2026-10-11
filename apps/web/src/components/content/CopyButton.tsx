@@ -14,7 +14,12 @@ export function CopyButton({ text, label = 'copy' }: { text: string; label?: str
     setTimeout(() => setState('idle'), 1800);
   }
   return (
-    <button type="button" onClick={copy} className="chip cursor-pointer text-accent" aria-live="polite">
+    <button
+      type="button"
+      onClick={copy}
+      className="chip cursor-pointer text-accent"
+      aria-live="polite"
+    >
       {state === 'copied' ? 'copied' : state === 'failed' ? 'copy failed' : label}
     </button>
   );

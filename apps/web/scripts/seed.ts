@@ -84,21 +84,27 @@ const seeds: Seed[] = [
       endMonth: 'TODO: end month in 2019 (YYYY-MM)',
     },
   },
-  ...['Machine Learning', 'Probability & Statistics', 'Information Theory', 'Discrete Mathematics'].map(
-    (course, index): Seed => ({
-      type: 'teaching',
-      slug: course.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-'),
-      status: 'draft',
-      sortOrder: index,
-      data: {
-        course,
-        institution: 'TODO: institution',
-        role: 'Teaching Assistant',
-        startMonth: 'TODO: start month (YYYY-MM)',
-        endMonth: 'TODO: end month (YYYY-MM)',
-      },
-    }),
-  ),
+  ...[
+    'Machine Learning',
+    'Probability & Statistics',
+    'Information Theory',
+    'Discrete Mathematics',
+  ].map((course, index): Seed => ({
+    type: 'teaching',
+    slug: course
+      .toLowerCase()
+      .replace(/&/g, 'and')
+      .replace(/[^a-z0-9]+/g, '-'),
+    status: 'draft',
+    sortOrder: index,
+    data: {
+      course,
+      institution: 'TODO: institution',
+      role: 'Teaching Assistant',
+      startMonth: 'TODO: start month (YYYY-MM)',
+      endMonth: 'TODO: end month (YYYY-MM)',
+    },
+  })),
   {
     type: 'project',
     slug: 'encrypted-traffic-classification',
@@ -113,8 +119,10 @@ const seeds: Seed[] = [
       tags: ['network traffic', 'encrypted traffic', 'deep learning'],
       featured: true,
       sections: {
-        threatModel: 'TODO: who observes the traffic, what they can see (sizes, timings, directions), and what they want to infer.',
-        method: 'TODO: dataset, features, CNN/LSTM/ensemble architectures, training and evaluation protocol.',
+        threatModel:
+          'TODO: who observes the traffic, what they can see (sizes, timings, directions), and what they want to infer.',
+        method:
+          'TODO: dataset, features, CNN/LSTM/ensemble architectures, training and evaluation protocol.',
         results: 'TODO: measured results with figures/tables from the thesis.',
         limitations: 'TODO: limitations.',
         nextSteps: '',
@@ -126,45 +134,41 @@ const seeds: Seed[] = [
   // The previous site's projects, archived: hidden publicly, recoverable in the admin.
   ...legacyProjects
     .filter((project) => project.slug !== 'encrypted-network-traffic-classification')
-    .map(
-      (project): Seed => ({
-        type: 'project',
-        slug: project.slug,
-        status: 'archived',
-        data: {
-          title: project.title,
-          summary: project.summary,
-          startMonth: 'TODO: start month (YYYY-MM)',
-          projectStatus: 'completed',
-          tags: project.stack,
-          featured: false,
-          sections: {
-            threatModel: '',
-            method: project.body,
-            results: '',
-            limitations: '',
-            nextSteps: '',
-            reproduce: '',
-          },
-          links: { code: project.repoUrl ?? '', writeup: '', data: '' },
-        },
-      }),
-    ),
-  ...legacyPosts.map(
-    (post): Seed => ({
-      type: 'note',
-      slug: post.slug,
+    .map((project): Seed => ({
+      type: 'project',
+      slug: project.slug,
       status: 'archived',
-      publishedAt: new Date(post.publishedAt),
       data: {
-        title: post.title,
-        date: post.publishedAt.slice(0, 10),
-        tags: post.tags,
-        summary: post.summary,
-        bodyMarkdown: post.body,
+        title: project.title,
+        summary: project.summary,
+        startMonth: 'TODO: start month (YYYY-MM)',
+        projectStatus: 'completed',
+        tags: project.stack,
+        featured: false,
+        sections: {
+          threatModel: '',
+          method: project.body,
+          results: '',
+          limitations: '',
+          nextSteps: '',
+          reproduce: '',
+        },
+        links: { code: project.repoUrl ?? '', writeup: '', data: '' },
       },
-    }),
-  ),
+    })),
+  ...legacyPosts.map((post): Seed => ({
+    type: 'note',
+    slug: post.slug,
+    status: 'archived',
+    publishedAt: new Date(post.publishedAt),
+    data: {
+      title: post.title,
+      date: post.publishedAt.slice(0, 10),
+      tags: post.tags,
+      summary: post.summary,
+      bodyMarkdown: post.body,
+    },
+  })),
 ];
 
 let inserted = 0;
@@ -176,7 +180,8 @@ for (const seed of seeds) {
     .limit(1);
   if (existing) continue;
   const valid = validateData(seed.type, seed.data);
-  if (!valid.ok) throw new Error(`Seed ${seed.type}/${seed.slug} is invalid: ${JSON.stringify(valid.errors)}`);
+  if (!valid.ok)
+    throw new Error(`Seed ${seed.type}/${seed.slug} is invalid: ${JSON.stringify(valid.errors)}`);
   const [row] = await db
     .insert(schema.entries)
     .values({
@@ -193,7 +198,13 @@ for (const seed of seeds) {
     await db.insert(schema.revisions).values({
       entryId: row.id,
       kind: 'seed',
-      snapshot: { title: row.title, slug: row.slug, status: row.status, data: row.data, publishAt: null },
+      snapshot: {
+        title: row.title,
+        slug: row.slug,
+        status: row.status,
+        data: row.data,
+        publishAt: null,
+      },
     });
     inserted += 1;
   }

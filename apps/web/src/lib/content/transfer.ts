@@ -90,16 +90,18 @@ export async function buildExport(): Promise<ExportBundle> {
       publishedAt: row.publishedAt?.toISOString() ?? null,
       publishAt: row.publishAt?.toISOString() ?? null,
     })),
-    assets: assetRows.map(({ url, pathname, contentType, size, width, height, altText, caption }) => ({
-      url,
-      pathname,
-      contentType,
-      size,
-      width,
-      height,
-      altText,
-      caption,
-    })),
+    assets: assetRows.map(
+      ({ url, pathname, contentType, size, width, height, altText, caption }) => ({
+        url,
+        pathname,
+        contentType,
+        size,
+        width,
+        height,
+        altText,
+        caption,
+      }),
+    ),
     cvFiles: cvRows.map(({ url, pathname, label, size, isCurrent, uploadedAt }) => ({
       url,
       pathname,
@@ -174,10 +176,18 @@ export async function buildExportZip(bundle: ExportBundle): Promise<Uint8Array> 
   return zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
 }
 
-export type ImportReport = { created: number; updated: number; assets: number; cvFiles: number; redirects: number };
+export type ImportReport = {
+  created: number;
+  updated: number;
+  assets: number;
+  cvFiles: number;
+  redirects: number;
+};
 
 /** Validates the whole bundle first; writes nothing unless every entry is valid. */
-export async function importBundle(raw: unknown): Promise<{ ok: true; report: ImportReport } | { ok: false; errors: Record<string, string> }> {
+export async function importBundle(
+  raw: unknown,
+): Promise<{ ok: true; report: ImportReport } | { ok: false; errors: Record<string, string> }> {
   const parsed = exportSchema.safeParse(raw);
   if (!parsed.success) return { ok: false, errors: flattenIssues(parsed.error.issues) };
   const bundle = parsed.data;
@@ -216,29 +226,54 @@ export async function importBundle(raw: unknown): Promise<{ ok: true; report: Im
         .where(and(eq(entries.type, entry.type), eq(entries.slug, entry.slug)))
         .limit(1);
       const [row] = existing
-        ? await tx.update(entries).set({ ...values, updatedAt: new Date() }).where(eq(entries.id, existing.id)).returning()
-        : await tx.insert(entries).values({ ...values, type: entry.type, slug: entry.slug }).returning();
+        ? await tx
+            .update(entries)
+            .set({ ...values, updatedAt: new Date() })
+            .where(eq(entries.id, existing.id))
+            .returning()
+        : await tx
+            .insert(entries)
+            .values({ ...values, type: entry.type, slug: entry.slug })
+            .returning();
       if (!row) continue;
       await tx.insert(revisions).values({
         entryId: row.id,
         kind: 'import',
-        snapshot: { title: row.title, slug: row.slug, status: row.status, data: row.data, publishAt: entry.publishAt },
+        snapshot: {
+          title: row.title,
+          slug: row.slug,
+          status: row.status,
+          data: row.data,
+          publishAt: entry.publishAt,
+        },
       });
       if (existing) report.updated += 1;
       else report.created += 1;
     }
     for (const asset of bundle.assets) {
-      await tx.insert(assets).values(asset).onConflictDoUpdate({
-        target: assets.url,
-        set: { altText: asset.altText, caption: asset.caption, width: asset.width, height: asset.height },
-      });
+      await tx
+        .insert(assets)
+        .values(asset)
+        .onConflictDoUpdate({
+          target: assets.url,
+          set: {
+            altText: asset.altText,
+            caption: asset.caption,
+            width: asset.width,
+            height: asset.height,
+          },
+        });
       report.assets += 1;
     }
     if (bundle.cvFiles.some((cv) => cv.isCurrent)) {
       await tx.update(cvFiles).set({ isCurrent: false });
     }
     for (const cv of bundle.cvFiles) {
-      const [existing] = await tx.select({ id: cvFiles.id }).from(cvFiles).where(eq(cvFiles.url, cv.url)).limit(1);
+      const [existing] = await tx
+        .select({ id: cvFiles.id })
+        .from(cvFiles)
+        .where(eq(cvFiles.url, cv.url))
+        .limit(1);
       const values = { ...cv, uploadedAt: new Date(cv.uploadedAt) };
       if (existing) await tx.update(cvFiles).set(values).where(eq(cvFiles.id, existing.id));
       else await tx.insert(cvFiles).values(values);
@@ -248,7 +283,10 @@ export async function importBundle(raw: unknown): Promise<{ ok: true; report: Im
       await tx
         .insert(slugRedirects)
         .values(redirect)
-        .onConflictDoUpdate({ target: [slugRedirects.type, slugRedirects.fromSlug], set: { toSlug: redirect.toSlug } });
+        .onConflictDoUpdate({
+          target: [slugRedirects.type, slugRedirects.fromSlug],
+          set: { toSlug: redirect.toSlug },
+        });
       report.redirects += 1;
     }
   });

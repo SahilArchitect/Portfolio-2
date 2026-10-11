@@ -10,7 +10,11 @@ export const metadata = { title: 'Dashboard' };
 
 export default async function Dashboard() {
   await requireOwnerPage();
-  const [counts, edits, todos] = await Promise.all([dashboardCounts(), recentEdits(10), entriesWithTodos()]);
+  const [counts, edits, todos] = await Promise.all([
+    dashboardCounts(),
+    recentEdits(10),
+    entriesWithTodos(),
+  ]);
   const types = CONTENT_TYPES.filter((t) => t !== 'profile');
 
   return (
@@ -78,7 +82,8 @@ export default async function Dashboard() {
                 {edit.createdAt.toISOString().slice(0, 16).replace('T', ' ')}
               </time>
               <span>
-                <Link href={`/admin/${edit.type}/${edit.entryId}`}>{edit.title}</Link> <span className="meta">{edit.kind}</span>
+                <Link href={`/admin/${edit.type}/${edit.entryId}`}>{edit.title}</Link>{' '}
+                <span className="meta">{edit.kind}</span>
               </span>
             </li>
           ))}

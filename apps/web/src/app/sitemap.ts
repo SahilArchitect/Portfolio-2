@@ -16,8 +16,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: absoluteUrl(path),
       lastModified: site,
     })),
-    ...projects.map((p) => ({ url: absoluteUrl(`/research/${p.slug}`), lastModified: new Date(p.updatedAt) })),
-    ...reproductions.map((r) => ({ url: absoluteUrl(`/reproductions/${r.slug}`), lastModified: new Date(r.updatedAt) })),
-    ...notes.map((n) => ({ url: absoluteUrl(`/notes/${n.slug}`), lastModified: new Date(n.updatedAt) })),
+    ...projects.map((p) => ({
+      url: absoluteUrl(`/research/${p.slug}`),
+      lastModified: new Date(p.updatedAt),
+    })),
+    ...reproductions.map((r) => ({
+      url: absoluteUrl(`/reproductions/${r.slug}`),
+      lastModified: new Date(r.updatedAt),
+    })),
+    ...notes.map((n) => ({
+      url: absoluteUrl(`/notes/${n.slug}`),
+      lastModified: new Date(n.updatedAt),
+    })),
   ];
 }

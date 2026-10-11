@@ -7,7 +7,14 @@ import { deleteCvAction, setCurrentCvAction, uploadCvAction } from '@/app/admin/
 
 import { useToast } from './Toaster';
 
-export type CvRow = { id: string; url: string; label: string; size: number; isCurrent: boolean; uploadedAt: string };
+export type CvRow = {
+  id: string;
+  url: string;
+  label: string;
+  size: number;
+  isCurrent: boolean;
+  uploadedAt: string;
+};
 
 export function CvManager({ files }: { files: CvRow[] }) {
   const router = useRouter();
@@ -16,7 +23,8 @@ export function CvManager({ files }: { files: CvRow[] }) {
 
   async function upload(form: FormData) {
     const file = form.get('file');
-    if (file instanceof File && file.size > 4 * 1024 * 1024) return toast('The PDF must be 4 MB or smaller', 'error');
+    if (file instanceof File && file.size > 4 * 1024 * 1024)
+      return toast('The PDF must be 4 MB or smaller', 'error');
     setBusy(true);
     const result = await uploadCvAction(form);
     setBusy(false);
@@ -27,16 +35,28 @@ export function CvManager({ files }: { files: CvRow[] }) {
 
   return (
     <div className="space-y-6">
-      <form action={upload} className="flex flex-wrap items-end gap-3 rounded border border-rule p-3">
+      <form
+        action={upload}
+        className="flex flex-wrap items-end gap-3 rounded border border-rule p-3"
+      >
         <label className="block">
           <span className="meta block text-fg">PDF</span>
           <input name="file" type="file" accept="application/pdf" required className="text-sm" />
         </label>
         <label className="block">
           <span className="meta block text-fg">Label</span>
-          <input name="label" required placeholder="e.g. 2026-10 PhD applications" className="rounded border border-rule bg-bg px-2 py-1 text-sm" />
+          <input
+            name="label"
+            required
+            placeholder="e.g. 2026-10 PhD applications"
+            className="rounded border border-rule bg-bg px-2 py-1 text-sm"
+          />
         </label>
-        <button type="submit" disabled={busy} className="rounded bg-fg px-3 py-1.5 text-sm text-bg disabled:opacity-50">
+        <button
+          type="submit"
+          disabled={busy}
+          className="rounded bg-fg px-3 py-1.5 text-sm text-bg disabled:opacity-50"
+        >
           {busy ? 'Uploading…' : 'Upload as current'}
         </button>
       </form>
@@ -80,7 +100,11 @@ export function CvManager({ files }: { files: CvRow[] }) {
             )}
           </li>
         ))}
-        {files.length === 0 && <li className="py-2 text-sm text-muted">No CV uploaded. The public CV link stays hidden until you upload one.</li>}
+        {files.length === 0 && (
+          <li className="py-2 text-sm text-muted">
+            No CV uploaded. The public CV link stays hidden until you upload one.
+          </li>
+        )}
       </ul>
     </div>
   );

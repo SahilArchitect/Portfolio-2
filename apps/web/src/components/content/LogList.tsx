@@ -4,7 +4,15 @@ import type { PublicEntry } from '@/lib/content/public';
 
 export const LOG_PAGE_SIZE = 30;
 
-export function LogList({ items, page, pages }: { items: PublicEntry<'log'>[]; page: number; pages: number }) {
+export function LogList({
+  items,
+  page,
+  pages,
+}: {
+  items: PublicEntry<'log'>[];
+  page: number;
+  pages: number;
+}) {
   return (
     <div className="pt-6 sm:pt-10">
       <h1 className="text-[1.6rem] font-semibold">Log</h1>
@@ -15,7 +23,9 @@ export function LogList({ items, page, pages }: { items: PublicEntry<'log'>[]; p
             <time className="meta pt-[0.2em]" dateTime={item.data.date}>
               {item.data.date}
             </time>
-            <span>{item.data.url ? <a href={item.data.url}>{item.data.text}</a> : item.data.text}</span>
+            <span>
+              {item.data.url ? <a href={item.data.url}>{item.data.text}</a> : item.data.text}
+            </span>
           </li>
         ))}
       </ul>

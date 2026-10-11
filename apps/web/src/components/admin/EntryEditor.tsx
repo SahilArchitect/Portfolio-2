@@ -11,7 +11,14 @@ import {
   setStatusAction,
   type EntryState,
 } from '@/app/admin/actions';
-import { FIELDS, HAS_SLUG_URL, TYPE_LABELS, getPath, publicPathFor, setPath } from '@/lib/content/fields';
+import {
+  FIELDS,
+  HAS_SLUG_URL,
+  TYPE_LABELS,
+  getPath,
+  publicPathFor,
+  setPath,
+} from '@/lib/content/fields';
 import { dataSchemas, flattenIssues, publishProblems, titleFor } from '@/lib/content/schemas';
 import { slugify } from '@/lib/slug';
 
@@ -31,7 +38,9 @@ export function EntryEditor({ initial, assets }: { initial: EntryState; assets: 
   const [entry, setEntry] = useState(initial);
   const [data, setData] = useState<Record<string, unknown>>(initial.data);
   const [slug, setSlug] = useState(initial.slug);
-  const [slugTouched, setSlugTouched] = useState(initial.status !== 'draft' || initial.slug !== slugify(initial.title));
+  const [slugTouched, setSlugTouched] = useState(
+    initial.status !== 'draft' || initial.slug !== slugify(initial.title),
+  );
   const [publishAt, setPublishAt] = useState(initial.publishAt ?? '');
   const [dirty, setDirty] = useState(false);
   const [save, setSave] = useState<SaveState>({ kind: 'saved', at: initial.updatedAt });
@@ -113,7 +122,8 @@ export function EntryEditor({ initial, assets }: { initial: EntryState; assets: 
         toast(`Cannot publish: ${problems.join('; ')}`, 'error');
         return;
       }
-      if (!window.confirm(`Publish "${titleFor(type, data)}"? It will be public within seconds.`)) return;
+      if (!window.confirm(`Publish "${titleFor(type, data)}"? It will be public within seconds.`))
+        return;
     }
     const result = await setStatusAction(entry.id, status);
     if (!result.ok) {
@@ -121,7 +131,13 @@ export function EntryEditor({ initial, assets }: { initial: EntryState; assets: 
       return;
     }
     setEntry(result.value);
-    toast(status === 'published' ? 'Published' : status === 'archived' ? 'Archived (hidden publicly)' : 'Moved to draft');
+    toast(
+      status === 'published'
+        ? 'Published'
+        : status === 'archived'
+          ? 'Archived (hidden publicly)'
+          : 'Moved to draft',
+    );
   }
 
   // Cmd/Ctrl+S saves; Cmd/Ctrl+Enter publishes (with confirmation).
@@ -176,7 +192,9 @@ export function EntryEditor({ initial, assets }: { initial: EntryState; assets: 
   }
 
   async function deletePermanently() {
-    const typed = window.prompt(`This permanently deletes "${entry.title}" and its history. Type DELETE to confirm.`);
+    const typed = window.prompt(
+      `This permanently deletes "${entry.title}" and its history. Type DELETE to confirm.`,
+    );
     if (typed !== 'DELETE') return;
     const result = await deleteEntryAction(entry.id, type);
     if (result && !result.ok) toast(Object.values(result.errors).join('; '), 'error');
@@ -201,28 +219,53 @@ export function EntryEditor({ initial, assets }: { initial: EntryState; assets: 
           <Link href={`/admin/${type}`} className="meta no-underline">
             ← {TYPE_LABELS[type].plural}
           </Link>
-          <span className="meta rounded-sm bg-badge px-1.5 py-0.5 text-fg" data-testid="entry-status">
+          <span
+            className="meta rounded-sm bg-badge px-1.5 py-0.5 text-fg"
+            data-testid="entry-status"
+          >
             {entry.status}
           </span>
-          <span className={`meta ${save.kind === 'error' ? 'text-red-700 dark:text-red-400' : ''}`} data-testid="save-status" aria-live="polite">
+          <span
+            className={`meta ${save.kind === 'error' ? 'text-red-700 dark:text-red-400' : ''}`}
+            data-testid="save-status"
+            aria-live="polite"
+          >
             {statusLine}
           </span>
           <div className="ml-auto flex flex-wrap gap-2 text-sm">
-            <button type="button" onClick={() => void doSave('save')} className="rounded border border-rule px-3 py-1 hover:border-accent" title="Cmd/Ctrl+S">
+            <button
+              type="button"
+              onClick={() => void doSave('save')}
+              className="rounded border border-rule px-3 py-1 hover:border-accent"
+              title="Cmd/Ctrl+S"
+            >
               Save
             </button>
             {type !== 'profile' && entry.status !== 'published' && (
-              <button type="button" onClick={() => void changeStatus('published')} className="rounded bg-fg px-3 py-1 text-bg hover:opacity-90" title="Cmd/Ctrl+Enter">
+              <button
+                type="button"
+                onClick={() => void changeStatus('published')}
+                className="rounded bg-fg px-3 py-1 text-bg hover:opacity-90"
+                title="Cmd/Ctrl+Enter"
+              >
                 Publish
               </button>
             )}
             {type !== 'profile' && entry.status === 'published' && (
-              <button type="button" onClick={() => void changeStatus('draft')} className="rounded border border-rule px-3 py-1">
+              <button
+                type="button"
+                onClick={() => void changeStatus('draft')}
+                className="rounded border border-rule px-3 py-1"
+              >
                 Unpublish
               </button>
             )}
             {type !== 'profile' && entry.status !== 'archived' && (
-              <button type="button" onClick={() => void changeStatus('archived')} className="rounded border border-rule px-3 py-1">
+              <button
+                type="button"
+                onClick={() => void changeStatus('archived')}
+                className="rounded border border-rule px-3 py-1"
+              >
                 Archive
               </button>
             )}
@@ -238,10 +281,18 @@ export function EntryEditor({ initial, assets }: { initial: EntryState; assets: 
         )}
         {['project', 'note', 'reproduction'].includes(type) && (
           <>
-            <button type="button" onClick={() => void makePreviewLink()} className="text-accent underline">
+            <button
+              type="button"
+              onClick={() => void makePreviewLink()}
+              className="text-accent underline"
+            >
               Create preview link
             </button>
-            <button type="button" onClick={() => void revokePreviews()} className="text-muted underline">
+            <button
+              type="button"
+              onClick={() => void revokePreviews()}
+              className="text-muted underline"
+            >
               Revoke preview links
             </button>
           </>
@@ -255,7 +306,10 @@ export function EntryEditor({ initial, assets }: { initial: EntryState; assets: 
       )}
 
       {errors._ && (
-        <p role="alert" className="mt-4 rounded border border-red-700 p-2 text-sm text-red-700 dark:text-red-400">
+        <p
+          role="alert"
+          className="mt-4 rounded border border-red-700 p-2 text-sm text-red-700 dark:text-red-400"
+        >
           {errors._}
         </p>
       )}
@@ -285,7 +339,11 @@ export function EntryEditor({ initial, assets }: { initial: EntryState; assets: 
               {publicPathFor(type, slug)}
               {entry.publishedAt && slug !== initial.slug && ' — the old URL will redirect here'}
             </span>
-            {errors.slug && <span className="mt-1 block text-sm text-red-700 dark:text-red-400">{errors.slug}</span>}
+            {errors.slug && (
+              <span className="mt-1 block text-sm text-red-700 dark:text-red-400">
+                {errors.slug}
+              </span>
+            )}
           </label>
         )}
 
@@ -313,7 +371,9 @@ export function EntryEditor({ initial, assets }: { initial: EntryState; assets: 
               }}
               className="mt-1 w-full rounded border border-rule bg-bg px-2 py-1.5 text-sm"
             />
-            <span className="meta mt-1 block">A published entry stays hidden until this time (within the hour).</span>
+            <span className="meta mt-1 block">
+              A published entry stays hidden until this time (within the hour).
+            </span>
           </label>
         )}
       </form>
@@ -321,7 +381,11 @@ export function EntryEditor({ initial, assets }: { initial: EntryState; assets: 
       {entry.status === 'archived' && (
         <section className="mt-12 border-t border-rule pt-4">
           <h2 className="meta uppercase">Danger zone</h2>
-          <button type="button" onClick={() => void deletePermanently()} className="mt-2 rounded border border-red-700 px-3 py-1 text-sm text-red-700 dark:text-red-400">
+          <button
+            type="button"
+            onClick={() => void deletePermanently()}
+            className="mt-2 rounded border border-red-700 px-3 py-1 text-sm text-red-700 dark:text-red-400"
+          >
             Delete permanently…
           </button>
         </section>

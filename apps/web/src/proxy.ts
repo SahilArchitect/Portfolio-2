@@ -1,7 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 import { resolveLegacyPath } from '@/lib/legacy-routes';
-import { adminCsp } from '@/lib/security-headers';
 
 const SESSION_COOKIES = ['authjs.session-token', '__Secure-authjs.session-token'];
 
@@ -51,13 +50,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/admin/login', request.url));
   }
 
-  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
-  const csp = adminCsp(nonce);
-  const headers = new Headers(request.headers);
-  headers.set('x-nonce', nonce);
-  headers.set('Content-Security-Policy', csp);
-  const response = NextResponse.next({ request: { headers } });
-  response.headers.set('Content-Security-Policy', csp);
+  const response = NextResponse.next();
   response.headers.set('Cache-Control', 'private, no-store');
   return response;
 }

@@ -3,7 +3,13 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-export type NoteListItem = { slug: string; title: string; date: string; tags: string[]; minutes: number };
+export type NoteListItem = {
+  slug: string;
+  title: string;
+  date: string;
+  tags: string[];
+  minutes: number;
+};
 
 /** Client-side tag filter and title search. Press "/" to focus the search box. */
 export function NotesList({ notes }: { notes: NoteListItem[] }) {
@@ -15,7 +21,9 @@ export function NotesList({ notes }: { notes: NoteListItem[] }) {
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       const target = event.target as HTMLElement | null;
-      const typing = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+      const typing =
+        target &&
+        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
       if (event.key === '/' && !typing) {
         event.preventDefault();
         search.current?.focus();
@@ -27,7 +35,9 @@ export function NotesList({ notes }: { notes: NoteListItem[] }) {
 
   const q = query.trim().toLowerCase();
   const shown = notes.filter(
-    (n) => (!tag || n.tags.includes(tag)) && (!q || n.title.toLowerCase().includes(q) || n.tags.some((t) => t.toLowerCase().includes(q))),
+    (n) =>
+      (!tag || n.tags.includes(tag)) &&
+      (!q || n.title.toLowerCase().includes(q) || n.tags.some((t) => t.toLowerCase().includes(q))),
   );
 
   return (
@@ -45,12 +55,27 @@ export function NotesList({ notes }: { notes: NoteListItem[] }) {
         />
       </label>
       {tags.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1" role="group" aria-label="Filter by tag">
-          <button type="button" onClick={() => setTag(null)} aria-pressed={tag === null} className={`chip cursor-pointer ${tag === null ? 'text-fg' : 'text-accent'}`}>
+        <div
+          className="mt-3 flex flex-wrap gap-x-3 gap-y-1"
+          role="group"
+          aria-label="Filter by tag"
+        >
+          <button
+            type="button"
+            onClick={() => setTag(null)}
+            aria-pressed={tag === null}
+            className={`chip cursor-pointer ${tag === null ? 'text-fg' : 'text-accent'}`}
+          >
             all
           </button>
           {tags.map((t) => (
-            <button key={t} type="button" onClick={() => setTag(tag === t ? null : t)} aria-pressed={tag === t} className={`chip cursor-pointer ${tag === t ? 'font-semibold text-fg' : 'text-accent'}`}>
+            <button
+              key={t}
+              type="button"
+              onClick={() => setTag(tag === t ? null : t)}
+              aria-pressed={tag === t}
+              className={`chip cursor-pointer ${tag === t ? 'font-semibold text-fg' : 'text-accent'}`}
+            >
               {t}
             </button>
           ))}
@@ -59,7 +84,10 @@ export function NotesList({ notes }: { notes: NoteListItem[] }) {
       <ul className="mt-5">
         {shown.map((note) => (
           <li key={note.slug} className="border-t border-rule py-3">
-            <Link href={`/notes/${note.slug}`} className="font-semibold text-fg no-underline hover:text-accent hover:underline">
+            <Link
+              href={`/notes/${note.slug}`}
+              className="font-semibold text-fg no-underline hover:text-accent hover:underline"
+            >
               {note.title}
             </Link>
             <p className="meta mt-0.5">

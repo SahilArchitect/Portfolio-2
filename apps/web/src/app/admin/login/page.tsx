@@ -6,10 +6,15 @@ export const metadata = { title: 'Sign in' };
 
 const ERRORS: Record<string, string> = {
   AccessDenied: 'That GitHub account is not allowed to sign in.',
-  Configuration: 'Sign-in is not configured on this deployment (check AUTH_* environment variables).',
+  Configuration:
+    'Sign-in is not configured on this deployment (check AUTH_* environment variables).',
 };
 
-async function Message({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+async function Message({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { error } = await searchParams;
   const code = typeof error === 'string' ? error : undefined;
   if (!code) return null;

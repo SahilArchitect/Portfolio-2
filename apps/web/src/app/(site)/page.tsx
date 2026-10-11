@@ -22,14 +22,24 @@ export default async function HomePage() {
 
   const links: { key: string; node: React.ReactNode }[] = [];
   if (profile?.email) {
-    links.push({ key: 'email', node: <ObfuscatedEmail reversed={profile.email.split('').reverse().join('')} /> });
+    links.push({
+      key: 'email',
+      node: <ObfuscatedEmail reversed={profile.email.split('').reverse().join('')} />,
+    });
   }
-  if (profile?.githubUrl) links.push({ key: 'github', node: <a href={profile.githubUrl}>GitHub</a> });
+  if (profile?.githubUrl)
+    links.push({ key: 'github', node: <a href={profile.githubUrl}>GitHub</a> });
   if (cv) links.push({ key: 'cv', node: <a href={cv.url}>CV (PDF)</a> });
-  if (profile?.scholarUrl) links.push({ key: 'scholar', node: <a href={profile.scholarUrl}>Google Scholar</a> });
+  if (profile?.scholarUrl)
+    links.push({ key: 'scholar', node: <a href={profile.scholarUrl}>Google Scholar</a> });
   if (profile?.orcidUrl) links.push({ key: 'orcid', node: <a href={profile.orcidUrl}>ORCID</a> });
 
-  const sameAs = [profile?.githubUrl, profile?.scholarUrl, profile?.orcidUrl, profile?.linkedinUrl].filter(Boolean);
+  const sameAs = [
+    profile?.githubUrl,
+    profile?.scholarUrl,
+    profile?.orcidUrl,
+    profile?.linkedinUrl,
+  ].filter(Boolean);
 
   return (
     <div className="space-y-10 pt-6 sm:pt-10">
@@ -44,7 +54,9 @@ export default async function HomePage() {
       />
       <section className="space-y-4">
         <h1 className="text-[1.75rem] leading-tight font-semibold">{name}</h1>
-        {profile?.researchStatement && <p className="text-[1.12em] leading-snug">{profile.researchStatement}</p>}
+        {profile?.researchStatement && (
+          <p className="text-[1.12em] leading-snug">{profile.researchStatement}</p>
+        )}
         {links.length > 0 && (
           <p className="meta flex flex-wrap gap-x-2 gap-y-1 text-[0.85rem]">
             {links.map((link, i) => (
@@ -92,7 +104,9 @@ export default async function HomePage() {
                 <time className="meta pt-[0.2em]" dateTime={item.data.date}>
                   {item.data.date}
                 </time>
-                <span>{item.data.url ? <a href={item.data.url}>{item.data.text}</a> : item.data.text}</span>
+                <span>
+                  {item.data.url ? <a href={item.data.url}>{item.data.text}</a> : item.data.text}
+                </span>
               </li>
             ))}
           </ul>

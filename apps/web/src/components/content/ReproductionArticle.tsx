@@ -64,16 +64,26 @@ export async function ReproductionArticle({
             <table className="w-full border-collapse text-[0.92em] tabular-nums">
               <thead>
                 <tr className="border-b border-fg text-left">
-                  <th scope="col" className="py-1.5 pr-4 font-semibold">Metric</th>
-                  <th scope="col" className="py-1.5 pr-4 font-semibold">Reported</th>
-                  <th scope="col" className="py-1.5 pr-4 font-semibold">Mine</th>
-                  <th scope="col" className="py-1.5 font-semibold">Notes</th>
+                  <th scope="col" className="py-1.5 pr-4 font-semibold">
+                    Metric
+                  </th>
+                  <th scope="col" className="py-1.5 pr-4 font-semibold">
+                    Reported
+                  </th>
+                  <th scope="col" className="py-1.5 pr-4 font-semibold">
+                    Mine
+                  </th>
+                  <th scope="col" className="py-1.5 font-semibold">
+                    Notes
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {data.rows.map((row) => (
                   <tr key={row.metric} className="border-b border-rule align-top">
-                    <th scope="row" className="py-1.5 pr-4 text-left font-normal">{row.metric}</th>
+                    <th scope="row" className="py-1.5 pr-4 text-left font-normal">
+                      {row.metric}
+                    </th>
                     <td className="py-1.5 pr-4 font-mono text-[0.85em]">{row.reported || '—'}</td>
                     <td className="py-1.5 pr-4 font-mono text-[0.85em]">{row.mine || '—'}</td>
                     <td className="py-1.5 text-[0.92em] text-muted">{row.notes}</td>

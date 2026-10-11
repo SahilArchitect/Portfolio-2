@@ -1,4 +1,7 @@
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bysahil.dev').replace(/\/$/, '');
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bysahil.dev').replace(
+  /\/$/,
+  '',
+);
 export const SITE_NAME = 'Sahil Bhatti';
 export const SITE_TITLE = 'Sahil Bhatti — Security of AI Systems';
 export const SITE_DESCRIPTION =

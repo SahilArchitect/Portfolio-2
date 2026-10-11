@@ -11,12 +11,13 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
+    "test:e2e": "tsx scripts/e2e-prepare.ts && next build && playwright test",
     "test:trident": "node --test tests/trident-core.test.mjs tests/trident-r7.test.mjs tests/trident-r8.test.mjs tests/trident-coach.test.mjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx scripts/seed.ts",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "test:e2e:run": "playwright test"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.3",

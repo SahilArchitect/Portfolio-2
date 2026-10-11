@@ -123,7 +123,10 @@ export default async function CvPage() {
           <ul className="space-y-1">
             {profile.email && (
               <li>
-                <ObfuscatedEmail reversed={profile.email.split('').reverse().join('')} label="Email" />
+                <ObfuscatedEmail
+                  reversed={profile.email.split('').reverse().join('')}
+                  label="Email"
+                />
               </li>
             )}
             {profile.githubUrl && (

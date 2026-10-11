@@ -21,7 +21,8 @@ export type AssetRow = {
 };
 
 function snippetFor(asset: AssetRow): string {
-  if (asset.contentType === 'application/json') return `::figure{type="bitflip-curve" data="${asset.url}"}`;
+  if (asset.contentType === 'application/json')
+    return `::figure{type="bitflip-curve" data="${asset.url}"}`;
   if (asset.contentType === 'application/pdf') return `[PDF](${asset.url})`;
   return `![${asset.altText}](${asset.url}${asset.caption ? ` "${asset.caption}"` : ''})`;
 }
@@ -36,22 +37,35 @@ function AssetItem({ asset }: { asset: AssetRow }) {
     <li className="grid gap-3 border-t border-rule py-4 sm:grid-cols-[8rem_1fr]">
       {isImage ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={asset.url} alt={asset.altText} className="max-h-28 w-full border border-rule object-contain" />
+        <img
+          src={asset.url}
+          alt={asset.altText}
+          className="max-h-28 w-full border border-rule object-contain"
+        />
       ) : (
         <span className="meta">{asset.contentType}</span>
       )}
       <div className="min-w-0 space-y-2">
         <p className="meta break-all">
-          {asset.url} · {(asset.size / 1024).toFixed(0)} KB{asset.width ? ` · ${asset.width}×${asset.height}` : ''}
+          {asset.url} · {(asset.size / 1024).toFixed(0)} KB
+          {asset.width ? ` · ${asset.width}×${asset.height}` : ''}
         </p>
         <div className="grid gap-2 sm:grid-cols-2">
           <label className="block">
             <span className="meta">alt text{isImage ? ' (required)' : ''}</span>
-            <input value={alt} onChange={(e) => setAlt(e.target.value)} className="mt-0.5 w-full rounded border border-rule bg-bg px-2 py-1 text-sm" />
+            <input
+              value={alt}
+              onChange={(e) => setAlt(e.target.value)}
+              className="mt-0.5 w-full rounded border border-rule bg-bg px-2 py-1 text-sm"
+            />
           </label>
           <label className="block">
             <span className="meta">caption / label</span>
-            <input value={caption} onChange={(e) => setCaption(e.target.value)} className="mt-0.5 w-full rounded border border-rule bg-bg px-2 py-1 text-sm" />
+            <input
+              value={caption}
+              onChange={(e) => setCaption(e.target.value)}
+              className="mt-0.5 w-full rounded border border-rule bg-bg px-2 py-1 text-sm"
+            />
           </label>
         </div>
         <p className="meta">Used in: {asset.usedIn.length ? asset.usedIn.join(', ') : 'nothing'}</p>
@@ -104,7 +118,11 @@ export function AssetManager({ assets }: { assets: AssetRow[] }) {
   const [open, setOpen] = useState(false);
   return (
     <div>
-      <button type="button" onClick={() => setOpen(true)} className="rounded border border-rule px-3 py-1.5 text-sm hover:border-accent">
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="rounded border border-rule px-3 py-1.5 text-sm hover:border-accent"
+      >
         + Upload (PNG, JPEG, WebP, PDF, figure JSON · max 4 MB)
       </button>
       <ul className="mt-4">

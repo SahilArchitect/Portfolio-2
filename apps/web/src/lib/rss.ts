@@ -1,4 +1,10 @@
-export type RssItem = { title: string; link: string; date: string; description?: string; category?: string };
+export type RssItem = {
+  title: string;
+  link: string;
+  date: string;
+  description?: string;
+  category?: string;
+};
 
 export function escapeXml(value: string): string {
   return value
@@ -9,7 +15,13 @@ export function escapeXml(value: string): string {
     .replace(/'/g, '&apos;');
 }
 
-export function buildRss(opts: { title: string; link: string; description: string; selfUrl: string; items: RssItem[] }) {
+export function buildRss(opts: {
+  title: string;
+  link: string;
+  description: string;
+  selfUrl: string;
+  items: RssItem[];
+}) {
   const items = opts.items
     .map(
       (item) => `    <item>

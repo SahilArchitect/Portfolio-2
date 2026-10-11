@@ -17,7 +17,10 @@ export default async function EntryList(props: PageProps<'/admin/[type]'>) {
   if (type === 'profile') {
     const [profile] = await listEntries('profile');
     if (profile) redirect(`/admin/profile/${profile.id}`);
-    const created = await createEntry('profile', undefined, { slug: 'profile', status: 'published' });
+    const created = await createEntry('profile', undefined, {
+      slug: 'profile',
+      status: 'published',
+    });
     if (created.ok) redirect(`/admin/profile/${created.value.id}`);
     notFound();
   }
@@ -34,11 +37,20 @@ export default async function EntryList(props: PageProps<'/admin/[type]'>) {
         <NewEntryButton type={type} label={`New ${labels.singular.toLowerCase()}`} />
       </div>
       <nav aria-label="Filter by status" className="meta mt-4 flex gap-3">
-        <Link href={`/admin/${type}`} aria-current={!status ? 'page' : undefined} className={!status ? 'text-fg' : ''}>
+        <Link
+          href={`/admin/${type}`}
+          aria-current={!status ? 'page' : undefined}
+          className={!status ? 'text-fg' : ''}
+        >
           all
         </Link>
         {STATUSES.map((s) => (
-          <Link key={s} href={`/admin/${type}?status=${s}`} aria-current={status === s ? 'page' : undefined} className={status === s ? 'text-fg' : ''}>
+          <Link
+            key={s}
+            href={`/admin/${type}?status=${s}`}
+            aria-current={status === s ? 'page' : undefined}
+            className={status === s ? 'text-fg' : ''}
+          >
             {s}
           </Link>
         ))}
@@ -46,7 +58,10 @@ export default async function EntryList(props: PageProps<'/admin/[type]'>) {
       <ul className="mt-4 divide-y divide-rule border-y border-rule">
         {rows.map((row) => (
           <li key={row.id} className="flex flex-wrap items-baseline justify-between gap-2 py-2.5">
-            <Link href={`/admin/${type}/${row.id}`} className="min-w-0 flex-1 text-fg no-underline hover:text-accent">
+            <Link
+              href={`/admin/${type}/${row.id}`}
+              className="min-w-0 flex-1 text-fg no-underline hover:text-accent"
+            >
               {row.title}
             </Link>
             <span className="meta">

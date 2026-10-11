@@ -3,7 +3,11 @@ import { buildRss, type RssItem } from '@/lib/rss';
 import { SITE_DESCRIPTION, SITE_TITLE, absoluteUrl } from '@/lib/site';
 
 export async function GET() {
-  const [notes, projects, log] = await Promise.all([listPublic('note'), listPublic('project'), listPublic('log')]);
+  const [notes, projects, log] = await Promise.all([
+    listPublic('note'),
+    listPublic('project'),
+    listPublic('log'),
+  ]);
   const items: RssItem[] = [
     ...notes.map((n) => ({
       title: n.data.title,

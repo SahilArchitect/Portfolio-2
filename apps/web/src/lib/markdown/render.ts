@@ -167,7 +167,10 @@ function buildProcessor(options: RenderOptions) {
   );
 }
 
-export async function renderMarkdown(source: string, options: RenderOptions = {}): Promise<Rendered> {
+export async function renderMarkdown(
+  source: string,
+  options: RenderOptions = {},
+): Promise<Rendered> {
   if (!source.trim()) return { blocks: [], headings: [] };
   const processor = buildProcessor(options);
   const tree = (await processor.run(processor.parse(source))) as HastRoot;

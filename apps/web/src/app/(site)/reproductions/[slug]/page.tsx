@@ -2,13 +2,21 @@ import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
 
 import { ReproductionArticle } from '@/components/content/ReproductionArticle';
-import { getProfile, getPublic, getSlugRedirect, listPublic, slugParams } from '@/lib/content/public';
+import {
+  getProfile,
+  getPublic,
+  getSlugRedirect,
+  listPublic,
+  slugParams,
+} from '@/lib/content/public';
 
 export async function generateStaticParams() {
   return slugParams(await listPublic('reproduction'));
 }
 
-export async function generateMetadata({ params }: PageProps<'/reproductions/[slug]'>): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<'/reproductions/[slug]'>): Promise<Metadata> {
   const { slug } = await params;
   const item = await getPublic('reproduction', slug);
   if (!item) return {};

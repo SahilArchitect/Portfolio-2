@@ -22,7 +22,13 @@ const SECTIONS = [
 ] as const;
 
 /** Fixed-order research write-up; shared by the public page and draft previews. */
-export async function ProjectArticle({ project, author }: { project: PublicEntry<'project'>; author: string }) {
+export async function ProjectArticle({
+  project,
+  author,
+}: {
+  project: PublicEntry<'project'>;
+  author: string;
+}) {
   const { data } = project;
   const dims = await getImageDims();
   const rendered = await Promise.all(
@@ -39,8 +45,17 @@ export async function ProjectArticle({ project, author }: { project: PublicEntry
   const present = rendered.filter((section) => section.blocks.length > 0);
   const figures = await loadFigureData(present.flatMap((s) => s.blocks));
   const path = `/research/${project.slug}`;
-  const bibtex = bibtexFor({ author, title: data.title, dateLike: data.endMonth || data.startMonth, path });
-  const toc = [{ id: 'summary', label: 'Summary' }, ...present.map((s) => ({ id: s.id, label: s.label })), { id: 'cite', label: 'Cite' }];
+  const bibtex = bibtexFor({
+    author,
+    title: data.title,
+    dateLike: data.endMonth || data.startMonth,
+    path,
+  });
+  const toc = [
+    { id: 'summary', label: 'Summary' },
+    ...present.map((s) => ({ id: s.id, label: s.label })),
+    { id: 'cite', label: 'Cite' },
+  ];
 
   return (
     <article className="relative pt-6 sm:pt-10">
@@ -61,7 +76,9 @@ export async function ProjectArticle({ project, author }: { project: PublicEntry
         <h1 className="text-[1.6rem] leading-tight font-semibold">{data.title}</h1>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <StatusBadge status={data.projectStatus} />
-          <MetaLine parts={[formatMonthRange(data.startMonth, data.endMonth), data.tags.join(', ')]} />
+          <MetaLine
+            parts={[formatMonthRange(data.startMonth, data.endMonth), data.tags.join(', ')]}
+          />
         </div>
         <ChipRow
           links={[

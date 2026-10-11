@@ -15,9 +15,16 @@ export function SiteHeader() {
       <Link href="/" className="font-semibold text-fg no-underline hover:text-accent">
         Sahil Bhatti
       </Link>
-      <nav aria-label="Main" className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-[0.95rem]">
+      <nav
+        aria-label="Main"
+        className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-[0.95rem]"
+      >
         {NAV.map((item) => (
-          <Link key={item.href} href={item.href} className="text-fg no-underline hover:text-accent hover:underline">
+          <Link
+            key={item.href}
+            href={item.href}
+            className="text-fg no-underline hover:text-accent hover:underline"
+          >
             {item.label}
           </Link>
         ))}

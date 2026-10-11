@@ -13,12 +13,14 @@ export default async function FeaturedPage() {
     <div className="max-w-2xl">
       <h1 className="text-xl font-semibold">Featured projects</h1>
       <p className="mt-1 text-sm text-muted">
-        Order on the home page. Drag, or use the arrows. Mark a project as featured in its editor. Research interests are
-        reordered in the profile.
+        Order on the home page. Drag, or use the arrows. Mark a project as featured in its editor.
+        Research interests are reordered in the profile.
       </p>
       <div className="mt-4">
         {projects.length ? (
-          <FeaturedOrder items={projects.map((p) => ({ id: p.id, title: p.title, status: p.status }))} />
+          <FeaturedOrder
+            items={projects.map((p) => ({ id: p.id, title: p.title, status: p.status }))}
+          />
         ) : (
           <p className="text-sm text-muted">No featured projects.</p>
         )}

@@ -29,7 +29,13 @@ export default async function EditEntry(props: PageProps<'/admin/[type]/[id]'>) 
         publishedAt: entry.publishedAt?.toISOString() ?? null,
         updatedAt: entry.updatedAt.toISOString(),
       }}
-      assets={assetRows.map((a) => ({ id: a.id, url: a.url, contentType: a.contentType, altText: a.altText, caption: a.caption }))}
+      assets={assetRows.map((a) => ({
+        id: a.id,
+        url: a.url,
+        contentType: a.contentType,
+        altText: a.altText,
+        caption: a.caption,
+      }))}
     />
   );
 }

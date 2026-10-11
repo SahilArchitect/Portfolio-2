@@ -18,5 +18,11 @@ export default async function LogPageN({ params }: PageProps<'/log/page/[n]'>) {
   const all = await listPublic('log');
   const pages = Math.max(1, Math.ceil(all.length / LOG_PAGE_SIZE));
   if (!Number.isInteger(page) || page < 2 || page > pages) notFound();
-  return <LogList items={all.slice((page - 1) * LOG_PAGE_SIZE, page * LOG_PAGE_SIZE)} page={page} pages={pages} />;
+  return (
+    <LogList
+      items={all.slice((page - 1) * LOG_PAGE_SIZE, page * LOG_PAGE_SIZE)}
+      page={page}
+      pages={pages}
+    />
+  );
 }

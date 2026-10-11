@@ -4,58 +4,19 @@ import { and, desc, eq, isNotNull } from 'drizzle-orm';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { db } from '@/db';
-import { assets, cvFiles, entries, slugRedirects, type Entry } from '@/db/schema';
+import { assets, cvFiles, entries, slugRedirects } from '@/db/schema';
 import { bitflipDataSchema, type BitflipData } from '@/lib/markdown/bitflip';
 import type { ImageDims } from '@/lib/markdown/render';
 import { storage } from '@/lib/storage';
 
 import { visibleProfile } from './profile';
-import {
-  dataSchemas,
-  hasTodo,
-  type ContentType,
-  type DataFor,
-  type ProfileData,
-} from './schemas';
+import { toPublic, type PublicEntry } from './visibility';
+import { dataSchemas, type ContentType, type ProfileData } from './schemas';
+
+export { toPublic, type PublicEntry };
 
 /** Every public query carries this tag; every admin mutation invalidates it. */
 export const CONTENT_TAG = 'content';
-
-export type PublicEntry<T extends ContentType> = {
-  id: string;
-  slug: string;
-  title: string;
-  data: DataFor<T>;
-  publishedAt: string | null;
-  updatedAt: string;
-  sortOrder: number;
-};
-
-/**
- * The single gate between the database and the public site. An entry is
- * public only if it is published, its scheduled time has passed, it parses
- * against its schema, and nothing in it still says TODO:.
- */
-export function toPublic<T extends ContentType>(
-  type: T,
-  row: Entry,
-  now: Date,
-): PublicEntry<T> | null {
-  if (row.type !== type || row.status !== 'published') return null;
-  if (row.publishAt && row.publishAt > now) return null;
-  if (hasTodo(row.title) || hasTodo(row.data)) return null;
-  const parsed = dataSchemas[type].safeParse(row.data);
-  if (!parsed.success) return null;
-  return {
-    id: row.id,
-    slug: row.slug,
-    title: row.title,
-    data: parsed.data as DataFor<T>,
-    publishedAt: row.publishedAt?.toISOString() ?? null,
-    updatedAt: row.updatedAt.toISOString(),
-    sortOrder: row.sortOrder,
-  };
-}
 
 function sortKey(type: ContentType, entry: PublicEntry<ContentType>): string {
   const data = entry.data as Record<string, unknown>;

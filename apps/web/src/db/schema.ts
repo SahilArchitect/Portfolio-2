@@ -102,7 +102,11 @@ export const cvFiles = pgTable(
     uploadedAt: timestamp('uploaded_at', { withTimezone: true }).notNull().defaultNow(),
   },
   // At most one current CV; the admin action keeps it at exactly one.
-  (t) => [uniqueIndex('cv_files_one_current_idx').on(t.isCurrent).where(sql`${t.isCurrent}`)],
+  (t) => [
+    uniqueIndex('cv_files_one_current_idx')
+      .on(t.isCurrent)
+      .where(sql`${t.isCurrent}`),
+  ],
 );
 
 export const rateLimits = pgTable('rate_limits', {

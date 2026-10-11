@@ -12,5 +12,8 @@ export async function generateStaticParams() {
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const note = await getPublic('note', slug);
-  return ogImage({ title: note?.data.title ?? 'Notes', label: note ? `note · ${note.data.date}` : 'notes' });
+  return ogImage({
+    title: note?.data.title ?? 'Notes',
+    label: note ? `note · ${note.data.date}` : 'notes',
+  });
 }

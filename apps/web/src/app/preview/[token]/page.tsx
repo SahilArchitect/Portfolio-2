@@ -10,7 +10,10 @@ import { dataSchemas, type ContentType } from '@/lib/content/schemas';
 import { entryForPreviewToken } from '@/lib/content/repository';
 import type { PublicEntry } from '@/lib/content/public';
 
-export const metadata: Metadata = { title: 'Draft preview', robots: { index: false, follow: false } };
+export const metadata: Metadata = {
+  title: 'Draft preview',
+  robots: { index: false, follow: false },
+};
 
 async function Preview({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
@@ -29,9 +32,11 @@ async function Preview({ params }: { params: Promise<{ token: string }> }) {
     sortOrder: row.sortOrder,
   };
   const author = 'Sahil Bhatti';
-  if (type === 'project') return <ProjectArticle project={entry as PublicEntry<'project'>} author={author} />;
+  if (type === 'project')
+    return <ProjectArticle project={entry as PublicEntry<'project'>} author={author} />;
   if (type === 'note') return <NoteArticle note={entry as PublicEntry<'note'>} author={author} />;
-  if (type === 'reproduction') return <ReproductionArticle entry={entry as PublicEntry<'reproduction'>} author={author} />;
+  if (type === 'reproduction')
+    return <ReproductionArticle entry={entry as PublicEntry<'reproduction'>} author={author} />;
   notFound();
 }
 

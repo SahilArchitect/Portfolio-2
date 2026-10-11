@@ -23,7 +23,10 @@ export function NoteArticle({ note, author }: { note: PublicEntry<'note'>; autho
         }}
       />
       <h1 className="text-[1.6rem] leading-tight font-semibold">{data.title}</h1>
-      <MetaLine className="mt-2" parts={[data.date, data.tags.join(', '), `${readingMinutes(data.bodyMarkdown)} min read`]} />
+      <MetaLine
+        className="mt-2"
+        parts={[data.date, data.tags.join(', '), `${readingMinutes(data.bodyMarkdown)} min read`]}
+      />
       {data.paperRef && <p className="meta mt-1">re: {data.paperRef}</p>}
       <div className="mt-8">
         <Markdown source={data.bodyMarkdown} headingOffset={1} />

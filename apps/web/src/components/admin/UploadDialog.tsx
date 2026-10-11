@@ -60,27 +60,61 @@ export function UploadDialog({
   }
 
   return (
-    <dialog ref={dialog} onClose={onClose} className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded border border-rule bg-bg p-0 text-fg backdrop:bg-black/40">
+    <dialog
+      ref={dialog}
+      onClose={onClose}
+      className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded border border-rule bg-bg p-0 text-fg backdrop:bg-black/40"
+    >
       <form onSubmit={submit} className="space-y-3 p-4">
         <h2 className="font-semibold">Upload file</h2>
-        <input type="file" accept={accept} onChange={(event) => setFile(event.target.files?.[0])} className="block w-full text-sm" />
-        {file && <p className="meta">{file.name} · {(file.size / 1024).toFixed(0)} KB</p>}
+        <input
+          type="file"
+          accept={accept}
+          onChange={(event) => setFile(event.target.files?.[0])}
+          className="block w-full text-sm"
+        />
+        {file && (
+          <p className="meta">
+            {file.name} · {(file.size / 1024).toFixed(0)} KB
+          </p>
+        )}
         {isImage && (
           <label className="block">
             <span className="meta text-fg">Alt text (required)</span>
-            <input value={alt} onChange={(event) => setAlt(event.target.value)} className="mt-1 w-full rounded border border-rule bg-bg px-2 py-1.5" required />
+            <input
+              value={alt}
+              onChange={(event) => setAlt(event.target.value)}
+              className="mt-1 w-full rounded border border-rule bg-bg px-2 py-1.5"
+              required
+            />
           </label>
         )}
         <label className="block">
           <span className="meta text-fg">Caption (optional)</span>
-          <input value={caption} onChange={(event) => setCaption(event.target.value)} className="mt-1 w-full rounded border border-rule bg-bg px-2 py-1.5" />
+          <input
+            value={caption}
+            onChange={(event) => setCaption(event.target.value)}
+            className="mt-1 w-full rounded border border-rule bg-bg px-2 py-1.5"
+          />
         </label>
-        {error && <p role="alert" className="text-sm text-red-700 dark:text-red-400">{error}</p>}
+        {error && (
+          <p role="alert" className="text-sm text-red-700 dark:text-red-400">
+            {error}
+          </p>
+        )}
         <div className="flex justify-end gap-2">
-          <button type="button" onClick={() => dialog.current?.close()} className="rounded border border-rule px-3 py-1 text-sm">
+          <button
+            type="button"
+            onClick={() => dialog.current?.close()}
+            className="rounded border border-rule px-3 py-1 text-sm"
+          >
             Cancel
           </button>
-          <button type="submit" disabled={busy} className="rounded bg-fg px-3 py-1 text-sm text-bg disabled:opacity-50">
+          <button
+            type="submit"
+            disabled={busy}
+            className="rounded bg-fg px-3 py-1 text-sm text-bg disabled:opacity-50"
+          >
             {busy ? 'Uploading…' : 'Upload'}
           </button>
         </div>

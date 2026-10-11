@@ -2,7 +2,13 @@ import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
 
 import { NoteArticle } from '@/components/content/NoteArticle';
-import { getProfile, getPublic, getSlugRedirect, listPublic, slugParams } from '@/lib/content/public';
+import {
+  getProfile,
+  getPublic,
+  getSlugRedirect,
+  listPublic,
+  slugParams,
+} from '@/lib/content/public';
 
 export async function generateStaticParams() {
   return slugParams(await listPublic('note'));
@@ -12,12 +18,18 @@ export async function generateMetadata({ params }: PageProps<'/notes/[slug]'>): 
   const { slug } = await params;
   const note = await getPublic('note', slug);
   if (!note) return {};
-  const description = note.data.summary || note.data.bodyMarkdown.replace(/[#*_`>[\]()!]/g, '').slice(0, 180);
+  const description =
+    note.data.summary || note.data.bodyMarkdown.replace(/[#*_`>[\]()!]/g, '').slice(0, 180);
   return {
     title: note.data.title,
     description,
     alternates: { canonical: `/notes/${note.slug}` },
-    openGraph: { type: 'article', title: note.data.title, description, publishedTime: note.data.date },
+    openGraph: {
+      type: 'article',
+      title: note.data.title,
+      description,
+      publishedTime: note.data.date,
+    },
   };
 }
 

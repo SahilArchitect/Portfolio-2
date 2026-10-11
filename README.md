@@ -1,164 +1,188 @@
-# The Engine Room
+# bysahil.dev
 
-Sahil Bhatti's portfolio site and a working demonstration of production AI backend infrastructure: RAG, LLM observability, admin operations, Substack ingestion, and deployable services.
+Source for [bysahil.dev](https://www.bysahil.dev), Sahil Bhatti's research website (security of AI
+systems), with a private admin at `/admin` for editing everything from the browser.
 
-## First Run In 5 Minutes
-
-Prerequisites: Node 20+, pnpm 9.12, Python 3.12, uv, Docker.
-
-```bash
-corepack enable
-corepack prepare pnpm@9.12.0 --activate
-pnpm install
-uv sync --all-packages --all-extras
-cp infra/.env.example .env
-docker compose -f infra/docker-compose.yml up -d postgres redis
-cd services/api && uv run --package engine-room-api alembic upgrade head && cd ../..
-uv run python infra/seed.py
-```
-
-Start the apps in separate terminals:
-
-```bash
-uv run --package engine-room-api uvicorn app.main:app --app-dir services/api --reload --port 8000
-```
-
-```bash
-PYTHONPATH=services/worker:services/api uv run --package engine-room-worker python -m app.scheduler
-```
-
-```bash
-pnpm dev
-```
-
-Local URLs:
-
-- Public site: `http://localhost:3000`
-- Admin console: `http://localhost:3001`
-- API health: `http://localhost:8000/api/health`
-- API docs: `http://localhost:8000/docs`
+- **Public site:** Home, Research, Reproductions, Notes, CV, Log, plus RSS (`/feed.xml`),
+  `/sitemap.xml`, `/robots.txt` and a custom 404. Pages are prerendered and served statically.
+  Saving in the admin invalidates the cache, so changes are live within seconds.
+- **Admin:** single owner (GitHub sign-in restricted to one account), Markdown editor with live
+  preview, autosave, revision history, preview links, uploads, export and import.
 
 ## Stack
 
-- Frontend: Next.js App Router, TypeScript, Tailwind, Framer Motion
-- Backend: FastAPI, Pydantic v2, SQLAlchemy 2.0, Alembic
-- Data: PostgreSQL 16 + pgvector, Redis
-- AI: OpenAI embeddings, Anthropic generation through an LLM gateway
-- Auth: NextAuth email magic link for the admin app, `ADMIN_TOKEN` for admin API calls
-- Observability: OpenTelemetry collector, console exporter in dev, configurable OTLP export in prod
-- Deploy: Docker Compose production stack, Caddy auto-TLS, Fly.io configs, GitHub Actions
+| Concern    | Choice                                                                   |
+| ---------- | ------------------------------------------------------------------------ |
+| Framework  | Next.js 16 (App Router, Cache Components), React 19, TypeScript strict   |
+| Styling    | Tailwind CSS 4, design tokens as CSS variables (`src/app/globals.css`)   |
+| Database   | PostgreSQL via Drizzle ORM + SQL migrations (`apps/web/drizzle/`)        |
+| Files      | Vercel Blob (prod) / local disk (dev), behind `src/lib/storage`          |
+| Auth       | Auth.js v5, GitHub OAuth, database sessions (7 days)                     |
+| Markdown   | unified: GFM, footnotes, KaTeX, Shiki, `rehype-sanitize` (strict schema) |
+| Validation | Zod schemas shared by forms, server actions and import                   |
+| Tests      | Vitest (unit), Playwright (end-to-end)                                   |
 
-## Layout
+Layout: everything lives in `apps/web` (pnpm workspace).
 
 ```text
-apps/web              Public Next.js site
-apps/admin            Admin Next.js console
-services/api          FastAPI backend and Alembic migrations
-services/worker       APScheduler ingestion/maintenance worker
-packages/ui           Shared design tokens, motion, primitives
-packages/types        Generated TypeScript API types
-infra                 Docker, Fly, OTel, seed, backup, env templates
-docs/AGENTS.md        Phase 2 parallel-agent contracts
+apps/web/
+  src/app/(site)/        public pages (prerendered; ensureStatic = 'navigation')
+  src/app/admin/         admin (owner-only) and its server actions
+  src/app/api/           auth, admin export, admin preview
+  src/lib/content/       schemas, public read gate, repository, import/export
+  src/lib/markdown/      renderer + sanitizer schema
+  src/db/                Drizzle schema; legacy-content.ts = old site's content (seeded as archived)
+  drizzle/               SQL migrations
+  scripts/               migrate, seed, e2e-prepare
+  tests/unit, tests/e2e  Vitest and Playwright
 ```
 
-## Common Commands
+## Run locally
+
+Prerequisites: Node 22 (`.nvmrc`), pnpm 9 (`corepack enable`), and Docker for Postgres. Any
+Postgres 14+ also works.
+
+```bash
+pnpm install
+docker compose -f infra/docker-compose.yml up -d     # Postgres on :5432 (user/pass/db: site)
+cp .env.example apps/web/.env                         # then fill in AUTH_* (see below)
+pnpm db:migrate
+pnpm db:seed                                          # idempotent; never overwrites edits
+pnpm dev                                              # http://localhost:3000
+```
+
+Without `BLOB_READ_WRITE_TOKEN`, uploads are stored in `apps/web/.data/` and served from `/files/…`.
+
+To sign in locally, create a second GitHub OAuth App with callback
+`http://localhost:3000/api/auth/callback/github` and put its ID and secret in `apps/web/.env`.
+
+## Environment variables
+
+All variables are documented in [`.env.example`](.env.example).
+
+| Variable                                | Required             | Purpose                                                       |
+| --------------------------------------- | -------------------- | ------------------------------------------------------------- |
+| `DATABASE_URL`                          | yes                  | Postgres connection string (pooled Neon URL in production)    |
+| `NEXT_PUBLIC_SITE_URL`                  | yes                  | Canonical origin, e.g. `https://www.bysahil.dev`              |
+| `AUTH_SECRET`                           | yes                  | Auth.js secret: `openssl rand -base64 32`                     |
+| `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` | yes                  | GitHub OAuth App credentials                                  |
+| `ADMIN_ALLOWED_IDENTITY`                | yes                  | `github:<numeric user id>`, the only account that may sign in |
+| `BLOB_READ_WRITE_TOKEN`                 | prod                 | Vercel Blob token (set automatically when a store is linked)  |
+| `NEXT_PUBLIC_ANALYTICS`                 | no (default `false`) | Reserved flag for cookieless analytics; off                   |
+
+## Tests and checks
 
 ```bash
 pnpm lint
 pnpm typecheck
-pnpm build
-uv run ruff check services infra/seed.py
-cd services/api && uv run --package engine-room-api alembic check
-uv run --package engine-room-api pytest services/api/tests
+pnpm test                 # Vitest: schemas, slugs, renderer + sanitizer, BibTeX, redirects, uploads
+pnpm format:check
+
+# End-to-end: needs a database whose name ends in _test (the script refuses anything else)
+DATABASE_URL=postgres://site:site@localhost:5432/site_test pnpm test:e2e
 ```
 
-## Production Compose
+`test:e2e` resets the test database, migrates, seeds, creates an owner session directly in the
+database, builds, and runs Playwright against the production server. CI
+(`.github/workflows/ci.yml`) runs all of the above on every pull request and push to `main`.
 
-```bash
-cp infra/.env.production.example infra/.env.production
-# edit infra/.env.production: domains, secrets, provider keys, backup bucket
-docker compose --env-file infra/.env.production -f infra/docker-compose.prod.yml up -d --build
-```
+## Deploy (Vercel)
 
-Caddy is the only public container. It serves the public site at `DOMAIN`, the admin app at `ADMIN_DOMAIN`, and proxies `/api/*` to FastAPI.
+The site deploys through Vercel's Git integration: pull requests get preview deployments, and
+merging to `main` deploys production.
 
-## Fly.io Deploy
+One-time setup for the `portfolio-2-web` project:
 
-```bash
-fly apps create engine-room-api
-fly apps create engine-room-web
-fly apps create engine-room-admin
-fly postgres create --name engine-room-db --region sjc --volume-size 10
-fly postgres attach --app engine-room-api engine-room-db
-fly secrets set --app engine-room-api ADMIN_TOKEN=... OPENAI_API_KEY=... ANTHROPIC_API_KEY=...
-fly secrets set --app engine-room-admin AUTH_SECRET=... ADMIN_EMAIL=... ADMIN_TOKEN=... RESEND_API_KEY=... EMAIL_FROM=...
-fly deploy --config infra/fly/api.fly.toml --remote-only
-fly deploy --config infra/fly/web.fly.toml --remote-only
-fly deploy --config infra/fly/admin.fly.toml --remote-only
-```
+1. **Root directory** `apps/web`, framework Next.js. Install and build commands stay at their defaults.
+2. **Database:** Storage → Marketplace → **Neon** → create and connect. This sets `DATABASE_URL`.
+   Use the pooled connection string.
+3. **Files:** Storage → **Blob** → create and connect. This sets `BLOB_READ_WRITE_TOKEN`.
+4. **GitHub OAuth App** at <https://github.com/settings/developers>: homepage
+   `https://www.bysahil.dev`, callback `https://www.bysahil.dev/api/auth/callback/github`. Copy
+   the ID and secret into `AUTH_GITHUB_ID` and `AUTH_GITHUB_SECRET`.
+5. Set `AUTH_SECRET`, `ADMIN_ALLOWED_IDENTITY=github:26546141` and
+   `NEXT_PUBLIC_SITE_URL=https://www.bysahil.dev`.
+6. **Migrate and seed the production database** once, from your machine:
+   ```bash
+   cd apps/web
+   DATABASE_URL='<neon url>' pnpm db:migrate
+   DATABASE_URL='<neon url>' pnpm db:seed
+   ```
+   Run `db:migrate` again whenever a new file appears in `apps/web/drizzle/`.
+7. Redeploy. Public pages are prerendered at build time, so the build needs `DATABASE_URL`.
 
-GitHub Actions deploys the three Fly apps on pushes to `main` when `FLY_API_TOKEN` is configured.
+The old `portfolio-2-admin` project (admin.bysahil.dev) is no longer needed. Point that domain at
+a redirect to `https://www.bysahil.dev/admin`, or remove it.
 
-## Operations
+## Using the admin
 
-Seed data after migrations:
+Sign in at `/admin` with GitHub. Only the account in `ADMIN_ALLOWED_IDENTITY` is accepted, and
+there is no sign-up.
 
-```bash
-uv run python infra/seed.py
-```
+- **Dashboard:** counts per type and status, the last 10 edits, every entry that still contains
+  `TODO:`, and "New …" buttons.
+- **Editing:** every field is validated as you type. Drafts autosave to the database after about
+  3 s ("Saved · 12:41"), and the browser warns before you leave with unsaved changes.
+  **Cmd/Ctrl+S** saves; **Cmd/Ctrl+Enter** publishes (asks first).
+- **Markdown:** GFM tables, footnotes, `$math$` / `$$display math$$`, fenced code with syntax
+  highlighting. `![alt](url "caption")` on its own line becomes a numbered figure. Drag an image
+  onto the editor to upload it; alt text is required. On a phone, the editor switches to
+  Edit/Preview tabs.
+- **Interactive figure:** upload a JSON file under **Assets**, shaped as
+  `{ "series": [{ "name": "random", "points": [[0, 0.93], [10, 0.71]] }] }`, then insert
+  `::figure{type="bitflip-curve" data="<asset url>"}` or pick it in a project's "Interactive
+  figure" field. If there's no valid data, nothing renders.
+- **Statuses:** `draft` → `published` → `archived`. Archive is the soft delete. Archived entries
+  can be deleted permanently (you type `DELETE` to confirm). Anything containing `TODO:` cannot be
+  published, and is filtered from public pages anyway.
+- **Slugs** follow the title until you edit them. Renaming a published slug creates a redirect
+  from the old URL automatically.
+- **Revision history:** every save creates a revision (autosaves within 10 minutes merge into
+  one). You can diff any two revisions and restore one in a click.
+- **Preview links:** "Create preview link" copies an unguessable URL that expires in 7 days.
+  "Revoke preview links" kills every link for that entry.
+- **Scheduled publishing:** set a time on a published entry. It appears within the hour after
+  that time (the cache lifetime).
+- **Featured order** reorders home-page projects. Research interests are reordered in **Profile**.
+- **CV files:** upload a PDF; the newest becomes current and the only one linked publicly.
+  Earlier versions stay listed.
+- **Profile:** the bio is hidden until you tick "Bio reviewed". Interests containing `TODO:` are
+  hidden.
+- **Settings:** export everything (zip with `content.json` + Markdown copies), import a
+  `content.json` (fully validated first; nothing is written if anything is invalid), and "Log out
+  everywhere" (deletes all sessions).
 
-Back up Postgres to S3-compatible storage:
+## Backups
 
-```bash
-export BACKUP_DATABASE_URL=postgresql://engine_room:password@host:5432/engine_room
-export S3_BUCKET=engine-room-backups
-export AWS_ACCESS_KEY_ID=...
-export AWS_SECRET_ACCESS_KEY=...
-infra/backup.sh
-```
+- **Export:** Admin → Settings → Download export. Keep a copy after big edits.
+- **Database:** Neon keeps point-in-time history (the length depends on the plan). Also take a
+  scheduled dump, for example a weekly GitHub Action or cron job:
+  `pg_dump "$DATABASE_URL" --no-owner --format=custom > bysahil-$(date +%F).dump`, stored outside
+  Vercel.
+- **Files:** Blob files are referenced by URL in the export. For an offline copy, list and
+  download them with the Vercel CLI (`vercel blob list`).
 
+## Security notes
 
-## Personal workout journal
+- Every admin page, server action and admin route re-checks the owner session against the
+  database. The proxy only does a cheap redirect.
+- Mutations: server actions verify `Origin`, and the proxy additionally rejects admin `POST`s
+  whose `Origin` is missing or foreign. Login and mutations are rate-limited (Postgres-backed).
+- Markdown never passes raw HTML. Output is sanitized (http/https/mailto links only), and
+  directives are allow-listed.
+- Uploads are typed by magic bytes. Only PNG, JPEG, WebP, PDF and figure JSON are accepted; SVG
+  is rejected. Files get random names (max 4 MB because of Vercel's request limit).
+- Headers: CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`,
+  `X-Frame-Options`. The CSP allows `'unsafe-inline'` scripts because Cache Components serves
+  prerendered shells, which cannot carry per-request nonces. No third-party script origins are
+  allowed.
 
-The Trident mobile tracker is available at **/trident** (redirects to /trident/index.html).
-It is a standalone static app under apps/web/public/trident, so it does not inherit
-portfolio layout scripts or change API routing. Its service worker is scoped to
-/trident/ and caches only its own app shell.
+## Retired URLs
 
-The page is public and marked noindex; that is not access control. Workout records
-stay in each visitor's browser. No personal baseline is embedded in public source.
-Save a weekly JSON backup to Files/iCloud Drive and use the Markdown coaching export
-for reviewing weights, reps, RIR and recovery. There is no automatic cloud sync.
+`/work` → `/research`, `/work/encrypted-network-traffic-classification` →
+`/research/encrypted-traffic-classification`, and `/writing` → `/notes` all redirect (308).
+`/hire`, `/now`, `/traces`, the old project and post URLs, and `/resume/ai-backend-engineer.pdf`
+answer **410 Gone**. See `src/lib/legacy-routes.ts`.
 
-On iPhone, open the page in Safari, then Share → Add to Home Screen. Open it once
-online before relying on offline use.
-
-Run tracker logic tests with **pnpm --filter @engine-room/web test:trident**.
-
-Trident prescription revision 2026-09-08-r2 uses 4×12 compounds and three-set isolations, with rotating arms, twice-weekly pec deck and more abs/wrist work. Historical session definitions are retained for compatible backup imports and review; current sessions never overwrite same-day older-revision records.
-
-Trident revision 2026-09-09-r3 adds Friday incline barbell bench press (4×12), bringing Friday to 33 sets. Both prior prescriptions remain available for saved sessions and imports.
-
-## Stride study tracker
-
-Stride is available at **/tracker** and is featured in the home-page Mission Logs. Its source lives in the public [`SahilArchitect/stride-daily-progress`](https://github.com/SahilArchitect/stride-daily-progress) repository.
-
-The static export is committed under `apps/web/public/tracker`. Rebuild and sync it from the Stride repository with `npm run build:portfolio` before deploying portfolio updates. Study progress stays in the browser's IndexedDB and is never sent to the portfolio API.
-
-## Trident Forge web companion (2026-10-04)
-
-Open **https://www.bysahil.dev/trident**. Today, Workout, Nutrition and Progress mirror the native app's navigation, palette, imagery and domain workflows. Workout adds focused exercise logging, comparable exercise history, PR markers, Epley estimates on supported loads, and rest timers. Progress shows direct muscle sets, recorded volume, observed bodyweight trends and daily/weekly DeepSeek reviews. Apple Health, Live Activities and native widgets remain iOS capabilities.
-
-The meal source is the agreed 2026-10-04 Markdown plan in the private fitness project: 1,855 kcal and 132.6 g protein as rounded row totals, targets 1,850 kcal / 130–150 g protein. Carbohydrate and fat values remain unknown. Meal snapshots, workouts, check-ins and coaching reviews export together; historical sessions preserve their original prescription. Browser storage is per device, with no cloud sync.
-
-### Private AI configuration
-
-Set **DEEPSEEK_API_KEY**, **TRIDENT_COACH_TOKEN**, and optionally **DEEPSEEK_MODEL** (default deepseek-flash) as private server environment variables in Vercel, then redeploy. Never prefix these with NEXT_PUBLIC or commit .env files. Enter the private coach access code under Settings → DeepSeek coach; this access code is kept in session storage only. The provider key never enters the browser in server-key mode. The optional personal-key connection holds that key in tab memory only. The same-origin POST /trident-coach proxy transmits selected logs to DeepSeek; it persists no workouts or credentials on the server and returns no secrets.
-
-Automatic daily reviews run after finishing workouts, and a due weekly review runs on the next visit after the previous week ends, once a coach connection exists. The browser cannot perform unattended reviews while closed. Reviews can also be generated manually for selected dates. Load guidance requires all prescribed sets and both unilateral sides at target reps/RIR; pain, deloads and incomplete sets cannot qualify for progression. Exact next loads require the athlete's actual equipment increment, bounded conservatively. Unknown increments are never invented. Assistance decreases for progression.
-
-Split changes require at least twelve finished sessions spanning three weeks with repeated recovery or pain signals. The model must also justify a balanced supported schedule. Apply an offered change from the next Monday; completed and draft sessions retain their original plan. Future exercise hints stay tied to exercise, load basis and equipment, and expire after fourteen days.
-
-Validation: **pnpm --filter @engine-room/web test:trident**. Production build: **pnpm --filter @engine-room/web build**. Mobile and desktop integration checks cover meals, persistence, set logging, coaching rendering, JSON export and layout. Live DeepSeek daily and weekly integration checks use synthetic training fixtures only. Service-worker shell cache is trident-shell-v9; close old tabs and reopen online to activate an update.
-
-Production verification: the hosted app and private server-key connection are confirmed live at https://www.bysahil.dev/trident. Daily and weekly DeepSeek calls both return validated reviews; the unauthenticated paid endpoint returns 401. Mobile/desktop production integration checks pass. A further same-load/both-side PR regression check passes (31 domain/API tests total); offline shell cache is now trident-shell-v10.
+The unlinked side projects `/trident`, `/tracker` and `/harsimran` are still reachable by direct
+URL but are `noindex` and disallowed in `robots.txt`.
