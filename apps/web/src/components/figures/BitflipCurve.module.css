@@ -1,0 +1,146 @@
+/* Categorical slots validated against the site surfaces (#fbfaf7 light, #141413 dark). */
+.root {
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --series-5: #e87ba4;
+  --series-6: #008300;
+  --series-7: #6250d6;
+  --series-8: #e34948;
+  margin: 1.75em 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :global(:root:where(:not([data-theme='light']))) .root {
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --series-4: #c98500;
+    --series-5: #d55181;
+    --series-6: #008300;
+    --series-7: #9085e9;
+    --series-8: #e66767;
+  }
+}
+
+:global(:root[data-theme='dark']) .root {
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+  --series-5: #d55181;
+  --series-6: #008300;
+  --series-7: #9085e9;
+  --series-8: #e66767;
+}
+
+.title {
+  font-weight: 600;
+  margin-bottom: 0.4em;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3em 1.2em;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--fg);
+  margin-bottom: 0.4em;
+}
+
+.swatch {
+  display: inline-block;
+  width: 0.9em;
+  height: 3px;
+  border-radius: 2px;
+  margin-right: 0.45em;
+  vertical-align: middle;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: pan-y;
+  border: 0;
+}
+
+.grid {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+.axis {
+  stroke: var(--muted);
+  stroke-width: 1;
+}
+
+.tick,
+.axisLabel {
+  fill: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.axisLabel {
+  fill: var(--fg);
+}
+
+.crosshair {
+  stroke: var(--muted);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.marker {
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+
+.controls {
+  display: grid;
+  gap: 0.35em;
+  margin-top: 0.5em;
+}
+
+.value {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.slider {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.readings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2em 1.2em;
+  color: var(--fg);
+}
+
+.table {
+  margin-top: 0.6em;
+}
+
+.table summary {
+  cursor: pointer;
+}
+
+.table table {
+  margin-top: 0.5em;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 0.2em 1em 0.2em 0;
+  text-align: right;
+  border-bottom: 1px solid var(--rule);
+}
