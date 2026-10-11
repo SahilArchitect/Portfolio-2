@@ -1,16 +1,43 @@
-import type {
-  NowEntryView,
-  PostDetailView,
-  PostView,
-  ProjectView,
-  PublicMetricsView,
-  ResumeVariantView,
-} from './view-models';
+/**
+ * Content of the previous (pre-2026-10) site, kept verbatim so the seed can
+ * import it as ARCHIVED entries: hidden publicly, recoverable from the admin.
+ * Do not publish from here; edit through the admin instead.
+ */
 
-const now = new Date('2026-05-07T12:00:00.000Z').toISOString();
-const resumeUrl = '/resume/ai-backend-engineer.pdf';
+export type LegacyProject = {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string;
+  body: string;
+  role: string;
+  stack: string[];
+  status: string;
+  displayOrder: number;
+  coverImageUrl: string | null;
+  repoUrl: string | null;
+  liveUrl: string | null;
+  demoUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+  featured: boolean;
+};
 
-export const fallbackProjects: ProjectView[] = [
+export type LegacyPost = {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string;
+  body: string;
+  tags: string[];
+  publishedAt: string;
+  canonicalUrl: string;
+  createdAt: string;
+  updatedAt: string;
+  readingMinutes: number;
+};
+
+export const legacyProjects: LegacyProject[] = [
   {
     id: 'project-stride',
     slug: 'stride',
@@ -46,7 +73,7 @@ export const fallbackProjects: ProjectView[] = [
     liveUrl: null,
     demoUrl: null,
     createdAt: '2026-04-20T10:00:00.000Z',
-    updatedAt: now,
+    updatedAt: '2026-05-07T12:00:00.000Z',
     featured: true,
   },
   {
@@ -65,7 +92,7 @@ export const fallbackProjects: ProjectView[] = [
     liveUrl: null,
     demoUrl: null,
     createdAt: '2026-04-10T10:00:00.000Z',
-    updatedAt: now,
+    updatedAt: '2026-05-07T12:00:00.000Z',
     featured: true,
   },
   {
@@ -84,7 +111,7 @@ export const fallbackProjects: ProjectView[] = [
     liveUrl: null,
     demoUrl: null,
     createdAt: '2022-06-01T10:00:00.000Z',
-    updatedAt: now,
+    updatedAt: '2026-05-07T12:00:00.000Z',
     featured: true,
   },
   {
@@ -103,7 +130,7 @@ export const fallbackProjects: ProjectView[] = [
     liveUrl: null,
     demoUrl: null,
     createdAt: '2021-01-01T10:00:00.000Z',
-    updatedAt: now,
+    updatedAt: '2026-05-07T12:00:00.000Z',
     featured: true,
   },
   {
@@ -122,12 +149,12 @@ export const fallbackProjects: ProjectView[] = [
     liveUrl: null,
     demoUrl: null,
     createdAt: '2020-01-01T10:00:00.000Z',
-    updatedAt: now,
+    updatedAt: '2026-05-07T12:00:00.000Z',
     featured: true,
   },
 ];
 
-export const fallbackPosts: PostView[] = [
+export const legacyPosts: LegacyPost[] = [
   {
     id: 'post-rag-without-magic',
     slug: 'rag-without-magic',
@@ -171,68 +198,3 @@ export const fallbackPosts: PostView[] = [
     readingMinutes: 2,
   },
 ];
-
-export const fallbackPostDetails: PostDetailView[] = fallbackPosts.map((post) => ({
-  ...post,
-  related: fallbackPosts.filter((candidate) => candidate.slug !== post.slug).slice(0, 3),
-}));
-
-export const fallbackNowEntries: NowEntryView[] = [
-  {
-    id: 'now-current',
-    headline: 'Building a portfolio that behaves like production infrastructure.',
-    body: `Current focus: shipping the public site, admin console, RAG pipeline, and deployment story as one coherent system.\n\nThe aim is not decoration. The aim is proof: visible traces, real API surfaces, clean contracts, and a site that can explain how it works.`,
-    mood: 'shipping carefully',
-    isCurrent: true,
-    createdAt: '2026-05-07T08:00:00.000Z',
-    updatedAt: now,
-  },
-  {
-    id: 'now-previous',
-    headline: 'Turning backend learning into visible artifacts.',
-    body: 'Recent work centered on FastAPI, async Postgres, RAG fundamentals, and writing implementation notes that can survive beyond a chat session.',
-    mood: 'systems mode',
-    isCurrent: false,
-    createdAt: '2026-04-15T08:00:00.000Z',
-    updatedAt: '2026-04-20T08:00:00.000Z',
-  },
-];
-
-export const fallbackResumes: ResumeVariantView[] = [
-  {
-    id: 'resume-ai-backend',
-    slug: 'ai-backend-engineer',
-    label: 'AI Backend Engineer',
-    fileUrl: resumeUrl,
-    isDefault: true,
-    createdAt: now,
-    roleKeywords: ['RAG', 'FastAPI', 'LLM infrastructure'],
-  },
-  {
-    id: 'resume-platform',
-    slug: 'backend-platform',
-    label: 'Backend Platform',
-    fileUrl: resumeUrl,
-    isDefault: false,
-    createdAt: now,
-    roleKeywords: ['Postgres', 'observability', 'distributed systems'],
-  },
-];
-
-export const fallbackMetrics: PublicMetricsView = {
-  ragQueries24h: 138,
-  medianLatencyMs: 284,
-  p99LatencyMs: 1180,
-  throughputPerMin: 14,
-  sparkline: [3, 5, 4, 8, 6, 9, 11, 7, 13, 15, 14, 18, 12, 16, 20, 17, 21, 19, 15, 13, 10, 9, 7, 6],
-  updatedAt: now,
-  traces: Array.from({ length: 50 }, (_, index) => ({
-    id: `trace-${String(index + 1).padStart(2, '0')}`,
-    name: index % 3 === 0 ? 'POST /api/search' : index % 3 === 1 ? 'GET /api/posts' : 'GET /api/projects',
-    service: index % 2 === 0 ? 'api' : 'web',
-    durationMs: 120 + ((index * 37) % 760),
-    status: index % 17 === 0 ? 'error' : 'ok',
-    startedAt: new Date(Date.parse(now) - index * 9 * 60 * 1000).toISOString(),
-    spans: 4 + (index % 8),
-  })),
-};
