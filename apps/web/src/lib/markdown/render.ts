@@ -114,12 +114,24 @@ function rehypeFigures(options: { imageDims?: ImageDims }) {
   };
 }
 
+/**
+ * Shift headings so the document's highest heading lands at level
+ * `offset + 1`, wherever the author started (# or ##). Keeps a valid
+ * outline under the page's own h1/h2 without skipped levels.
+ */
 function rehypeHeadingOffset(options: { offset: number }) {
   return (tree: HastRoot) => {
-    if (!options.offset) return;
+    let top = 7;
     visit(tree, 'element', (node) => {
       const match = /^h([1-6])$/.exec(node.tagName);
-      if (match) node.tagName = `h${Math.min(6, Number(match[1]) + options.offset)}`;
+      if (match) top = Math.min(top, Number(match[1]));
+    });
+    if (top === 7) return;
+    const shift = options.offset + 1 - top;
+    if (!shift) return;
+    visit(tree, 'element', (node) => {
+      const match = /^h([1-6])$/.exec(node.tagName);
+      if (match) node.tagName = `h${Math.max(1, Math.min(6, Number(match[1]) + shift))}`;
     });
   };
 }
@@ -159,7 +171,8 @@ function buildProcessor(options: RenderOptions) {
       .use(rehypeExternalLinks)
       .use(rehypeKatex, { strict: false, output: 'htmlAndMathml' })
       .use(rehypeShiki, {
-        themes: { light: 'github-light', dark: 'github-dark' },
+        // High-contrast variants: comment colours in the defaults fail WCAG AA.
+        themes: { light: 'github-light-high-contrast', dark: 'github-dark-high-contrast' },
         defaultColor: false,
         lazy: true,
         fallbackLanguage: 'text',

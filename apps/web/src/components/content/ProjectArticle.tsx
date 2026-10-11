@@ -2,8 +2,7 @@ import { bibtexFor } from '@/lib/content/cite';
 import type { PublicEntry } from '@/lib/content/public';
 import { formatMonthRange } from '@/lib/dates';
 import { absoluteUrl } from '@/lib/site';
-import { getImageDims } from '@/lib/content/public';
-import { renderMarkdown } from '@/lib/markdown/render';
+import { renderMarkdownCached } from '@/lib/markdown/cached';
 import { loadFigureData } from '@/lib/markdown/figures';
 
 import { ChipRow, MetaLine, StatusBadge } from './bits';
@@ -30,11 +29,10 @@ export async function ProjectArticle({
   author: string;
 }) {
   const { data } = project;
-  const dims = await getImageDims();
   const rendered = await Promise.all(
     SECTIONS.map(async ([key, label]) => {
       const source = data.sections[key] ?? '';
-      const result = await renderMarkdown(source, { headingOffset: 2, imageDims: dims });
+      const result = await renderMarkdownCached(source, 2);
       const blocks =
         key === 'results' && data.interactiveFigure
           ? [...result.blocks, { kind: 'figure' as const, figure: data.interactiveFigure }]

@@ -15,6 +15,8 @@ const nextConfig: NextConfig = {
   experimental: {
     // Uploads go through server actions; Vercel caps request bodies at 4.5 MB.
     serverActions: { bodySizeLimit: '4.5mb' },
+    // Most visitors arrive once (e.g. from an application); styles ship with the HTML.
+    inlineCss: true,
   },
   async redirects() {
     return [

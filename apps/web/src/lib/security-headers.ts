@@ -6,7 +6,6 @@
  * is the primary XSS defence.
  */
 const BLOB_ORIGIN = 'https://*.public.blob.vercel-storage.com';
-const ANALYTICS = process.env.NEXT_PUBLIC_ANALYTICS === 'true';
 const DEV = process.env.NODE_ENV !== 'production';
 
 function join(directives: Record<string, string[]>): string {
@@ -18,16 +17,11 @@ function join(directives: Record<string, string[]>): string {
 export function siteCsp(): string {
   return join({
     'default-src': ["'self'"],
-    'script-src': [
-      "'self'",
-      "'unsafe-inline'",
-      ...(DEV ? ["'unsafe-eval'"] : []),
-      ...(ANALYTICS ? ['https://va.vercel-scripts.com'] : []),
-    ],
+    'script-src': ["'self'", "'unsafe-inline'", ...(DEV ? ["'unsafe-eval'"] : [])],
     'style-src': ["'self'", "'unsafe-inline'"],
     'img-src': ["'self'", 'data:', 'blob:', BLOB_ORIGIN, 'https://avatars.githubusercontent.com'],
     'font-src': ["'self'", 'data:'],
-    'connect-src': ["'self'", ...(ANALYTICS ? ['https://va.vercel-scripts.com'] : [])],
+    'connect-src': ["'self'"],
     'frame-src': ["'self'", BLOB_ORIGIN],
     'object-src': ["'none'"],
     'base-uri': ["'self'"],

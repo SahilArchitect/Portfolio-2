@@ -16,8 +16,12 @@ export function MarkdownBlocks({
   blocks: RenderBlock[];
   figures: FigureDataMap;
 }) {
+  const hasMath = blocks.some((b) => b.kind === 'html' && b.html.includes('class="katex'));
   return (
     <div className="space-y-4">
+      {/* KaTeX styles only where math appears; React hoists this into <head>. */}
+      {/* eslint-disable-next-line @next/next/no-css-tags -- intentional: loaded only on pages with math */}
+      {hasMath && <link rel="stylesheet" href="/katex/katex.min.css" precedence="default" />}
       {blocks.map((block, index) => {
         if (block.kind === 'html') {
           return (

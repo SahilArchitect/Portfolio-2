@@ -1,6 +1,5 @@
-import { getImageDims } from '@/lib/content/public';
+import { renderMarkdownCached } from '@/lib/markdown/cached';
 import { loadFigureData } from '@/lib/markdown/figures';
-import { renderMarkdown } from '@/lib/markdown/render';
 
 import { MarkdownBlocks } from './MarkdownBlocks';
 
@@ -12,9 +11,6 @@ export async function Markdown({
   headingOffset?: number;
 }) {
   if (!source.trim()) return null;
-  const { blocks } = await renderMarkdown(source, {
-    headingOffset,
-    imageDims: await getImageDims(),
-  });
+  const { blocks } = await renderMarkdownCached(source, headingOffset);
   return <MarkdownBlocks blocks={blocks} figures={await loadFigureData(blocks)} />;
 }

@@ -8,15 +8,20 @@ import './globals.css';
 const serif = Source_Serif_4({
   subsets: ['latin'],
   variable: '--font-source-serif',
-  display: 'swap',
-  axes: ['opsz'],
+  // 'optional': no late re-paint when the font arrives (keeps LCP low); falls back to
+  // a metric-matched local serif on very slow first loads.
+  display: 'optional',
 });
 
 const mono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-jetbrains-mono',
-  display: 'swap',
+  // 'optional': no late re-paint when the font arrives (keeps LCP low); falls back to
+  // a metric-matched local serif on very slow first loads.
+  display: 'optional',
 });
+
+const THEME_SCRIPT = `try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -38,11 +43,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${serif.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
-        {/* Blocking on purpose: sets the saved theme before first paint. */}
-        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
-        <script src="/theme.js" />
+        {/* Applies the saved theme before first paint (inline: no extra request). */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        {/* Cookieless Vercel Web Analytics, same-origin; off unless explicitly enabled. */}
+        {process.env.NEXT_PUBLIC_ANALYTICS === 'true' && (
+          <script defer src="/_vercel/insights/script.js" />
+        )}
+      </body>
     </html>
   );
 }

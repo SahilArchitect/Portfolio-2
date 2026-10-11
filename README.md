@@ -60,15 +60,15 @@ To sign in locally, create a second GitHub OAuth App with callback
 
 All variables are documented in [`.env.example`](.env.example).
 
-| Variable                                | Required             | Purpose                                                       |
-| --------------------------------------- | -------------------- | ------------------------------------------------------------- |
-| `DATABASE_URL`                          | yes                  | Postgres connection string (pooled Neon URL in production)    |
-| `NEXT_PUBLIC_SITE_URL`                  | yes                  | Canonical origin, e.g. `https://www.bysahil.dev`              |
-| `AUTH_SECRET`                           | yes                  | Auth.js secret: `openssl rand -base64 32`                     |
-| `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` | yes                  | GitHub OAuth App credentials                                  |
-| `ADMIN_ALLOWED_IDENTITY`                | yes                  | `github:<numeric user id>`, the only account that may sign in |
-| `BLOB_READ_WRITE_TOKEN`                 | prod                 | Vercel Blob token (set automatically when a store is linked)  |
-| `NEXT_PUBLIC_ANALYTICS`                 | no (default `false`) | Reserved flag for cookieless analytics; off                   |
+| Variable                                | Required             | Purpose                                                                             |
+| --------------------------------------- | -------------------- | ----------------------------------------------------------------------------------- |
+| `DATABASE_URL`                          | yes                  | Postgres connection string (pooled Neon URL in production)                          |
+| `NEXT_PUBLIC_SITE_URL`                  | yes                  | Canonical origin, e.g. `https://www.bysahil.dev`                                    |
+| `AUTH_SECRET`                           | yes                  | Auth.js secret: `openssl rand -base64 32`                                           |
+| `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` | yes                  | GitHub OAuth App credentials                                                        |
+| `ADMIN_ALLOWED_IDENTITY`                | yes                  | `github:<numeric user id>`, the only account that may sign in                       |
+| `BLOB_READ_WRITE_TOKEN`                 | prod                 | Vercel Blob token (set automatically when a store is linked)                        |
+| `NEXT_PUBLIC_ANALYTICS`                 | no (default `false`) | `true` loads cookieless Vercel Web Analytics (also enable it in the Vercel project) |
 
 ## Tests and checks
 
@@ -91,25 +91,39 @@ database, builds, and runs Playwright against the production server. CI
 The site deploys through Vercel's Git integration: pull requests get preview deployments, and
 merging to `main` deploys production.
 
-One-time setup for the `portfolio-2-web` project:
+Current production setup of the `portfolio-2-web` project (done 2026-10-11):
 
-1. **Root directory** `apps/web`, framework Next.js. Install and build commands stay at their defaults.
-2. **Database:** Storage → Marketplace → **Neon** → create and connect. This sets `DATABASE_URL`.
-   Use the pooled connection string.
-3. **Files:** Storage → **Blob** → create and connect. This sets `BLOB_READ_WRITE_TOKEN`.
-4. **GitHub OAuth App** at <https://github.com/settings/developers>: homepage
-   `https://www.bysahil.dev`, callback `https://www.bysahil.dev/api/auth/callback/github`. Copy
-   the ID and secret into `AUTH_GITHUB_ID` and `AUTH_GITHUB_SECRET`.
-5. Set `AUTH_SECRET`, `ADMIN_ALLOWED_IDENTITY=github:26546141` and
+| Piece     | Where                                                                                 |
+| --------- | ------------------------------------------------------------------------------------- |
+| Build     | Root directory `apps/web`, Next.js preset, `pnpm install` / `pnpm build`              |
+| Functions | Region `sin1` (`apps/web/vercel.json`), next to the database                          |
+| Database  | Existing Neon project (`ep-aged-hat-…`, ap-southeast-1); pooled URL in `DATABASE_URL` |
+| Files     | Vercel Blob store `bysahil-files` (fra1) → `BLOB_READ_WRITE_TOKEN`                    |
+| Auth      | `AUTH_SECRET`, `ADMIN_ALLOWED_IDENTITY`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`       |
+
+The Neon database also still holds the retired FastAPI tables (`projects`, `posts`,
+`admin_users`, …). The new schema doesn't touch them; drop them once you no longer want them.
+
+To recreate this from scratch:
+
+1. Connect a Postgres database (e.g. Storage → Marketplace → Neon). Use the **pooled** connection
+   string as `DATABASE_URL`.
+2. Storage → **Blob** → create and connect. This sets `BLOB_READ_WRITE_TOKEN`.
+3. **GitHub OAuth App** at <https://github.com/settings/developers>: homepage
+   `https://www.bysahil.dev`, callback `https://www.bysahil.dev/api/auth/callback/github`. Put the
+   ID and secret into `AUTH_GITHUB_ID` and `AUTH_GITHUB_SECRET`. OAuth Apps allow only one callback
+   URL, so admin sign-in works on the production domain only; previews show the public site.
+4. Set `AUTH_SECRET` (`openssl rand -base64 32`), `ADMIN_ALLOWED_IDENTITY=github:26546141` and
    `NEXT_PUBLIC_SITE_URL=https://www.bysahil.dev`.
-6. **Migrate and seed the production database** once, from your machine:
+5. **Migrate and seed** from your machine (use the direct, non-pooled URL):
    ```bash
    cd apps/web
    DATABASE_URL='<neon url>' pnpm db:migrate
    DATABASE_URL='<neon url>' pnpm db:seed
    ```
-   Run `db:migrate` again whenever a new file appears in `apps/web/drizzle/`.
-7. Redeploy. Public pages are prerendered at build time, so the build needs `DATABASE_URL`.
+   Run `db:migrate` again whenever a new file appears in `apps/web/drizzle/`, **before** deploying
+   the code that needs it.
+6. Deploy. Public pages are prerendered at build time, so the build needs `DATABASE_URL`.
 
 The old `portfolio-2-admin` project (admin.bysahil.dev) is no longer needed. Point that domain at
 a redirect to `https://www.bysahil.dev/admin`, or remove it.
