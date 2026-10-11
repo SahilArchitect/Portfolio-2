@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { Markdown } from '@/components/content/Markdown';
 import { ObfuscatedEmail } from '@/components/site/ObfuscatedEmail';
 import { getCurrentCv, getProfile, listPublic } from '@/lib/content/public';
 import { formatMonthRange } from '@/lib/dates';
@@ -60,7 +61,11 @@ export default async function CvPage() {
                   {data.field && <>, {data.field}</>}
                 </p>
                 <p className="text-muted">{data.institution}</p>
-                {data.notes && <p className="text-[0.95em]">{data.notes}</p>}
+                {data.notes && (
+                  <div className="text-[0.95em]">
+                    <Markdown source={data.notes} />
+                  </div>
+                )}
               </Row>
             ))}
           </ul>
@@ -105,7 +110,11 @@ export default async function CvPage() {
                   <span className="font-semibold">{data.course}</span> — {data.role}
                 </p>
                 <p className="text-muted">{data.institution}</p>
-                {data.description && <p className="text-[0.95em]">{data.description}</p>}
+                {data.description && (
+                  <div className="text-[0.95em]">
+                    <Markdown source={data.description} />
+                  </div>
+                )}
               </Row>
             ))}
           </ul>

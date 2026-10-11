@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { educationSchema } from '@/lib/content/schemas';
 import { renderMarkdown } from '@/lib/markdown/render';
 
 async function html(md: string, offset = 0) {
@@ -94,5 +95,20 @@ describe('markdown renderer — features', () => {
   it('ignores unknown figure types', async () => {
     const { blocks } = await renderMarkdown('::figure{type="iframe" data="https://evil"}');
     expect(blocks.some((b) => b.kind === 'figure')).toBe(false);
+  });
+});
+
+describe('markdown renderer — CV free-text fields', () => {
+  it('renders a Markdown link in Education notes as an <a> tag', async () => {
+    const { notes } = educationSchema.parse({
+      degree: 'B.Tech',
+      institution: 'Example University',
+      startMonth: '2020-08',
+      notes: 'Thesis: [PDF](https://example.org/thesis.pdf)',
+    });
+    // Same heading offset as the public <Markdown> component.
+    const out = await html(notes ?? '', 1);
+    expect(out).toMatch(/<a [^>]*href="https:\/\/example\.org\/thesis\.pdf"[^>]*>PDF<\/a>/);
+    expect(out).not.toContain('[PDF]');
   });
 });

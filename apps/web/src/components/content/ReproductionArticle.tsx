@@ -53,7 +53,7 @@ export async function ReproductionArticle({
       {data.claim && (
         <section className="mt-8 border-l-2 border-accent pl-4">
           <h2 className="meta mb-1 uppercase">Claim being reproduced</h2>
-          <p>{data.claim}</p>
+          <Markdown source={data.claim} />
         </section>
       )}
 
