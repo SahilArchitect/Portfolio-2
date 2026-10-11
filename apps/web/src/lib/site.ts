@@ -1,7 +1,10 @@
-export const SITE_URL = 'https://bysahil.dev';
-export const SITE_DOMAIN = 'bysahil.dev';
-export const CONTACT_EMAIL = 'sahil@bysahil.dev';
-export const GITHUB_USERNAME = 'SahilArchitect';
-export const GITHUB_URL = `https://github.com/${GITHUB_USERNAME}`;
-export const GITHUB_DISPLAY = `github.com/${GITHUB_USERNAME}`;
-export const GITHUB_CONTRIBUTIONS_GRAPH_URL = `https://ghchart.rshah.org/00fff2/${GITHUB_USERNAME}`;
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bysahil.dev').replace(/\/$/, '');
+export const SITE_NAME = 'Sahil Bhatti';
+export const SITE_TITLE = 'Sahil Bhatti — Security of AI Systems';
+export const SITE_DESCRIPTION =
+  'Research on the security of AI systems: side-channel and fault attacks on neural networks, model extraction, and hardware-aware defenses.';
+export const SOURCE_URL = 'https://github.com/SahilArchitect/Portfolio-2';
+
+export function absoluteUrl(path: string): string {
+  return `${SITE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+}

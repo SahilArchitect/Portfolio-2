@@ -1,1 +1,12 @@
 apps/web/public/tracker/
+apps/web/public/trident/
+apps/web/src/app/harsimran/
+apps/web/src/lib/trident/
+apps/web/tests/trident-*.mjs
+apps/web/drizzle/meta/
+pnpm-lock.yaml
+.next/
+coverage/
+playwright-report/
+test-results/
+*.pdf

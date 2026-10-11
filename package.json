@@ -1,28 +1,26 @@
 {
-  "name": "engine-room",
-  "version": "0.1.0",
+  "name": "bysahil",
+  "version": "1.0.0",
   "private": true,
-  "description": "The Engine Room — Sahil Bhatti's portfolio. A working demonstration of production AI infrastructure.",
+  "description": "Sahil Bhatti's research website (bysahil.dev) with an embedded owner-only admin.",
   "engines": {
-    "node": ">=20.11",
-    "pnpm": ">=9.0"
+    "node": ">=20.9"
   },
   "packageManager": "pnpm@9.12.0",
   "scripts": {
-    "dev": "pnpm -r --parallel --filter \"./apps/*\" dev",
-    "dev:web": "pnpm --filter @engine-room/web dev",
-    "dev:admin": "pnpm --filter @engine-room/admin dev",
-    "build": "pnpm -r --filter \"./apps/*\" --filter \"./packages/*\" build",
-    "lint": "pnpm -r lint",
-    "typecheck": "pnpm -r typecheck",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,mdx,css}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,mdx,css}\"",
-    "types:generate": "pnpm --filter @engine-room/types generate",
-    "clean": "pnpm -r exec rm -rf .next .turbo node_modules dist build"
+    "dev": "pnpm --filter @bysahil/web dev",
+    "build": "pnpm --filter @bysahil/web build",
+    "start": "pnpm --filter @bysahil/web start",
+    "lint": "pnpm --filter @bysahil/web lint",
+    "typecheck": "pnpm --filter @bysahil/web typecheck",
+    "test": "pnpm --filter @bysahil/web test",
+    "test:e2e": "pnpm --filter @bysahil/web test:e2e",
+    "db:migrate": "pnpm --filter @bysahil/web db:migrate",
+    "db:seed": "pnpm --filter @bysahil/web db:seed",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "prettier": "^3.3.3",
-    "prettier-plugin-tailwindcss": "^0.6.8",
-    "typescript": "^5.6.3"
+    "prettier": "^3.6.2"
   }
 }

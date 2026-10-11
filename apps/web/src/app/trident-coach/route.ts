@@ -1,9 +1,9 @@
+import { connection } from 'next/server';
 import { analyze } from '@/lib/trident/coach.mjs';
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 const response = (data: unknown, status = 200) => Response.json(data, { status, headers: { 'Cache-Control': 'no-store' } });
 export async function GET() {
+  await connection();
   return response({ configured: Boolean(process.env.DEEPSEEK_API_KEY && process.env.TRIDENT_COACH_TOKEN), supportsPersonalKey: true });
 }
 export async function POST(request: Request) {
