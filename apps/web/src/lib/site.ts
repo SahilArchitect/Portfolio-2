@@ -3,9 +3,9 @@ export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bysahi
   '',
 );
 export const SITE_NAME = 'Sahil Bhatti';
-export const SITE_TITLE = 'Sahil Bhatti — Security of AI Systems';
+export const SITE_TITLE = 'Sahil Bhatti — Machine learning and AI security';
 export const SITE_DESCRIPTION =
-  'Research on the security of AI systems: side-channel and fault attacks on neural networks, model extraction, and hardware-aware defenses.';
+  'M.Tech in Data Science from IIT Jammu. I work on machine learning and how AI systems fail or leak. Projects, notes and CV.';
 export const SOURCE_URL = 'https://github.com/SahilArchitect/Portfolio-2';
 
 export function absoluteUrl(path: string): string {
