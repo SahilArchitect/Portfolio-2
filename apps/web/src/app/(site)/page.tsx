@@ -42,7 +42,7 @@ export default async function HomePage() {
   ].filter(Boolean);
 
   return (
-    <div className="space-y-10 pt-6 sm:pt-10">
+    <div className="home-index space-y-10 pt-6 sm:pt-10">
       <JsonLd
         data={{
           '@context': 'https://schema.org',
@@ -52,7 +52,8 @@ export default async function HomePage() {
           ...(sameAs.length ? { sameAs } : {}),
         }}
       />
-      <section className="space-y-4">
+      <section className="home-intro space-y-4">
+        <p className="meta file-label">index.html / personal homepage</p>
         <h1 className="text-[1.75rem] leading-tight font-semibold">{name}</h1>
         {profile?.researchStatement && (
           <p className="text-[1.12em] leading-snug">{profile.researchStatement}</p>
@@ -71,13 +72,18 @@ export default async function HomePage() {
 
       {profile?.bioMarkdown && (
         <section aria-label="Bio">
+          <h2 className="section-heading">
+            <span aria-hidden="true">01.</span> About
+          </h2>
           <Markdown source={profile.bioMarkdown} />
         </section>
       )}
 
       {profile && profile.interests.length > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold">Research interests</h2>
+          <h2 className="section-heading">
+            <span aria-hidden="true">02.</span> Research interests
+          </h2>
           <ul className="list-disc space-y-1 pl-5 marker:text-muted">
             {profile.interests.map((interest) => (
               <li key={interest}>{interest}</li>
@@ -88,7 +94,9 @@ export default async function HomePage() {
 
       {featured.length > 0 && (
         <section>
-          <h2 className="mb-1 text-lg font-semibold">Selected research</h2>
+          <h2 className="section-heading">
+            <span aria-hidden="true">03.</span> Selected research
+          </h2>
           {featured.map((project) => (
             <ProjectCard key={project.id} project={project} dims={dims} />
           ))}
@@ -97,7 +105,9 @@ export default async function HomePage() {
 
       {log.length > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold">Log</h2>
+          <h2 className="section-heading">
+            <span aria-hidden="true">04.</span> Log
+          </h2>
           <ul className="space-y-1.5">
             {log.slice(0, 5).map((item) => (
               <li key={item.id} className="grid grid-cols-[6.5rem_1fr] gap-x-3">

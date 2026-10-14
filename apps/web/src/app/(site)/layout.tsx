@@ -1,3 +1,4 @@
+import './retro.css';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteHeader } from '@/components/site/SiteHeader';
 
@@ -7,7 +8,7 @@ export const ensureStatic = 'navigation';
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
+    <div className="retro-site">
       <a
         href="#content"
         className="meta sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-bg focus:p-2"
@@ -19,6 +20,6 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
         {children}
       </main>
       <SiteFooter />
-    </>
+    </div>
   );
 }
