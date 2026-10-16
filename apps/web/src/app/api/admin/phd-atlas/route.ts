@@ -5,7 +5,6 @@ import { entries } from '@/db/schema';
 import { getOwnerId, requireOwner } from '@/lib/server/owner';
 import { rateLimit } from '@/lib/server/rate-limit';
 
-export const dynamic = 'force-dynamic';
 const TYPE = 'private-phd-atlas';
 const SLUG = 'owner-2027';
 const privateHeaders = { 'Cache-Control': 'private, no-store, max-age=0', 'X-Robots-Tag': 'noindex, nofollow, noarchive' };
